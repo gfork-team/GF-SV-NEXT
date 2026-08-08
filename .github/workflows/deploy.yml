@@ -25,6 +25,7 @@ jobs:
         run: npm run build
         env:
           VITE_CDN_ENABLED: 'true'
+          VITE_GIT_SHA: ${{ github.sha }}
 
       - name: Deploy build/ to publish branch
         uses: peaceiris/actions-gh-pages@v4

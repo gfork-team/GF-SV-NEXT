@@ -99,6 +99,13 @@
 		<!-- Copyright -->
 		<p class="m3-footer-meta m3-footer-copyright">
 			{t(lang, 'footer.copyright').replace('{year}', String(year))}
+			{#if __APP_VERSION__ && __APP_VERSION__ !== 'dev'}
+				<span class="m3-footer-version">
+					<a href={`${siteConfig.github.org}/commit/${__APP_VERSION__}`} target="_blank" rel="noopener noreferrer">
+						v{__APP_VERSION__}
+					</a>
+				</span>
+			{/if}
 		</p>
 	</div>
 </footer>
@@ -201,6 +208,19 @@
 	.m3-footer-copyright {
 		margin-top: 4px;
 		opacity: 0.7;
+	}
+
+	.m3-footer-version {
+		margin-left: 8px;
+		opacity: 0.8;
+	}
+	.m3-footer-version a {
+		font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+		font-size: 0.92em;
+		text-decoration: none;
+	}
+	.m3-footer-version a:hover {
+		text-decoration: underline;
 	}
 
 	/* Rating */
