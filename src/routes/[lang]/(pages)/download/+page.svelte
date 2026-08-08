@@ -310,8 +310,6 @@
 		<aside class="dl-side">
 			<div class="dl-ad-box"><Ad type="auto" /></div>
 			<div class="dl-ad-box"><Ad type="fluid" /></div>
-			<div class="dl-ad-box"><Ad type="autorelaxed" /></div>
-			<div class="dl-ad-box"><Ad type="auto" /></div>
 		</aside>
 		{/if}
 	</div>
@@ -340,9 +338,9 @@
 		border-radius: var(--md-sys-shape-corner-medium);
 		padding: 16px;
 		box-shadow: var(--glass-shadow);
-		display: flex; align-items: center; justify-content: center;
 		min-height: 250px;
 	}
+	.dl-ad-box > :global(ins.adsbygoogle) { width: 100%; }
 	.dl-icon { margin-bottom: 24px; }
 	.dl-icon .material-icons { font-size: 64px; color: var(--md-sys-color-on-surface-variant); }
 	.dl-icon .material-icons.ok { color: var(--md-sys-color-primary); }

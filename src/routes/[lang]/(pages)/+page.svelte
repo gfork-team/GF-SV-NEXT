@@ -123,11 +123,6 @@
 <div class="zh-home">
 	<div class="zh-wrap">
 
-		<!-- ═══ AD: Top banner ═══ -->
-		<div style="text-align:center;margin:16px 0">
-			<Ad type="fluid" />
-		</div>
-
 		<!-- ═══ Hero ═══ -->
 		<section class="zh-hero" data-reveal>
 			<div class="zh-hero-inner">
@@ -294,7 +289,7 @@
 
 		<!-- ═══ AD: After URL tool ═══ -->
 		<div style="text-align:center;margin:16px 0">
-			<Ad type="autorelaxed" />
+			<Ad type="auto" />
 		</div>
 
 		<!-- ═══ TOS & Installing Links ═══ -->
@@ -310,7 +305,7 @@
 
 		<!-- ═══ AD: Bottom ═══ -->
 		<div style="text-align:center;margin:16px 0 32px">
-			<Ad type="auto" />
+			<Ad type="autorelaxed" />
 		</div>
 
 	</div>

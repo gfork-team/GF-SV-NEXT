@@ -647,7 +647,7 @@ onMount(() => {
 
 			<!-- Main content -->
 			<div class="lk-main">
-				<div style="margin-bottom:16px"><Ad type="fluid" /></div>
+				<div style="margin-bottom:16px"><Ad type="auto" /></div>
 				<div style="margin-bottom:16px"><Ad type="fluid" /></div>
 				{#if loading}
 					<div class="md3-card lk-center-box">

@@ -604,29 +604,25 @@
 						<div class="if-content-area if-gf-header" id="script-header" use:processLinks={gfLocale}>{@html scriptHeaderHtml}</div>
 					{:else if scriptTitle}
 						<h2 class="if-script-page-title">{scriptTitle}</h2>
-					{:else}
-						<div style="text-align:center;padding:16px 0"><Ad type="fluid" /></div>
 					{/if}
 
 					{#if scriptMetaHtml}
 						<div class="if-content-area if-gf-meta" id="script-meta" use:processLinks={gfLocale}>{@html scriptMetaHtml}</div>
-					{:else if scriptHeaderHtml || scriptTitle || additionalInfoHtml}
-						<div style="text-align:center;padding:16px 0"><Ad type="fluid" /></div>
 					{/if}
 
 					{#if additionalInfoHtml}
 						<div class="if-content-area if-gf-content" id="additional-info" use:processLinks={gfLocale}>{@html additionalInfoHtml}</div>
-					{:else if scriptHeaderHtml || scriptMetaHtml || scriptTitle}
-						<div style="text-align:center;padding:16px 0"><Ad type="fluid" /></div>
 					{/if}
+
+					<div style="text-align:center;padding:16px 0"><Ad type="fluid" /></div>
 
 					{#if !scriptHeaderHtml && !scriptMetaHtml && !additionalInfoHtml}
 						<div class="md3-card if-no-content">
 							<p>{t(lang, 'info.no_description')}</p>
 						</div>
-					{:else}
-						<div style="margin-top:16px"><Ad type="auto" /></div>
 					{/if}
+
+					<div style="margin-top:16px"><Ad type="auto" /></div>
 				{:else}
 					<!-- Feedback Tab — ad fills empty spot -->
 					{#if feedbackListHtml}
@@ -648,9 +644,9 @@
 							{/if}
 						</nav>
 					{/if}
-					{:else}
-						<div style="text-align:center;padding:16px 0"><Ad type="fluid" /></div>
 					{/if}
+
+					<div style="text-align:center;padding:16px 0"><Ad type="fluid" /></div>
 
 					<div style="margin-top:16px"><Ad type="autorelaxed" /></div>
 				{/if}

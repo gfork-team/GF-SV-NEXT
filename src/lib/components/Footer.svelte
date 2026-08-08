@@ -13,8 +13,6 @@
 	const footerLinks = [
 		{ href: '/', key: 'nav.home' },
 		{ href: '/search', key: 'nav.search' },
-		{ href: '/download', key: 'nav.download' },
-		{ href: '/lookup', key: 'nav.lookup' },
 		{ href: '/help', key: 'nav.help' },
 		{ href: '/about', key: 'nav.about' }
 	];
