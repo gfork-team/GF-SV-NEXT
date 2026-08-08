@@ -57,6 +57,7 @@
 	<link rel="stylesheet" href="https://fonts.googleapis.com/icon?family=Material+Icons" />
 	<script async src="https://pagead2.googlesyndication-cn.com/pagead/js/adsbygoogle.js?client=ca-pub-3758644447684310" crossorigin="anonymous"></script>
 	<title>Redirecting - ZGF</title>
+	<meta name="robots" content="noindex, follow" />
 </svelte:head>
 
 <div class="page">

@@ -21,7 +21,10 @@ jobs:
 
       - run: npm ci
 
-      - run: npm run build
+      - name: Build (CDN enabled)
+        run: npm run build
+        env:
+          VITE_CDN_ENABLED: 'true'
 
       - name: Deploy build/ to publish branch
         uses: peaceiris/actions-gh-pages@v4

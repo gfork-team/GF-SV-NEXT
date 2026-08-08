@@ -1,7 +1,16 @@
 ﻿<script lang="ts">
 	import { page } from '$app/state';
-	import { i18nConfig, type Lang } from '$i18n';
-	import { siteConfig, siteProxyUrl } from '$lib/config';
+	import { i18nConfig, t, type Lang } from '$i18n';
+	import { siteConfig, siteProxyUrl, siteUrl } from '$lib/config';
+	import {
+		OG_LOCALES,
+		ROUTE_META,
+		canonicalUrl,
+		cleanPathFrom,
+		websiteJsonLd,
+		organizationJsonLd,
+		breadcrumbJsonLd
+	} from '$lib/seo';
 	import Ad from '$components/Ad.svelte';
 	import { sendAudit } from '$lib/audit';
 	import { onMount } from 'svelte';
@@ -11,7 +20,7 @@
 	import Footer from '$components/Footer.svelte';
 	import type { LayoutData } from './$types';
 
-	let { data, children } = $props<{ data: LayoutData; children: import('svelte').Snippet }>();
+	let { data, children }: { data: LayoutData; children: import('svelte').Snippet } = $props();
 	let lang: Lang = $derived(data.lang);
 	let showAds: boolean = $derived(data.showAds);
 
@@ -63,6 +72,11 @@
 	});
 
 	let cleanPath: string = $derived(page.url.pathname.replace(/^\/[^/]+/, '') || '/');
+	let routeMeta = $derived(ROUTE_META[cleanPath] ?? ROUTE_META['/']!);
+	let pageTitle = $derived(t(lang, routeMeta.titleKey));
+	let pageDesc = $derived(t(lang, routeMeta.descKey));
+	let canonical = $derived(canonicalUrl(lang, cleanPathFrom(page.url.pathname)));
+	let ogImage = $derived(siteUrl(siteConfig.seo.defaultOgImage));
 	let gtmId = siteConfig.adsense.gtmId;
 	let gtmCode = $derived(gtmId
 		? `(function(w,d,s,l,i){w[l]=w[l]||[];w[l].push({'gtm.start':new Date().getTime(),event:'gtm.js'});var f=d.getElementsByTagName(s)[0],j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src='https://www.googletagmanager.com/gtm.js?id=${gtmId}';f.parentNode.insertBefore(j,f);})(window,document,'script','dataLayer','${gtmId}');`
@@ -77,6 +91,36 @@
 <svelte:head>
 	<!-- Theme flash prevention: sets inline CSS vars before paint -->
 	{@html `<script>${getColorFoucScript()}</script>`}
+
+	<!-- Canonical URL (no trailing slash, Uniform URL) -->
+	<link rel="canonical" href={canonical} />
+
+	<!-- Open Graph -->
+	<meta property="og:site_name" content={siteConfig.name} />
+	<meta property="og:locale" content={OG_LOCALES[lang]} />
+	<meta property="og:type" content={routeMeta.ogType || 'website'} />
+	<meta property="og:title" content={pageTitle} />
+	<meta property="og:description" content={pageDesc} />
+	<meta property="og:url" content={canonical} />
+	<meta property="og:image" content={ogImage} />
+	<meta property="og:image:alt" content={siteConfig.name} />
+
+	<!-- Twitter Card -->
+	<meta name="twitter:card" content="summary_large_image" />
+	<meta name="twitter:title" content={pageTitle} />
+	<meta name="twitter:description" content={pageDesc} />
+	<meta name="twitter:image" content={ogImage} />
+
+	<!-- Structured data: WebSite + Organization (site-wide) -->
+	{#if cleanPath !== '/s' && cleanPath !== '/l'}
+		{@html `<script type="application/ld+json">${websiteJsonLd(lang)}</script>`}
+		{@html `<script type="application/ld+json">${organizationJsonLd()}</script>`}
+
+		<!-- Structured data: BreadcrumbList (auto-derived from path) -->
+		{#if cleanPath !== '/'}
+			{@html `<script type="application/ld+json">${breadcrumbJsonLd(lang, cleanPath, pageTitle)}</script>`}
+		{/if}
+	{/if}
 
 	<!-- Favicons (from config) -->
 	<link rel="icon" type="image/png" sizes="32x32" href={siteConfig.favicon.icon32} />
@@ -103,18 +147,18 @@
 	<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin="anonymous" />
 	<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200&family=Material+Icons+Outlined" />
 
-	<!-- hreflang alternates (including x-default) -->
+	<!-- hreflang alternates (including x-default, Uniform URL no trailing slash) -->
 	{#each i18nConfig.supportedLangs as langCode}
-		<link rel="alternate" hreflang={i18nConfig.langNames[langCode]} href={siteConfig.url + '/' + langCode + cleanPath} />
+		<link rel="alternate" hreflang={i18nConfig.langNames[langCode]} href={canonicalUrl(langCode, cleanPath)} />
 	{/each}
-	<link rel="alternate" hreflang="x-default" href={siteConfig.url + '/' + i18nConfig.defaultLang + cleanPath} />
+	<link rel="alternate" hreflang="x-default" href={canonicalUrl(i18nConfig.defaultLang, cleanPath)} />
 
 	{#if showAds}
 		<script async src="https://pagead2.googlesyndication-cn.com/pagead/js/adsbygoogle.js?client=ca-pub-3758644447684310" crossorigin="anonymous"></script>
 		<script>(function(){var t;function r(){var a=window.adsbygoogle||[];var u=document.querySelectorAll('.adsbygoogle[data-ad-status="unfilled"]');if(u.length){u.forEach(function(e){var c=parseInt(e.getAttribute('data-retry-count')||'0');if(c<3){e.setAttribute('data-retry-count',String(c+1));e.removeAttribute('data-ad-status');a.push({})}});t=setTimeout(r,2500)}else{t=undefined}}setTimeout(function(){r()},3000);window.addEventListener('load',function(){if(!t){setTimeout(r,1000)}})})();</script>
 	{/if}
 	{#if showAds && gtmCode}
-		<script>{gtmCode}</script>
+		{@html `<script>${gtmCode}</script>`}
 	{/if}
 </svelte:head>
 

@@ -44,6 +44,7 @@
 <svelte:head>
 	<link rel="stylesheet" href="https://fonts.googleapis.com/icon?family=Material+Icons" />
 	<title>{t(lang, 'redirect.title')}</title>
+	<meta name="robots" content="noindex, follow" />
 </svelte:head>
 
 <div class="rd-page">
