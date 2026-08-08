@@ -136,7 +136,7 @@
 	let filterLocale = $state('0');
 	let currentPage = $state('1');
 	let advancedParams = $state<SearchParams>({});
-	let responsePerPage = $state(100);
+let responsePerPage = $state(100);
 	let abortController: AbortController | null = $state(null);
 
 	async function generateSS(): Promise<string> {
@@ -490,7 +490,7 @@
 		if (isHashValid(hash)) lastValidHash = hash;
 	}
 
-	onMount(() => {
+onMount(() => {
 		if (window.location.hash === '#google_vignette') return;
 
 		window.addEventListener('hashchange', onHashChanged);
@@ -648,6 +648,7 @@
 			<!-- Main content -->
 			<div class="lk-main">
 				<div style="margin-bottom:16px"><Ad type="fluid" /></div>
+				<div style="margin-bottom:16px"><Ad type="fluid" /></div>
 				{#if loading}
 					<div class="md3-card lk-center-box">
 						<span class="material-icons lk-spinner">autorenew</span>
@@ -669,13 +670,8 @@
 						<p style="color:var(--md-sys-color-on-surface-variant)">{t(lang, 'lookup.no_results')}</p>
 					</div>
 				{:else if results.length > 0}
-					<ol class="lk-script-list">
-						{#each results as script, i (script.id)}
-							{#if i > 0 && i % 5 === 0}
-								<li class="lk-ad-item" style="display:flex;justify-content:center;padding:16px 0">
-									<div style="width:100%;max-width:672px"><Ad type="fluid" /></div>
-								</li>
-							{/if}
+<ol class="lk-script-list">
+						{#each results as script (script.id)}
 							<li class="lk-result-item" style="">
 								<article>
 									<h2>
@@ -725,13 +721,7 @@
 								</article>
 							</li>
 						{/each}
-					</ol>
-
-					{#if results.length > 3}
-						<div style="margin:16px 0">
-							<Ad type="fluid" />
-						</div>
-					{/if}
+</ol>
 
 					<!-- Pagination -->
 					{@const pageNum = parseInt(currentPage) || 1}
@@ -904,10 +894,6 @@
 		display: grid;
 		grid-template-columns: repeat(2, 1fr);
 		gap: 12px;
-	}
-
-	.lk-ad-item {
-		grid-column: 1 / -1;
 	}
 
 	.lk-result-item {
