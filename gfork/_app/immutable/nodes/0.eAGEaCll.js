@@ -1,0 +1,2 @@
+import{c as n,a}from"../chunks/BX5auRV0.js";import{ae as s}from"../chunks/Bp2fMm5O.js";import{s as p}from"../chunks/WfX7Iyzc.js";const c=!0,i=()=>({}),d=Object.freeze(Object.defineProperty({__proto__:null,load:i,prerender:c},Symbol.toStringTag,{value:"Module"}));function f(o,r){var e=n(),t=s(e);p(t,()=>r.children),a(o,e)}export{f as component,d as universal};
+//# sourceMappingURL=0.eAGEaCll.js.map
