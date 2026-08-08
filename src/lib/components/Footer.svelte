@@ -10,6 +10,15 @@
 	let { lang }: { lang: Lang } = $props();
 	const year = getCurrentYear();
 
+	const footerLinks = [
+		{ href: '/', key: 'nav.home' },
+		{ href: '/search', key: 'nav.search' },
+		{ href: '/download', key: 'nav.download' },
+		{ href: '/lookup', key: 'nav.lookup' },
+		{ href: '/help', key: 'nav.help' },
+		{ href: '/about', key: 'nav.about' }
+	];
+
 	function switchLanguage(e: Event) {
 		const select = e.target as HTMLSelectElement;
 		const selectedOption = select.options[select.selectedIndex];
@@ -22,6 +31,32 @@
 
 <footer class="m3-footer">
 	<div class="m3-footer-inner">
+
+		<!-- Brand + Quick Links -->
+		<div class="m3-footer-top">
+			<a class="m3-footer-brand" href="/{lang}" data-sveltekit-preload-data="hover" aria-label={t(lang, 'site.name')}>
+				<img
+					src="/img/gforkg.svg"
+					alt=""
+					width="44"
+					height="44"
+					loading="lazy"
+					class="m3-footer-brand-img"
+				/>
+				<span class="m3-footer-brand-text">
+					<span class="m3-footer-brand-name">{t(lang, 'site.name')}</span>
+					<span class="m3-footer-brand-tagline">{t(lang, 'site.tagline')}</span>
+				</span>
+			</a>
+
+			<nav class="m3-footer-links" aria-label={t(lang, 'site.name')}>
+				{#each footerLinks as link}
+					<a href="/{lang}{link.href}" class="m3-footer-link" data-sveltekit-preload-data="hover">
+						{t(lang, link.key)}
+					</a>
+				{/each}
+			</nav>
+		</div>
 
 		<!-- Sponsor Section -->
 		<div class="m3-footer-sponsor">
@@ -47,66 +82,68 @@
 			<Ad type="fluid" />
 		</div>
 
-		<!-- Language Selector -->
-		<form class="m3-footer-lang-form" onsubmit={(e) => e.preventDefault()}>
-			<select
-				id="locale-select"
-				class="m3-footer-lang-select"
-				aria-label={t(lang, 'language.select')}
-				onchange={switchLanguage}
-			>
-				<option value="" disabled selected>
-					{t(lang, 'language.select')}
-				</option>
-				{#each i18nConfig.supportedLangs as l}
-					<option value={l} data-language-url="/{l}" selected={l === lang}>
-						{t(lang, `lang.${l}`)}
+		<!-- Bottom Bar -->
+		<hr class="m3-footer-divider" />
+
+		<div class="m3-footer-bottom">
+			<div class="m3-footer-bottom-meta">
+				<a href="/{lang}/feedback" class="m3-footer-link" data-sveltekit-preload-data="hover">
+					{t(lang, 'footer.feedback')}
+				</a>
+				<span class="m3-footer-sep" aria-hidden="true">·</span>
+				<span class="m3-footer-copyright">
+					{t(lang, 'footer.copyright').replace('{year}', String(year))}
+					{#if __APP_VERSION__ && __APP_VERSION__ !== 'dev'}
+						<span class="m3-footer-version">
+							<a href={`${siteConfig.github.org}/commit/${__APP_VERSION__}`} target="_blank" rel="noopener noreferrer">
+								v{__APP_VERSION__}
+							</a>
+						</span>
+					{/if}
+				</span>
+			</div>
+
+			<form class="m3-footer-lang-form" onsubmit={(e) => e.preventDefault()}>
+				<select
+					id="locale-select"
+					class="m3-footer-lang-select"
+					aria-label={t(lang, 'language.select')}
+					onchange={switchLanguage}
+				>
+					<option value="" disabled selected>
+						{t(lang, 'language.select')}
 					</option>
-				{/each}
-			</select>
-		</form>
+					{#each i18nConfig.supportedLangs as l}
+						<option value={l} data-language-url="/{l}" selected={l === lang}>
+							{t(lang, `lang.${l}`)}
+						</option>
+					{/each}
+				</select>
+			</form>
 
-		<!-- Feedback Link -->
-		<p class="m3-footer-meta">
-			<a href="/{lang}/feedback" class="m3-footer-link" data-sveltekit-preload-data="hover">
-				{t(lang, 'footer.feedback')}
-			</a>
-		</p>
-
-		<!-- Rating Image -->
-		<img
-			src={siteConfig.footer.ratingImage}
-			alt={t(lang, 'footer.rating_alt')}
-			loading="lazy"
-			width="65"
-			height="65"
-			class="m3-footer-rating-img"
-		/>
-
-		<!-- ICP / Moe Union -->
-		<p class="m3-footer-meta">
-			{siteConfig.footer.icpNumber}｜
-			<a
-				href={siteConfig.footer.icpLink}
-				target="_blank"
-				rel="noopener noreferrer"
-				class="m3-footer-link"
-			>
-				{siteConfig.footer.icpLink}
-			</a>
-		</p>
-
-		<!-- Copyright -->
-		<p class="m3-footer-meta m3-footer-copyright">
-			{t(lang, 'footer.copyright').replace('{year}', String(year))}
-			{#if __APP_VERSION__ && __APP_VERSION__ !== 'dev'}
-				<span class="m3-footer-version">
-					<a href={`${siteConfig.github.org}/commit/${__APP_VERSION__}`} target="_blank" rel="noopener noreferrer">
-						v{__APP_VERSION__}
+			<div class="m3-footer-bottom-meta">
+				<img
+					src={siteConfig.footer.ratingImage}
+					alt={t(lang, 'footer.rating_alt')}
+					loading="lazy"
+					width="40"
+					height="40"
+					class="m3-footer-rating-img"
+				/>
+				<span class="m3-footer-sep" aria-hidden="true">·</span>
+				<span class="m3-footer-icp">
+					{siteConfig.footer.icpNumber}｜
+					<a
+						href={siteConfig.footer.icpLink}
+						target="_blank"
+						rel="noopener noreferrer"
+						class="m3-footer-link"
+					>
+						{siteConfig.footer.icpLink}
 					</a>
 				</span>
-			{/if}
-		</p>
+			</div>
+		</div>
 	</div>
 </footer>
 
@@ -116,17 +153,90 @@
 		background: var(--md-sys-color-surface-container-lowest);
 		margin-top: auto;
 		font-size: var(--md-sys-typescale-body-small-size);
-		text-align: center;
 	}
 
 	.m3-footer-inner {
 		max-width: var(--md-sys-layout-max-width);
 		margin: 0 auto;
-		padding: 40px var(--md-sys-layout-side-margin) 32px;
+		padding: 40px var(--md-sys-layout-side-margin) 28px;
 		display: flex;
 		flex-direction: column;
+		gap: 20px;
+	}
+
+	/* Brand + quick links */
+	.m3-footer-top {
+		display: flex;
+		flex-wrap: wrap;
 		align-items: center;
-		gap: 12px;
+		justify-content: space-between;
+		gap: 20px 32px;
+	}
+
+	.m3-footer-brand {
+		display: inline-flex;
+		align-items: center;
+		gap: 14px;
+		color: inherit;
+		text-decoration: none;
+	}
+
+	.m3-footer-brand-img {
+		width: 44px;
+		height: 44px;
+		border-radius: 12px;
+		background: var(--md-sys-color-surface);
+		box-shadow: 0 1px 2px rgba(0, 0, 0, .03), 0 8px 24px rgba(0, 0, 0, .04);
+	}
+
+	.m3-footer-brand-text {
+		display: flex;
+		flex-direction: column;
+		align-items: flex-start;
+		line-height: 1.3;
+	}
+
+	.m3-footer-brand-name {
+		font-size: var(--md-sys-typescale-title-medium-size);
+		font-weight: 600;
+		color: var(--md-sys-color-on-surface);
+	}
+
+	.m3-footer-brand-tagline {
+		font-size: var(--md-sys-typescale-body-small-size);
+		color: var(--md-sys-color-on-surface-variant);
+	}
+
+	.m3-footer-links {
+		display: flex;
+		flex-wrap: wrap;
+		align-items: center;
+		gap: 4px 2px;
+	}
+
+	/* Link */
+	.m3-footer-link {
+		color: var(--md-sys-color-primary);
+		text-decoration: none;
+		transition: color var(--md-sys-motion-duration-short) var(--md-sys-motion-easing-standard);
+	}
+	.m3-footer-link:hover {
+		color: var(--md-sys-color-secondary);
+		text-decoration: underline;
+	}
+
+	.m3-footer-links .m3-footer-link {
+		display: inline-flex;
+		align-items: center;
+		padding: 6px 12px;
+		border-radius: var(--md-sys-shape-corner-full);
+		font-size: var(--md-sys-typescale-body-medium-size);
+		color: var(--md-sys-color-on-surface-variant);
+	}
+	.m3-footer-links .m3-footer-link:hover {
+		background: var(--md-sys-color-surface-variant);
+		color: var(--md-sys-color-on-surface);
+		text-decoration: none;
 	}
 
 	/* Sponsor */
@@ -135,10 +245,11 @@
 		flex-direction: column;
 		align-items: center;
 		gap: 12px;
-		margin-bottom: 8px;
+		text-align: center;
 	}
 
 	.m3-footer-sponsor-text {
+		margin: 0;
 		font-size: var(--md-sys-typescale-label-large-size);
 		font-weight: 500;
 		color: var(--md-sys-color-on-surface-variant);
@@ -157,30 +268,72 @@
 		display: inline-block;
 	}
 
-	.m3-footer-link {
-		color: var(--md-sys-color-primary);
-		text-decoration: none;
-		transition: color var(--md-sys-motion-duration-short) var(--md-sys-motion-easing-standard);
-	}
-	.m3-footer-link:hover {
-		color: var(--md-sys-color-secondary);
-		text-decoration: underline;
-	}
-
 	/* AdSense */
 	.m3-footer-ad {
 		width: 100%;
 		max-width: 672px;
-		margin: 8px 0;
+		margin: 0 auto;
+	}
+
+	/* Divider */
+	.m3-footer-divider {
+		border: none;
+		border-top: 1px solid var(--md-sys-color-outline-variant);
+		margin: 4px 0 0;
+	}
+
+	/* Bottom bar */
+	.m3-footer-bottom {
+		display: flex;
+		flex-wrap: wrap;
+		align-items: center;
+		justify-content: space-between;
+		gap: 14px 24px;
+	}
+
+	.m3-footer-bottom-meta {
+		display: inline-flex;
+		align-items: center;
+		gap: 8px;
+		font-size: var(--md-sys-typescale-body-small-size);
+		color: var(--md-sys-color-on-surface-variant);
+		line-height: 1.5;
+	}
+
+	.m3-footer-sep {
+		opacity: .6;
+		user-select: none;
+	}
+
+	.m3-footer-copyright {
+		opacity: .7;
+	}
+
+	.m3-footer-version {
+		margin-left: 6px;
+		opacity: .8;
+	}
+	.m3-footer-version a {
+		font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+		font-size: 0.92em;
+		text-decoration: none;
+	}
+	.m3-footer-version a:hover {
+		text-decoration: underline;
+	}
+
+	.m3-footer-icp {
+		word-break: break-all;
+	}
+
+	.m3-footer-rating-img {
+		width: 40px;
+		height: 40px;
+		user-select: none;
+		pointer-events: none;
 	}
 
 	/* Language select */
-	.m3-footer-lang-form {
-		display: flex;
-		align-items: center;
-		justify-content: center;
-	}
-
 	.m3-footer-lang-select {
 		padding: 8px 12px;
 		font-size: var(--md-sys-typescale-body-medium-size);
@@ -198,36 +351,21 @@
 		border-width: 2px;
 	}
 
-	/* Meta */
-	.m3-footer-meta {
-		font-size: var(--md-sys-typescale-body-small-size);
-		color: var(--md-sys-color-on-surface-variant);
-		line-height: 1.5;
-	}
-
-	.m3-footer-copyright {
-		margin-top: 4px;
-		opacity: 0.7;
-	}
-
-	.m3-footer-version {
-		margin-left: 8px;
-		opacity: 0.8;
-	}
-	.m3-footer-version a {
-		font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
-		font-size: 0.92em;
-		text-decoration: none;
-	}
-	.m3-footer-version a:hover {
-		text-decoration: underline;
-	}
-
-	/* Rating */
-	.m3-footer-rating-img {
-		width: 65px;
-		height: 65px;
-		user-select: none;
-		pointer-events: none;
+	@media (max-width: 720px) {
+		.m3-footer-top {
+			flex-direction: column;
+			align-items: center;
+			justify-content: center;
+		}
+		.m3-footer-links {
+			justify-content: center;
+		}
+		.m3-footer-bottom {
+			flex-direction: column;
+			justify-content: center;
+		}
+		.m3-footer-bottom-meta {
+			justify-content: center;
+		}
 	}
 </style>

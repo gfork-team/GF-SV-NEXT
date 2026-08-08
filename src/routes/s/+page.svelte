@@ -29,13 +29,13 @@
 
 		function update() {
 			buildUrl();
-			meta.content = countdown + ';url=' + targetUrl;
+			meta.content = (countdown + 2) + ';url=' + targetUrl;
 			skipEl.innerHTML = '<button onclick="location.reload()" style="display:inline-block;padding:12px 32px;background:var(--md-sys-color-primary,#7f3300);color:var(--md-sys-color-on-primary,#fff);border:none;border-radius:999px;font-size:14px;font-weight:500;cursor:pointer">Click here if not redirected</button>';
 		}
 
 		function tick() {
 			countdown--;
-			if (countdown <= 0) { clearInterval(interval); return; }
+			if (countdown <= 0) { clearInterval(interval); textEl.textContent = '正在加载中…'; return; }
 			update();
 			textEl.textContent = 'Redirecting in ' + countdown + 's...';
 		}
@@ -148,7 +148,7 @@
 	}
 	.card-content { position: relative; padding: 40px 28px 24px; display: flex; flex-direction: column; align-items: center; }
 	.spin-icon {
-		font-size: 48px; color: var(--md-sys-color-primary);
+		font-size: 80px; color: var(--md-sys-color-primary);
 		animation: spin 0.5s linear infinite;
 		margin-bottom: 20px;
 	}

@@ -299,7 +299,9 @@
 	/* ── Basic search card ─────────────────────────────── */
 	.sr-basic-card {
 		background: var(--card-bg);
-		border-radius: var(--md-sys-shape-corner-medium);
+		border-radius: 14px;
+		border: 1px solid var(--md-sys-color-outline-variant);
+		box-shadow: 0 1px 2px rgba(0,0,0,.03), 0 8px 24px rgba(0,0,0,.04);
 		padding: 24px;
 	}
 
@@ -344,7 +346,9 @@
 	/* ── Advanced filters card ─────────────────────────── */
 	.sr-advanced-card {
 		background: var(--card-bg);
-		border-radius: var(--md-sys-shape-corner-medium);
+		border-radius: 14px;
+		border: 1px solid var(--md-sys-color-outline-variant);
+		box-shadow: 0 1px 2px rgba(0,0,0,.03), 0 8px 24px rgba(0,0,0,.04);
 		padding: 20px 24px;
 		margin-top: 24px;
 	}

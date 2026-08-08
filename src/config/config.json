@@ -3,7 +3,7 @@
     "name": "GFork Proxy",
     "tagline": "Greasy Fork Script Accelerated Access Service",
     "url": "https://home.greasyfork.org.cn",
-    "defaultColorScheme": "green",
+    "defaultColorScheme": "azure",
     "description": {
       "zh-hans": "Greasy Fork 油猴脚本加速访问 — 加速脚本下载，高级搜索",
       "zh-hant": "Greasy Fork 油猴腳本加速訪問 — 加速腳本下載，高級搜索",
@@ -100,8 +100,8 @@
   "greasyforkRegion": "cn",
 
   "redirects": {
-    "searchDelaySec": 2,
-    "downloadDelaySec": 2
+    "searchDelaySec": 3,
+    "downloadDelaySec": 3
   },
 
   "search": {

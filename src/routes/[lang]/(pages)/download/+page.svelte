@@ -223,17 +223,10 @@
 </svelte:head>
 
 <section class="download-page">
-	{#if siteConfig.adsense.allowOnDownloadPage}
-	<div class="content-wrapper" style="margin-bottom:16px">
-		<Ad type="auto" />
-	</div>
-	<div class="content-wrapper" style="margin-bottom:16px">
-		<Ad type="fluid" />
-	</div>
-	{/if}
-
-	<div class="content-wrapper">
-		<div class="md3-card" id="download-app" style="min-height:400px">
+	<div class="dl-grid">
+		<!-- 主列：状态卡片 -->
+		<div class="dl-main">
+			<div class="md3-card" id="download-app" style="min-height:400px">
 
 			<!-- no-path -->
 			{#if stage === 'no-path'}
@@ -249,7 +242,7 @@
 
 			<!-- fetching-ip -->
 			{#if stage === 'fetching-ip'}
-				<div class="dl-icon"><span class="material-icons">sync</span></div>
+				<div class="dl-icon"><span class="material-icons dl-spin">sync</span></div>
 				<h1>{t(lang, 'download.title')}</h1>
 				<p class="dl-desc">{progressText}</p>
 				<div class="dl-progress-bar"><div class="dl-progress-fill" style="width:{progress}%"></div></div>
@@ -257,7 +250,7 @@
 
 	<!-- checking-cache / init -->
 			{#if stage === 'checking-cache' || stage === 'init'}
-				<div class="dl-icon"><span class="material-icons">{stage === 'checking-cache' ? 'verified' : 'sync'}</span></div>
+				<div class="dl-icon"><span class="material-icons dl-spin">{stage === 'checking-cache' ? 'verified' : 'sync'}</span></div>
 				<h1>{stage === 'checking-cache' ? '校验中' : t(lang, 'download.title')}</h1>
 				<p class="dl-desc">{stage === 'checking-cache' ? '正在校验缓存节点...' : progressText}</p>
 				{#if scriptPath}
@@ -275,7 +268,7 @@
 
 		<!-- testing -->
 			{#if stage === 'testing'}
-				<div class="dl-icon"><span class="material-icons">speed</span></div>
+				<div class="dl-icon"><span class="material-icons dl-spin">speed</span></div>
 				<h1>{t(lang, 'download.testing')}</h1>
 				<p class="dl-desc">正在测试节点连接速度, 请稍候...</p>
 				{#if scriptPath}
@@ -312,29 +305,49 @@
 		</div>
 	</div>
 
-	{#if siteConfig.adsense.allowOnDownloadPage}
-	<div class="content-wrapper" style="margin-top:16px">
-		<Ad type="auto" />
+		<!-- 侧栏：广告框 -->
+		{#if siteConfig.adsense.allowOnDownloadPage}
+		<aside class="dl-side">
+			<div class="dl-ad-box"><Ad type="auto" /></div>
+			<div class="dl-ad-box"><Ad type="fluid" /></div>
+			<div class="dl-ad-box"><Ad type="autorelaxed" /></div>
+			<div class="dl-ad-box"><Ad type="auto" /></div>
+		</aside>
+		{/if}
 	</div>
-	<div class="content-wrapper" style="margin-top:16px">
-		<Ad type="autorelaxed" />
-	</div>
-	<div class="content-wrapper" style="margin-top:16px">
-		<Ad type="fluid" />
-	</div>
-	<div class="content-wrapper" style="margin-top:16px">
-		<Ad type="auto" />
-	</div>
-	{/if}
 </section>
 
 <style>
 	.download-page { padding: 32px 0; }
-	.content-wrapper { max-width: 720px; margin: 0 auto; padding: 0 16px; }
+	.dl-grid {
+		display: grid;
+		grid-template-columns: minmax(0, 1fr) 300px;
+		gap: 24px;
+		max-width: 1160px;
+		margin: 0 auto;
+		padding: 0 var(--md-sys-layout-side-margin, 16px);
+		align-items: start;
+	}
+	.dl-main { min-width: 0; }
+	.dl-main #download-app { max-width: 720px; margin: 0 auto; }
 	#download-app { padding: 48px 32px; text-align: center; }
+	.dl-side { display: flex; flex-direction: column; gap: 16px; position: sticky; top: 96px; }
+	.dl-ad-box {
+		background: var(--glass-bg);
+		backdrop-filter: blur(var(--glass-blur));
+		-webkit-backdrop-filter: blur(var(--glass-blur));
+		border: 1px solid var(--glass-border);
+		border-radius: var(--md-sys-shape-corner-medium);
+		padding: 16px;
+		box-shadow: var(--glass-shadow);
+		display: flex; align-items: center; justify-content: center;
+		min-height: 250px;
+	}
 	.dl-icon { margin-bottom: 24px; }
 	.dl-icon .material-icons { font-size: 64px; color: var(--md-sys-color-on-surface-variant); }
 	.dl-icon .material-icons.ok { color: var(--md-sys-color-primary); }
+	.dl-icon .material-icons.dl-spin { color: var(--md-sys-color-primary); animation: dl-spin 0.5s linear infinite; }
+	@keyframes dl-spin { from { transform: rotate(0deg) } to { transform: rotate(360deg) } }
 	#download-app h1 { font-family: var(--md-sys-typescale-headline-medium-font, inherit); font-size: 24px; font-weight: 600; margin: 0 0 12px; color: var(--md-sys-color-on-surface); }
 	.dl-desc { font-size: 15px; color: var(--md-sys-color-on-surface-variant); margin: 0 0 20px; }
 	.dl-url { font-size: 13px; color: var(--md-sys-color-outline); background: var(--md-sys-color-surface-container); padding: 8px 16px; border-radius: var(--md-sys-shape-corner-small); word-break: break-all; display: inline-block; max-width: 100%; margin-bottom: 16px; }
@@ -353,5 +366,9 @@
 	.dl-btn .material-icons { font-size: 18px; }
 	.dl-progress-bar { width: 100%; max-width: 400px; height: 4px; background: var(--md-sys-color-surface-container-highest); border-radius: 2px; margin: 16px auto 0; overflow: hidden; }
 	.dl-progress-fill { height: 100%; background: var(--md-sys-color-primary); border-radius: 2px; transition: width 0.3s ease; }
+	@media (max-width: 899px) {
+		.dl-grid { grid-template-columns: 1fr; }
+		.dl-side { position: static; }
+	}
 	@media (max-width: 600px) { #download-app { padding: 32px 16px; } }
 </style>

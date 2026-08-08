@@ -152,9 +152,19 @@
 		gap: 16px;
 		padding: 20px;
 		background: var(--card-bg);
-		border-radius: var(--md-sys-shape-corner-medium);
+		border-radius: 14px;
+		border: 1px solid var(--md-sys-color-outline-variant);
+		box-shadow: 0 1px 2px rgba(0,0,0,.03), 0 4px 12px rgba(0,0,0,.03);
 		text-decoration: none;
 		color: inherit;
+		transition: transform .2s ease-out, box-shadow .2s ease-out, border-color .2s ease-out;
+	}
+	@media (hover: hover) {
+		.hp-card:hover {
+			transform: translateY(-3px);
+			box-shadow: 0 8px 20px rgba(0,0,0,.08);
+			border-color: var(--md-sys-color-primary);
+		}
 	}
 
 	.hp-card-icon {

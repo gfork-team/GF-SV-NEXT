@@ -678,7 +678,7 @@
 		padding: 60px 20px; min-height: 400px; text-align: center;
 	}
 	.if-spinner {
-		font-size: 48px; animation: if-spin 0.5s linear infinite; display: inline-block;
+		font-size: 80px; animation: if-spin 0.5s linear infinite; display: inline-block;
 		color: var(--md-sys-color-primary);
 	}
 	.if-loading-tip {
@@ -1223,7 +1223,7 @@
 		color: var(--md-sys-color-on-surface);
 	}
 	.if-spinner-sm {
-		font-size: 18px; animation: if-spin 0.5s linear infinite;
+		font-size: 28px; animation: if-spin 0.5s linear infinite;
 		color: var(--md-sys-color-primary);
 	}
 </style>

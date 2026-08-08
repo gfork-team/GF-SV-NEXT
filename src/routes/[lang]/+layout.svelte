@@ -14,6 +14,7 @@
 	import Ad from '$components/Ad.svelte';
 	import { sendAudit } from '$lib/audit';
 	import { onMount } from 'svelte';
+	import { afterNavigate } from '$app/navigation';
 	import { initTheme, handleSystemChange } from '$lib/theme.svelte';
 	import { getColorFoucScript } from '$lib/colors';
 	import Nav from '$components/Nav.svelte';
@@ -69,6 +70,40 @@
 				return false;
 			};
 		}
+
+		// Scroll reveal: observe only after the page has settled so that
+		// in-viewport sections keep their staggered fade-up instead of
+		// being revealed all at once during initial render / SPA swap.
+		scheduleReveal();
+	});
+
+	// Scroll reveal (Cloudflare-style fade-up)
+	let revealObs: IntersectionObserver | null = null;
+	const ensureRevealObserver = () => {
+		if (revealObs) return;
+		revealObs = new IntersectionObserver(
+			(entries) => {
+				for (const entry of entries) {
+					if (entry.isIntersecting) {
+						const el = entry.target as HTMLElement;
+						el.setAttribute('data-reveal', 'true');
+						revealObs?.unobserve(el);
+					}
+				}
+			},
+			{ threshold: 0.08, rootMargin: '0px 0px -8% 0px' }
+		);
+	};
+	const observeReveal = () => {
+		ensureRevealObserver();
+		document.querySelectorAll('[data-reveal]:not([data-reveal="true"])').forEach((el) => revealObs?.observe(el));
+	};
+	const scheduleReveal = () => {
+		window.requestAnimationFrame(() => window.setTimeout(observeReveal, 80));
+	};
+
+	afterNavigate(() => {
+		scheduleReveal();
 	});
 
 	let cleanPath: string = $derived(page.url.pathname.replace(/^\/[^/]+/, '') || '/');
@@ -89,7 +124,7 @@
 </script>
 
 <svelte:head>
-	<!-- Theme flash prevention: sets inline CSS vars before paint -->
+	<!-- Anti-FOUC（paint 前同步套用本地配色，杜绝闪变） -->
 	{@html `<script>${getColorFoucScript()}</script>`}
 
 	<!-- Canonical URL (no trailing slash, Uniform URL) -->
@@ -162,6 +197,16 @@
 	{/if}
 </svelte:head>
 
+<!-- 顶部细红带（gov.cn 式，全站） -->
+<div class="zh-topbar" aria-hidden="true"></div>
+
+<!-- 全站背景动效（政务红水墨光斑，自定义配色时整体隐藏） -->
+<div class="zh-bg" aria-hidden="true">
+	<span class="zh-bg-blob zh-bg-blob--a"></span>
+	<span class="zh-bg-blob zh-bg-blob--b"></span>
+	<span class="zh-bg-blob zh-bg-blob--c"></span>
+</div>
+
 <Nav {lang} />
 
 <div class="m3-nav-ad"><Ad type="fluid" /></div>
@@ -192,6 +237,76 @@
 <Footer {lang} />
 
 <style>
+	/* 顶部细红带（gov.cn 式）：默认配色下为政务红渐变，自定义配色回落主题色 */
+	.zh-topbar {
+		height: 4px;
+		background: linear-gradient(90deg, var(--md-sys-color-primary) 0%, var(--md-sys-color-primary) 100%);
+	}
+	:global(:root[data-zh-china="1"]) .zh-topbar {
+		background: linear-gradient(90deg, var(--zh-seal-deep), var(--zh-seal) 55%, var(--zh-seal-bright));
+	}
+
+	/* 全站背景动效：固定浮层，缓慢漂移的光斑，所有配色下持续运动 */
+	.zh-bg {
+		position: fixed;
+		inset: 0;
+		z-index: 0;
+		overflow: hidden;
+		pointer-events: none;
+		opacity: 0;
+		animation: zh-bg-fade 1.2s ease-out 0.35s forwards;
+	}
+	.zh-bg-blob {
+		position: absolute;
+		border-radius: 50%;
+		will-change: transform;
+	}
+	/* 默认配色：粉紫 / 墨蓝光斑 */
+	.zh-bg-blob--a {
+		width: 62vmin; height: 62vmin; top: -14vmin; left: -12vmin;
+		background: radial-gradient(circle, color-mix(in srgb, var(--zh-seal) 26%, transparent) 0%, transparent 68%);
+		animation: zh-blob-a 26s ease-in-out infinite alternate;
+	}
+	.zh-bg-blob--b {
+		width: 54vmin; height: 54vmin; top: 18%; right: -14vmin;
+		background: radial-gradient(circle, color-mix(in srgb, var(--zh-seal-bright) 16%, transparent) 0%, transparent 66%);
+		animation: zh-blob-b 34s ease-in-out infinite alternate;
+	}
+	.zh-bg-blob--c {
+		width: 48vmin; height: 48vmin; bottom: -12vmin; left: 30%;
+		background: radial-gradient(circle, color-mix(in srgb, var(--zh-azure) 12%, transparent) 0%, transparent 68%);
+		animation: zh-blob-c 40s ease-in-out infinite alternate;
+	}
+	/* 自定义配色：同样持续运动，但回落中性灰，不“上色” */
+	:global(:root:not([data-zh-china="1"])) .zh-bg-blob {
+		background: radial-gradient(circle, rgba(108, 112, 122, 0.14) 0%, transparent 68%);
+	}
+	@keyframes zh-bg-fade { to { opacity: 1; } }
+	@keyframes zh-blob-a {
+		from { transform: translate3d(0, 0, 0) scale(1); }
+		50%  { transform: translate3d(12vmin, 9vmin, 0) scale(1.22); }
+		to { transform: translate3d(24vmin, 18vmin, 0) scale(1.18); }
+	}
+	@keyframes zh-blob-b {
+		from { transform: translate3d(0, 0, 0) scale(1.1); }
+		50%  { transform: translate3d(-13vmin, 10vmin, 0) scale(0.92); }
+		to { transform: translate3d(-26vmin, 20vmin, 0) scale(0.96); }
+	}
+	@keyframes zh-blob-c {
+		from { transform: translate3d(0, 0, 0) scale(0.95); }
+		50%  { transform: translate3d(11vmin, -10vmin, 0) scale(1.16); }
+		to { transform: translate3d(22vmin, -20vmin, 0) scale(1.12); }
+	}
+	@media (prefers-reduced-motion: reduce) {
+		.zh-bg { animation: none; opacity: 1; }
+	}
+
+	/* 内容浮于背景动效之上 */
+	:global(.m3-footer) {
+		position: relative;
+		z-index: 1;
+	}
+
 	.m3-nav-ad {
 		max-width: 1160px;
 		margin: 0 auto;
@@ -242,6 +357,8 @@
 		padding: 0 var(--md-sys-layout-side-margin, 16px);
 		display: flex;
 		gap: 24px;
+		position: relative;
+		z-index: 1;
 	}
 
 	.m3-layout-body main {

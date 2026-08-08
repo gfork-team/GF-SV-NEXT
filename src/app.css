@@ -248,12 +248,66 @@ html {
   -moz-osx-font-smoothing: grayscale;
 }
 
+/* 默认主题 token（Government Azure）静态声明：
+   首帧即有协调配色，避免 hydrate 前 CSS 变量未定义导致的黑白闪变。
+   hydrate 后 applyColorScheme() 以 inline style 覆盖（优先级更高），无冲突。 */
+:root {
+  --md-sys-color-primary: #1d5fa8;
+  --md-sys-color-on-primary: #ffffff;
+  --md-sys-color-primary-container: #d6e3f7;
+  --md-sys-color-on-primary-container: #0c2c50;
+  --md-sys-color-secondary: #5b6a7c;
+  --md-sys-color-on-secondary: #ffffff;
+  --md-sys-color-secondary-container: #dbe4ee;
+  --md-sys-color-on-secondary-container: #15222f;
+  --md-sys-color-tertiary: #6e6076;
+  --md-sys-color-on-tertiary: #ffffff;
+  --md-sys-color-tertiary-container: #e9dff0;
+  --md-sys-color-on-tertiary-container: #261b2e;
+  --md-sys-color-surface: #fafafa;
+  --md-sys-color-on-surface: #1f1f1f;
+  --md-sys-color-surface-variant: #eceff2;
+  --md-sys-color-on-surface-variant: #454b52;
+  --md-sys-color-surface-container-low: #f4f5f6;
+  --md-sys-color-surface-container: #eef0f1;
+  --md-sys-color-surface-container-high: #e9ebec;
+  --md-sys-color-surface-container-highest: #e3e5e7;
+  --md-sys-color-outline: #7a8087;
+  --md-sys-color-outline-variant: #cdd1d5;
+}
+
+/* 首帧纯白：主题颜色在 hydrate 读取配置后应用 */
 body {
   font-family: 'Noto Serif SC', 'Inter', system-ui, -apple-system, serif;
   font-size: var(--md-sys-typescale-body-medium);
-  color: var(--md-sys-color-on-surface);
-  background: var(--md-sys-color-surface);
+  color: #1f1f1f;
+  background: #ffffff;
   line-height: 1.5;
+}
+
+/* 水墨政务配色（默认主题）覆盖全局底色与链接色 */
+:root[data-zh-china="1"] body {
+  background: var(--zh-paper);
+  color: var(--zh-ink);
+}
+:root[data-zh-china="1"] a {
+  color: var(--zh-azure);
+  transition: color 160ms ease-out;
+}
+:root[data-zh-china="1"] a:hover { color: var(--zh-seal); }
+
+/* 按钮形态的链接保持按钮文字色，不被链接色覆盖（否则默认配色下文字与底色同色不可见） */
+:root[data-zh-china="1"] a.md3-button,
+:root[data-zh-china="1"] a.md3-button:hover {
+  color: var(--md-sys-color-on-primary);
+}
+:root[data-zh-china="1"] a.md3-tonal-button,
+:root[data-zh-china="1"] a.md3-tonal-button:hover {
+  color: var(--md-sys-color-on-secondary-container);
+}
+:root[data-zh-china="1"] a.md3-outlined-button,
+:root[data-zh-china="1"] a.md3-outlined-button:hover {
+  color: var(--md-sys-color-primary);
 }
 
 @media (min-width: 768px) {
@@ -278,8 +332,17 @@ a:hover { color: var(--md-sys-color-secondary); }
 /* Surface card */
 .md3-card {
   background: var(--card-bg);
-  border-radius: var(--md-sys-shape-corner-medium);
+  border-radius: 14px;
+  border: 1px solid var(--md-sys-color-outline-variant);
+  box-shadow: 0 1px 2px rgba(0,0,0,0.03), 0 8px 24px rgba(0,0,0,0.04);
   padding: 24px;
+  transition: transform 0.2s ease-out, box-shadow 0.2s ease-out, border-color 0.2s ease-out;
+}
+@media (hover: hover) {
+  .md3-card:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 2px 4px rgba(0,0,0,0.04), 0 16px 40px rgba(0,0,0,0.08);
+  }
 }
 
 /* Unfilled AdSense ads — hidden but space reserved */
@@ -569,6 +632,21 @@ ins.adsbygoogle[data-ad-status="unfilled"] {
   border-radius: var(--md-sys-shape-corner-medium);
   border: 1px solid var(--md-sys-color-outline-variant);
   padding: 24px;
+}
+
+/* ─── Scroll reveal (Cloudflare-style fade-up) ── */
+[data-reveal] {
+  opacity: 0;
+  transform: translateY(18px);
+  transition: opacity 0.55s ease-out, transform 0.55s ease-out;
+  transition-delay: var(--reveal-delay, 0ms);
+}
+[data-reveal="true"] {
+  opacity: 1;
+  transform: none;
+}
+@media (prefers-reduced-motion: reduce) {
+  [data-reveal] { opacity: 1; transform: none; transition: none; }
 }
 
 .btn-primary {

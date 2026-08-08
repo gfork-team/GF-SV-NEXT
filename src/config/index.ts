@@ -12,7 +12,7 @@ export const siteConfig = {
   description: cfg.site.description as Record<string, string>,
   keywords: cfg.site.keywords,
   url: cfg.site.url,
-  defaultColorScheme: cfg.site.defaultColorScheme || 'green',
+  defaultColorScheme: cfg.site.defaultColorScheme || 'azure',
   favicon: cfg.favicon,
   cdn: {
     get enabled() { return cdnEnabled; },

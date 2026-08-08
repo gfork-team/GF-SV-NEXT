@@ -889,7 +889,7 @@ onMount(() => {
 	}
 
 	.lk-spinner {
-		font-size: 48px;
+		font-size: 80px;
 		animation: lk-spin 0.5s linear infinite;
 		display: inline-block;
 		color: var(--md-sys-color-primary);
@@ -1001,13 +1001,19 @@ onMount(() => {
 
 /* ─── Mobile ──────────────────────────────────────── */
 	@media (max-width: 768px) {
-		.lk-sidebar-toggle { display: flex; align-items:center; justify-content:center; }
+		/* 顶栏 sticky z-index:50 会盖住 layout-body(z-index:1) 内的元素；
+		   因此开关按钮移到顶栏下方，避免与品牌区重叠而点不到 */
+		.lk-sidebar-toggle {
+			display: flex; align-items:center; justify-content:center;
+			top: 72px; right: 12px; left: auto;
+		}
 		.lk-layout { flex-direction: column; }
 		.lk-sidebar {
 			display: none; position: fixed;
-			top: 0; left: 0;
-			width: 280px; height: 100vh;
-			z-index: 99; border-radius: 0;
+			top: 64px; left: 0;
+			width: 280px; height: calc(100dvh - 64px);
+			z-index: 99;
+			border-radius: 0 var(--md-sys-shape-corner-medium) var(--md-sys-shape-corner-medium) 0;
 			box-shadow: var(--md-sys-elevation-4);
 		}
 		.lk-sidebar.open { display: block; }

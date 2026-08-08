@@ -18,9 +18,7 @@
 	let defaultScheme = $derived(getScheme(getDefaultSchemeId_()));
 	let showColorPicker = $state(false);
 	let showThemeDropdown = $state(false);
-	let isZhHansHome = $derived(lang === 'zh-hans' && (page.url.pathname === `/${lang}` || page.url.pathname === `/${lang}/`));
-	let brandName = $derived(isZhHansHome ? 'GreasyFork镜像 Proxy' : 'GFork Proxy');
-
+	let brandName = 'GFork Proxy';
 	onMount(() => {
 		const handleKey = (e: KeyboardEvent) => {
 			if (!mobileOpen) return;
@@ -69,7 +67,9 @@
 
 <header class="m3-nav-header glass-nav">
 	<nav class="m3-nav-inner">
-		<a href="/{lang}" class="m3-nav-brand" data-sveltekit-preload-data="hover">{brandName}</a>
+		<a href="/{lang}" class="m3-nav-brand" data-sveltekit-preload-data="hover" aria-label="GFork Proxy">
+			<span class="m3-nav-brand-text">{brandName}</span>
+		</a>
 
 		<!-- Desktop links -->
 		<div class="m3-nav-links">
@@ -198,7 +198,10 @@
 	<button class="m3-drawer-overlay" onclick={() => mobileOpen = false} aria-label="Close menu"></button>
 	<nav class="m3-drawer" class:open={mobileOpen} bind:this={drawerRef}>
 			<div class="m3-drawer-header">
-				<span class="m3-drawer-title">{brandName}</span>
+				<span class="m3-drawer-title">
+					<span class="material-symbols-outlined m3-drawer-title-icon" aria-hidden="true">bolt</span>
+					{brandName}
+				</span>
 				<button class="m3-drawer-close" onclick={() => mobileOpen = false} aria-label="Close menu">
 					<svg class="m3-drawer-close-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
 						<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
@@ -236,7 +239,7 @@
 							<svg width="20" height="20" fill="currentColor" viewBox="0 0 24 24" style="margin-right:8px;flex-shrink:0"><path d="M12 3V1m0 22v-2M4.22 4.22l1.42 1.42m12.72 12.72l1.42 1.42M1 12h2m18 0h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42M12 7a5 5 0 110 10 5 5 0 010-10z"/></svg>{t(lang, 'theme.light')}
 						{/if}
 						{#if theme === 'system'}
-							<svg width="20" height="20" fill="currentColor" viewBox="0 0 24 24" style="margin-right:8px;flex-shrink:0"><path d="M12 2a10 10 0 1010 10A10 10 0 0012 2zm0 18a8 8 0 110-16 8 8 0 018 8z"/></svg>{t(lang, 'theme.system')}
+							<svg width="20" height="20" fill="currentColor" viewBox="0 0 24 24" style="margin-right:8px;flex-shrink:0"><path d="M12 2a10 10 0 1010 10A10 10 0 0012 2zm0 18a8 8 0 110-16 8 8 0 018 8 8 8 0 01-8 8z"/></svg>{t(lang, 'theme.system')}
 						{/if}
 				</button>
 			</div>
@@ -281,23 +284,62 @@
 	{/if}
 
 <style>
+	/* ─── 鏀垮姟绠€绾﹂厤鑹插彉閲忥細浠呭湪榛樿涓婚涓嬪惎鐢紙data-zh-china="1"锛?── */
+	:global(:root) {
+		--zh-ink: #1f1f1f;
+		--zh-ink-deep: #111111;
+		--zh-ink-soft: #5f5f5f;
+		--zh-azure: #1d5fa8;
+		--zh-azure-soft: #6b93c2;
+		--zh-seal: #ddaacc;
+		--zh-seal-deep: #c86b8a;
+		--zh-seal-bright: #eed3e5;
+		--zh-seal-soft: #f8edf4;
+		--zh-gold: #b98a1e;
+		--zh-gold-deep: #9a731a;
+		--zh-ivory: #f5f5f5;
+		--zh-ivory-bright: #ffffff;
+		--zh-paper: #fafafa;
+		--zh-line: #e5e5e5;
+		--zh-serif: "Noto Serif SC", "Source Han Serif SC", "Songti SC", "STSong", "SimSun", Georgia, "Times New Roman", serif;
+	}
+
 	/* ─── Top bar ─────────────────────── */
 	.m3-nav-header {
 		position: sticky; top: 0; z-index: 50;
 		height: 64px; display: flex; align-items: center;
 		padding: 0 var(--md-sys-layout-side-margin);
 	}
+	/* 榛樿涓婚锛堟棤鑷畾涔夐厤鑹诧級锛氭斂鍔＄畝绾?脳 鐧界幓鐠冿紙gov.cn 寮忥級 */
+	:global(:root[data-zh-china="1"]) .m3-nav-header {
+		height: 72px;
+		background: rgba(255,255,255,.82);
+		backdrop-filter: blur(20px) saturate(160%);
+		-webkit-backdrop-filter: blur(20px) saturate(160%);
+		box-shadow:
+			inset 0 -1px 0 rgba(0,0,0,.05),
+			0 4px 20px rgba(0,0,0,.04);
+		border-bottom: 1px solid var(--zh-line);
+	}
 	.m3-nav-inner {
 		display: flex; align-items: center; justify-content: space-between;
 		width: 100%; max-width: var(--md-sys-layout-max-width); margin: 0 auto;
 	}
 	.m3-nav-brand {
-		font-size: var(--md-sys-typescale-title-large); font-weight: 600;
+		display: inline-flex; align-items: center; gap: 10px;
 		color: var(--md-sys-color-on-surface); text-decoration: none;
-		transition: color var(--md-sys-motion-duration-short) var(--md-sys-motion-easing-standard);
 		flex-shrink: 0;
+		transition: opacity var(--md-sys-motion-duration-short) var(--md-sys-motion-easing-standard);
 	}
-	.m3-nav-brand:hover { color: var(--md-sys-color-primary); }
+	.m3-nav-brand:hover { opacity: .85; }
+	:global(:root[data-zh-china="1"]) .m3-nav-brand { color: var(--zh-ink-deep); }
+	.m3-nav-brand-text {
+		font-size: var(--md-sys-typescale-title-large); font-weight: 600;
+		white-space: nowrap;
+	}
+	:global(:root[data-zh-china="1"]) .m3-nav-brand-text {
+		font-size: 21px; font-weight: 700; letter-spacing: -0.01em;
+	}
 
 	/* ─── Desktop links ───────────────── */
 	.m3-nav-links {
@@ -308,9 +350,9 @@
 		font-size: var(--md-sys-typescale-label-large); font-weight: 500;
 		color: var(--md-sys-color-on-surface-variant); text-decoration: none;
 		border-bottom: 3px solid transparent; position: relative; overflow: hidden;
+		border-radius: var(--md-sys-shape-corner-full) var(--md-sys-shape-corner-full) 0 0;
 		transition: color var(--md-sys-motion-duration-short) var(--md-sys-motion-easing-standard),
 		            background var(--md-sys-motion-duration-short) var(--md-sys-motion-easing-standard);
-		border-radius: var(--md-sys-shape-corner-full) var(--md-sys-shape-corner-full) 0 0;
 	}
 	.m3-nav-link:hover { color: var(--md-sys-color-on-surface); background: var(--md-sys-color-surface-variant); }
 	.m3-nav-link--active { color: var(--md-sys-color-primary) !important; }
@@ -322,6 +364,28 @@
 		transform-origin: center;
 	}
 	.m3-nav-link--active:after { transform: translate(-50%) scaleX(1); }
+	/* 鏀垮姟椋庡鑸摼鎺ワ紙hover 鍙樼孩锛屾縺娲荤孩瀛椾笅鍒掔嚎锛?*/
+	:global(:root[data-zh-china="1"]) .m3-nav-link {
+		padding: 8px 14px;
+		border-radius: 6px;
+		color: var(--zh-ink);
+		letter-spacing: 0;
+		border-bottom: none;
+		transition:
+			color 160ms ease-out,
+			background 160ms ease-out;
+	}
+	:global(:root[data-zh-china="1"]) .m3-nav-link:hover { color: var(--zh-seal); background: rgba(221,170,204,.14); }
+	:global(:root[data-zh-china="1"]) .m3-nav-link:active { transform: scale(.96); transition: none; }
+	:global(:root[data-zh-china="1"]) .m3-nav-link--active { color: var(--zh-seal) !important; font-weight: 600; }
+	:global(:root[data-zh-china="1"]) .m3-nav-link--active:after,
+	:global(:root[data-zh-china="1"]) .m3-nav-link:hover:after {
+		content: ''; position: absolute; left: 50%; bottom: 2px;
+		width: 24px; height: 2px;
+		background: var(--zh-seal);
+		border-radius: 1px;
+		transform: translate(-50%);
+	}
 
 	/* ─── Language selector ─────────────── */
 	.m3-lang-selector { position: relative; margin-left: 8px; }
@@ -337,6 +401,16 @@
 		white-space: nowrap;
 	}
 	.m3-lang-btn:hover { filter: brightness(.95); box-shadow: var(--md-sys-elevation-1); }
+	:global(:root[data-zh-china="1"]) .m3-lang-btn {
+		background: var(--zh-ivory-bright);
+		color: var(--zh-ink);
+		border: 1px solid var(--zh-line);
+		border-radius: 6px;
+		box-shadow: none;
+		transition: all 160ms ease-out;
+	}
+	:global(:root[data-zh-china="1"]) .m3-lang-btn:hover { background: var(--zh-paper); border-color: var(--zh-azure-soft); filter: none; }
+	:global(:root[data-zh-china="1"]) .m3-lang-btn:active { transform: scale(.95); transition: none; }
 	.m3-lang-chevron { width: 16px; height: 16px; flex-shrink: 0; }
 	.m3-lang-dropdown {
 		position: absolute; right: 0; top: calc(100% + 4px); min-width: 140px;
@@ -370,6 +444,10 @@
 		flex-shrink: 0;
 	}
 	.m3-color-btn:hover { background: var(--md-sys-color-surface-variant); color: var(--md-sys-color-primary); }
+	:global(:root[data-zh-china="1"]) .m3-color-btn {
+		border-radius: 999px; color: var(--zh-ink);
+	}
+	:global(:root[data-zh-china="1"]) .m3-color-btn:hover { background: var(--zh-paper); color: var(--zh-seal); }
 	.m3-color-icon { width: 20px; height: 20px; }
 	.m3-color-dropdown {
 		position: absolute; right: 0; top: calc(100% + 8px);
@@ -430,6 +508,16 @@
 		transition: all var(--md-sys-motion-duration-short) var(--md-sys-motion-easing-standard);
 	}
 	.m3-theme-btn:hover { background: var(--md-sys-color-surface-container-highest); color: var(--md-sys-color-on-surface); }
+	:global(:root[data-zh-china="1"]) .m3-theme-btn {
+		background: var(--zh-ivory-bright);
+		color: var(--zh-ink);
+		border: 1px solid var(--zh-line);
+		border-radius: 6px;
+		box-shadow: none;
+		transition: all 160ms ease-out;
+	}
+	:global(:root[data-zh-china="1"]) .m3-theme-btn:hover { background: var(--zh-paper); border-color: var(--zh-azure-soft); }
+	:global(:root[data-zh-china="1"]) .m3-theme-btn:active { transform: scale(.95); transition: none; }
 	.m3-theme-icon { width: 18px; height: 18px; flex-shrink: 0; }
 	.m3-theme-label { font-size: var(--md-sys-typescale-label-large); }
 	.m3-theme-chevron { width: 14px; height: 14px; flex-shrink: 0; }
@@ -463,6 +551,11 @@
 		flex-shrink: 0;
 	}
 	.m3-hamburger:hover { background: var(--md-sys-color-surface-variant); }
+	:global(:root[data-zh-china="1"]) .m3-hamburger {
+		border-radius: 6px; color: var(--zh-ink);
+	}
+	:global(:root[data-zh-china="1"]) .m3-hamburger:hover { background: var(--zh-paper); }
+	:global(:root[data-zh-china="1"]) .m3-hamburger:active { transform: scale(.92); transition: none; }
 	.m3-hamburger-icon { width: 24px; height: 24px; }
 
 	/* ─── Drawer ─────────────────────── */
@@ -483,10 +576,29 @@
 	.m3-drawer.open { transform: translate(0); }
 	.m3-drawer-header {
 		display: flex; align-items: center; justify-content: space-between;
-		padding: 0 8px 16px; border-bottom: 1px solid var(--md-sys-color-outline-variant);
+		gap: 8px;
+		padding: 10px 12px 14px; border-bottom: 1px solid var(--md-sys-color-outline-variant);
 		margin-bottom: 8px;
 	}
-	.m3-drawer-title { font-size: var(--md-sys-typescale-title-medium); font-weight: 600; color: var(--md-sys-color-on-surface); }
+	:global(:root[data-zh-china="1"]) .m3-drawer-header {
+		border-bottom: 1px solid var(--zh-line);
+		background: var(--zh-paper);
+		border-radius: 6px 6px 0 0;
+		margin: -8px 0 8px;
+	}
+	.m3-drawer-title {
+		display: inline-flex; align-items: center; gap: 8px;
+		font-size: var(--md-sys-typescale-title-medium); font-weight: 600;
+		color: var(--md-sys-color-on-surface);
+	}
+	:global(:root[data-zh-china="1"]) .m3-drawer-title {
+		color: var(--zh-ink-deep);
+	}
+	.m3-drawer-title-icon {
+		font-size: 22px; line-height: 1;
+		color: var(--md-sys-color-primary);
+	}
+	:global(:root[data-zh-china="1"]) .m3-drawer-title-icon { color: var(--zh-seal); }
 	.m3-drawer-close {
 		display: flex; align-items: center; justify-content: center;
 		width: 40px; height: 40px; background: none; border: none;
@@ -495,6 +607,8 @@
 		transition: background var(--md-sys-motion-duration-short) var(--md-sys-motion-easing-standard);
 	}
 	.m3-drawer-close:hover { background: var(--md-sys-color-surface-variant); }
+	:global(:root[data-zh-china="1"]) .m3-drawer-close { border-radius: 999px; color: var(--zh-ink); }
+	:global(:root[data-zh-china="1"]) .m3-drawer-close:hover { background: var(--zh-paper); }
 	.m3-drawer-close-icon { width: 20px; height: 20px; }
 	.m3-drawer-item {
 		display: flex; align-items: center; gap: 12px; padding: 14px 16px;
@@ -507,6 +621,8 @@
 	}
 	.m3-drawer-item:hover { background: var(--md-sys-color-surface-variant); color: var(--md-sys-color-on-surface); }
 	.m3-drawer-item--active { color: var(--md-sys-color-primary) !important; background: var(--md-sys-color-primary-container) !important; }
+	:global(:root[data-zh-china="1"]) .m3-drawer-item { border-radius: 6px; }
+	:global(:root[data-zh-china="1"]) .m3-drawer-item--active { color: var(--zh-seal) !important; background: rgba(221,170,204,.14) !important; font-weight: 600; }
 	.m3-drawer-divider { height: 1px; background: var(--md-sys-color-outline-variant); margin: 8px; }
 	.m3-drawer-lang-label { padding: 8px 16px; font-size: var(--md-sys-typescale-label-medium); color: var(--md-sys-color-on-surface-variant); }
 
@@ -544,6 +660,32 @@
 	}
 	.m3-drawer-swatch svg { width: 18px; height: 18px; }
 
+	/* ─── 鏃犻殰纰嶇劍鐐圭幆 ─────────────────── */
+	:global(:root[data-zh-china="1"]) .m3-nav-link:focus-visible,
+	:global(:root[data-zh-china="1"]) .m3-lang-btn:focus-visible,
+	:global(:root[data-zh-china="1"]) .m3-theme-btn:focus-visible,
+	:global(:root[data-zh-china="1"]) .m3-hamburger:focus-visible,
+	:global(:root[data-zh-china="1"]) .m3-drawer-close:focus-visible {
+		outline: 2px solid var(--zh-seal);
+		outline-offset: 2px;
+	}
+
+	/* ─── 鍑忓皯鍔ㄦ€侊紙鏃犻殰纰嶏級─────────────── */
+	@media (prefers-reduced-motion: reduce) {
+		:global(:root[data-zh-china="1"]) .m3-nav-header,
+		:global(:root[data-zh-china="1"]) .m3-nav-link,
+		:global(:root[data-zh-china="1"]) .m3-lang-btn,
+		:global(:root[data-zh-china="1"]) .m3-theme-btn,
+		:global(:root[data-zh-china="1"]) .m3-hamburger,
+		:global(:root[data-zh-china="1"]) .m3-nav-link:active,
+		:global(:root[data-zh-china="1"]) .m3-lang-btn:active,
+		:global(:root[data-zh-china="1"]) .m3-theme-btn:active,
+		:global(:root[data-zh-china="1"]) .m3-hamburger:active {
+			transition: none !important;
+			transform: none !important;
+		}
+	}
+
 	/* ─── Responsive ─────────────────── */
 	@media (min-width: 768px) {
 		.m3-nav-links { display: flex; }
@@ -552,5 +694,7 @@
 	@media (max-width: 767px) {
 		.m3-nav-links { display: none; }
 		.m3-hamburger { display: flex; }
+		:global(:root[data-zh-china="1"]) .m3-nav-header { height: 64px; }
+		:global(:root[data-zh-china="1"]) .m3-nav-brand-text { font-size: 17px; letter-spacing: 0; }
 	}
 </style>

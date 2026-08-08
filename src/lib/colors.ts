@@ -54,40 +54,40 @@ export interface ColorScheme {
 
 /* ── Schemes (first = site default) ───────────────── */
 export const SCHEMES: ColorScheme[] = [
-  // ── Forest Green (default) ─────────────────
+  // ── Government Azure (default, 政务水墨协调色) ──
   {
-    id: 'green',
-    label: 'Forest Green',
-    swatch: '#388e3c',
+    id: 'azure',
+    label: 'Government Azure',
+    swatch: '#1d5fa8',
     light: {
-      primary: '#1b6b22',           onPrimary: '#ffffff',
-      primaryContainer: '#a2f5a6',  onPrimaryContainer: '#002106',
-      secondary: '#516351',         onSecondary: '#ffffff',
-      secondaryContainer: '#d5e8d2', onSecondaryContainer: '#0f1f12',
-      tertiary: '#3b6471',          onTertiary: '#ffffff',
-      tertiaryContainer: '#bfe9f8',  onTertiaryContainer: '#001f27',
-      surface: '#f6fbf3',           onSurface: '#181d18',
-      surfaceVariant: '#dbe5d9',    onSurfaceVariant: '#414a40',
-      surfaceContainerLow: '#f0f6ee',
-      surfaceContainer: '#eaf0e8',
-      surfaceContainerHigh: '#e5ebe3',
-      surfaceContainerHighest: '#dfe5dd',
-      outline: '#717970',           outlineVariant: '#c1c9bf',
+      primary: '#1d5fa8',           onPrimary: '#ffffff',
+      primaryContainer: '#d6e3f7',  onPrimaryContainer: '#0c2c50',
+      secondary: '#5b6a7c',         onSecondary: '#ffffff',
+      secondaryContainer: '#dbe4ee', onSecondaryContainer: '#15222f',
+      tertiary: '#6e6076',          onTertiary: '#ffffff',
+      tertiaryContainer: '#e9dff0',  onTertiaryContainer: '#261b2e',
+      surface: '#fafafa',           onSurface: '#1f1f1f',
+      surfaceVariant: '#eceff2',    onSurfaceVariant: '#454b52',
+      surfaceContainerLow: '#f4f5f6',
+      surfaceContainer: '#eef0f1',
+      surfaceContainerHigh: '#e9ebec',
+      surfaceContainerHighest: '#e3e5e7',
+      outline: '#7a8087',           outlineVariant: '#cdd1d5',
     },
     dark: {
-      primary: '#7ddd85',           onPrimary: '#00390a',
-      primaryContainer: '#005312',  onPrimaryContainer: '#a2f5a6',
-      secondary: '#b9ccb6',         onSecondary: '#253528',
-      secondaryContainer: '#3a4b3d', onSecondaryContainer: '#d5e8d2',
-      tertiary: '#a3cddb',          onTertiary: '#043543',
-      tertiaryContainer: '#224c5a',  onTertiaryContainer: '#bfe9f8',
-      surface: '#10140f',           onSurface: '#dfe5dd',
-      surfaceVariant: '#414a40',    onSurfaceVariant: '#c1c9bf',
-      surfaceContainerLow: '#0b100a',
-      surfaceContainer: '#141a14',
-      surfaceContainerHigh: '#1e251e',
-      surfaceContainerHighest: '#282f28',
-      outline: '#8b938a',           outlineVariant: '#414a40',
+      primary: '#a9c7ee',           onPrimary: '#0b315c',
+      primaryContainer: '#0f4a86',  onPrimaryContainer: '#d6e3f7',
+      secondary: '#bdc8d6',         onSecondary: '#273341',
+      secondaryContainer: '#3d4957', onSecondaryContainer: '#dbe4ee',
+      tertiary: '#cbb7d4',          onTertiary: '#342841',
+      tertiaryContainer: '#4a3d54',  onTertiaryContainer: '#e9dff0',
+      surface: '#131517',           onSurface: '#e3e5e7',
+      surfaceVariant: '#42464b',    onSurfaceVariant: '#cdd1d5',
+      surfaceContainerLow: '#0e1012',
+      surfaceContainer: '#191b1d',
+      surfaceContainerHigh: '#232528',
+      surfaceContainerHighest: '#2d3033',
+      outline: '#898d92',           outlineVariant: '#42464b',
     },
   },
 
@@ -363,20 +363,28 @@ export function applyColorScheme(schemeId: string, isDark: boolean) {
     root.style.setProperty(prop, tokens[key]);
   }
   root.setAttribute('data-color-scheme', schemeId);
+  // 中国红风格仅作用于默认主题；自定义配色保持原样
+  root.setAttribute('data-zh-china', schemeId === resolveDefaultId() ? '1' : '0');
 }
 
-/** Generate the inline anti-FOUC script.
- *  Embeds only the default scheme data to keep the script small.
- *  Applies default scheme colors before paint, preventing flash.
- *  Custom-scheme users will get their scheme after Svelte hydrates. */
+/**
+ * Anti-FOUC 轻量内联脚本（渲染于 <head>，paint 前同步执行）。
+ * 读取 localStorage 的配色/明暗配置并立即应用：
+ *   - 无自定义配色 → 默认 azure token，data-zh-china=1（首帧即为完整水墨配色）
+ *   - 有自定义配色 → 直接应用该配色 token，零闪烁
+ * 仅内嵌各 scheme 的 token 数据，无外部依赖。
+ */
 export function getColorFoucScript(): string {
   const propNames = PROPERTY_MAP.map(([, p]) => p);
-  const def = SCHEMES.find(s => s.id === resolveDefaultId()) || SCHEMES[0];
-  const defaultTokens = [
-    PROPERTY_MAP.map(([k]) => def.light[k]),
-    PROPERTY_MAP.map(([k]) => def.dark[k]),
-  ];
+  const bundles: Record<string, [string[], string[]]> = {};
+  for (const s of SCHEMES) {
+    bundles[s.id] = [
+      PROPERTY_MAP.map(([k]) => s.light[k]),
+      PROPERTY_MAP.map(([k]) => s.dark[k]),
+    ];
+  }
   const propsJson = JSON.stringify(propNames);
-  const tokensJson = JSON.stringify(defaultTokens);
-  return `(function(){var P=${propsJson},T=${tokensJson};try{var t=localStorage.getItem('gf-theme'),d=t==='dark'||(!t&&matchMedia('(prefers-color-scheme:dark)').matches),a=T[d?1:0],r=document.documentElement;for(var i=0;i<P.length;i++)r.style.setProperty(P[i],a[i]);r.setAttribute('data-color-scheme',${JSON.stringify(def.id)});if(t==='light'||t==='dark')r.setAttribute('data-theme',t)}catch(e){}})()`;
+  const dataJson = JSON.stringify(bundles);
+  const defId = JSON.stringify(resolveDefaultId());
+  return `(function(){var P=${propsJson},D=${dataJson},DEF=${defId};try{var t=localStorage.getItem('gf-theme'),dark=t==='dark'||(t!=='light'&&window.matchMedia('(prefers-color-scheme: dark)').matches),c=localStorage.getItem('gf-color'),id=(c&&D[c])?c:DEF,b=(D[id]||D[DEF])[dark?1:0],r=document.documentElement;for(var i=0;i<P.length;i++)r.style.setProperty(P[i],b[i]);r.setAttribute('data-color-scheme',id);r.setAttribute('data-zh-china',id===DEF?'1':'0');if(t==='light'||t==='dark')r.setAttribute('data-theme',t)}catch(e){}})()`;
 }
