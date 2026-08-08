@@ -1,0 +1,45 @@
+name: Deploy to publish branch
+
+on:
+  push:
+    branches: [main, master]
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  build-and-deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+
+      - run: npm ci
+
+      - run: npm run build
+
+      - name: Deploy build/ to publish branch
+        uses: peaceiris/actions-gh-pages@v4
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          publish_dir: ./build
+          publish_branch: publish
+          commit_message: 'deploy: ${{ github.sha }}'
+
+      - name: Prepare cdn deploy
+        run: |
+          mkdir -p /tmp/cdn_deploy/gfork
+          cp -r build/_app /tmp/cdn_deploy/gfork/_app
+
+      - name: Deploy _app/ to cdn branch
+        uses: peaceiris/actions-gh-pages@v4
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          publish_dir: /tmp/cdn_deploy
+          publish_branch: cdn
+          commit_message: 'cdn: ${{ github.sha }}'

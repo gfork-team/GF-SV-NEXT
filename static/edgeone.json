@@ -1,0 +1,116 @@
+{
+    "redirects": [
+        {
+            "source": "/",
+            "destination": "/zh-hans",
+            "statusCode": 308
+        },
+        {
+            "source": "/vite/assets/firefox-*",
+            "destination": "/img/firefox.svg",
+            "statusCode": 308
+        },
+        {
+            "source": "/vite/assets/edge-*",
+            "destination": "/img/edge.svg",
+            "statusCode": 308
+        },
+        {
+            "source": "/vite/assets/safari-*",
+            "destination": "/img/safari.svg",
+            "statusCode": 308
+        },
+        {
+            "source": "/vite/assets/chrome-*",
+            "destination": "/img/chrome.svg",
+            "statusCode": 308
+        },
+        {
+            "source": "/vite/assets/opera-*",
+            "destination": "/img/opera.svg",
+            "statusCode": 308
+        },
+        {
+            "source": "/zh-CN/*",
+            "destination": "/zh-hans/:splat",
+            "statusCode": 308
+        },
+        {
+            "source": "/zh-TW/*",
+            "destination": "/zh-hant/:splat",
+            "statusCode": 308
+        },
+        {
+            "source": "/rails/*",
+            "destination": "https://gfork.zh-tw.eu.org/rails/:splat",
+            "statusCode": 308
+        },
+        {
+            "source": "/zh-hans/users/*",
+            "destination": "https://gfork.zh-tw.eu.org/zh-hans/users/:splat",
+            "statusCode": 307
+        },
+        {
+            "source": "/zh-hant/users/*",
+            "destination": "https://gfork.zh-tw.eu.org/zh-hans/users/:splat",
+            "statusCode": 307
+        },
+        {
+            "source": "/en/users/*",
+            "destination": "https://gfork.zh-tw.eu.org/en/users/:splat",
+            "statusCode": 307
+        },
+        {
+            "source": "/ja/users/*",
+            "destination": "https://gfork.zh-tw.eu.org/ja/users/:splat",
+            "statusCode": 307
+        },
+        {
+            "source": "/ja/scripts/*",
+            "destination": "https://gfork.zh-tw.eu.org/ja/scripts/:splat",
+            "statusCode": 308
+        },
+        {
+            "source": "/en/scripts/*",
+            "destination": "https://gfork.zh-tw.eu.org/en/scripts/:splat",
+            "statusCode": 308
+        },
+        {
+            "source": "/zh-hans/scripts/*",
+            "destination": "https://gfork.zh-tw.eu.org/zh-hans/scripts/:splat",
+            "statusCode": 308
+        },
+        {
+            "source": "/zh-hant/scripts/*",
+            "destination": "https://gfork.zh-tw.eu.org/zh-hans/scripts/:splat",
+            "statusCode": 308
+        }
+    ],
+    "headers": [
+        {
+            "source": "/*",
+            "headers": [
+                {
+                    "key": "Cache-Control",
+                    "value": "max-age=360000"
+                },
+                {
+                    "key": "Access-Control-Allow-Origin",
+                    "value": "https://home.greasyfork.org.cn"
+                },
+                {
+                    "key": "Access-Control-Allow-Methods",
+                    "value": "GET, OPTIONS"
+                },
+                {
+                    "key": "Access-Control-Allow-Headers",
+                    "value": "Content-Type, Authorization, X-Requested-With"
+                },
+                {
+                    "key": "Access-Control-Allow-Credentials",
+                    "value": "true"
+                }
+            ]
+        }
+    ]
+}
