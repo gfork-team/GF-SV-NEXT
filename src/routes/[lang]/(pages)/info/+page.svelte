@@ -45,13 +45,17 @@
 		for (const { regex, pageType } of patterns) {
 			const m = path.match(regex);
 			if (m) {
-				const locale = m[1].replace('zh-hans', 'zh-CN').replace('zh-hant', 'zh-TW');
+				const locale = (m[1] || '').toLowerCase();
+				const normLocale =
+					locale === 'zh-cn' || locale === 'zh-hans' ? 'zh-CN' :
+					locale === 'zh-tw' || locale === 'zh-hant' ? 'zh-TW' : m[1];
+				const rest = path.slice(m[1].length);
 				return {
-					locale,
+					locale: normLocale,
 					scriptId: pageType !== 'users' ? m[2] : null,
 					userId: pageType === 'users' ? m[2] : null,
 					pageType,
-					fullPath: '/' + path
+					fullPath: '/' + normLocale + rest
 				};
 			}
 		}
@@ -122,7 +126,7 @@
 	}
 
 	function redirectToMirror(r: RouteInfo, redirectDelay = 1000): void {
-		const mirrorUrl = BACKUP_SITE + r.fullPath.replace(/^\/+|\/detail$/g, '');
+		const mirrorUrl = BACKUP_SITE + r.fullPath.replace(/\/detail$/, '');
 		error = t(lang, 'info.error_502').replace('{mirror}', mirrorUrl);
 		setTimeout(() => { window.location.href = mirrorUrl; }, redirectDelay);
 	}
