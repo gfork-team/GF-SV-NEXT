@@ -752,6 +752,12 @@ onMount(() => {
 		color: var(--md-sys-color-on-surface);
 	}
 
+	/* 撑满视口宽度，让侧边栏贴屏幕左边缘 */
+	:global(.m3-layout-body:has(.lk-page)) {
+		max-width: none;
+		padding: 0;
+	}
+
 	.lk-page :global(.width-constraint) {
 		max-width: none;
 		padding: 16px 0;
@@ -762,7 +768,12 @@ onMount(() => {
 		gap: 24px;
 	}
 
-	.lk-main { flex: 1; min-width: 0; }
+	.lk-main {
+		flex: 1;
+		min-width: 0;
+		max-width: 1160px;
+		margin: 0 auto;
+	}
 
 	/* ─── Sidebar ──────────────────────────────────────── */
 	.lk-sidebar {
@@ -774,10 +785,13 @@ onMount(() => {
 		border-radius: var(--md-sys-shape-corner-medium);
 		padding: 20px;
 		box-shadow: var(--glass-shadow);
-		position: sticky; top: 16px;
-		max-height: calc(100vh - 32px);
+		position: sticky; top: 96px;
+		max-height: calc(100vh - 112px);
 		overflow-y: auto;
 		contain: layout style;
+		border-radius: 0 var(--md-sys-shape-corner-medium) var(--md-sys-shape-corner-medium) 0;
+		border-left: none;
+		z-index: 40;
 	}
 
 	.lk-sidebar-title {
