@@ -1,0 +1,1 @@
+{"version":3,"file":"3.DNcoddqW.js","sources":["../../../../../../src/routes/+page.ts"],"sourcesContent":["import { redirect } from '@sveltejs/kit';\nexport const load = () => { redirect(301, '/zh-hans'); };\nexport const prerender = true;"],"names":["load","redirect","prerender"],"mappings":"0CACO,MAAMA,EAAO,IAAM,CAAEC,EAAS,IAAK,UAAU,CAAG,EAC1CC,EAAY"}
