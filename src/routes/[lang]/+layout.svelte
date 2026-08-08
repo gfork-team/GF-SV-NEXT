@@ -190,7 +190,7 @@
 
 	{#if showAds}
 		<script async src="https://pagead2.googlesyndication-cn.com/pagead/js/adsbygoogle.js?client=ca-pub-3758644447684310" crossorigin="anonymous"></script>
-		<script>(function(){var t;function r(){var a=window.adsbygoogle||[];var u=document.querySelectorAll('.adsbygoogle[data-ad-status="unfilled"]');if(u.length){u.forEach(function(e){var c=parseInt(e.getAttribute('data-retry-count')||'0');if(c<3){e.setAttribute('data-retry-count',String(c+1));e.removeAttribute('data-ad-status');a.push({})}});t=setTimeout(r,2500)}else{t=undefined}}setTimeout(function(){r()},3000);window.addEventListener('load',function(){if(!t){setTimeout(r,1000)}})})();</script>
+		<script>(function(){var t;function r(){var a=window.adsbygoogle||[];var u=document.querySelectorAll('ins.adsbygoogle:not([data-adsbygoogle-status])');if(u.length){a.push({});t=setTimeout(r,2500)}else{t=undefined}}setTimeout(function(){r()},3000);window.addEventListener('load',function(){if(!t){setTimeout(r,1000)}})})();</script>
 	{/if}
 	{#if showAds && gtmCode}
 		{@html `<script>${gtmCode}</script>`}

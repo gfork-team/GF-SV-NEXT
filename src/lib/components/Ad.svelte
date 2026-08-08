@@ -13,13 +13,22 @@
 
   let { type = 'auto' }: { type?: string } = $props();
   let cfg = $derived(SLOTS[type] || SLOTS.auto);
+  let container: HTMLElement;
 
   onMount(() => {
+    // Google 对每个 ins 处理后写入 data-adsbygoogle-status="done"；
+    // 用自定义标记防止 SPA 重挂载 / 布局重试脚本重复 push（会抛
+    // "All ins elements already have ads in them"）。
+    if (!container) return;
+    if (container.getAttribute('data-adsbygoogle-status') === 'done') return;
+    if (container.getAttribute('data-gf-pushed') === '1') return;
+    container.setAttribute('data-gf-pushed', '1');
     (window.adsbygoogle = window.adsbygoogle || []).push({});
   });
 </script>
 
 <ins
+  bind:this={container}
   class="adsbygoogle"
   style={cfg.style}
   data-ad-client={CLIENT}
