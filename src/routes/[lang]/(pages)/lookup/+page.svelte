@@ -1024,7 +1024,7 @@ onMount(() => {
 		}
 		.lk-layout { flex-direction: column; }
 		.lk-main { margin: 0; width: 100%; min-width: 0; overflow: hidden; }
-		:global(.width-constraint) { padding: 16px; }
+		.lk-page :global(.width-constraint) { padding: 16px; }
 		.lk-main :global(ins), .lk-main :global(iframe) { max-width: 100%; }
 		.lk-sidebar {
 			display: none; position: fixed;
