@@ -1,0 +1,2 @@
+import{X as b,bf as g,be as l,bc as d,aT as i,aS as m,ag as p,a1 as v,a5 as h,ab as k}from"./C_RPn1AL.js";function x(t=!1){const s=b,e=s.l.u;if(!e)return;let o=()=>v(s.s);if(t){let n=0,a={};const _=h(()=>{let c=!1;const r=s.s;for(const f in r)r[f]!==a[f]&&(a[f]=r[f],c=!0);return c&&n++,n});o=()=>p(_)}e.b.length&&g(()=>{u(s,o),i(e.b)}),l(()=>{const n=d(()=>e.m.map(m));return()=>{for(const a of n)typeof a=="function"&&a()}}),e.a.length&&l(()=>{u(s,o),i(e.a)})}function u(t,s){if(t.l.s)for(const e of t.l.s)p(e);s()}k();export{x as i};
+//# sourceMappingURL=D8ARCp0L.js.map

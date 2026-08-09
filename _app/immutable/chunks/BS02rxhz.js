@@ -1,0 +1,2 @@
+import{Q as c,ap as o,an as l,k as b,aN as p,b3 as v,a_ as g,a$ as _,ao as m}from"./C_RPn1AL.js";import{B as y}from"./Mqw51tg_.js";function N(f,d,h=!1){var n;o&&(n=m,l());var s=new y(f),u=h?b:0;function t(a,r){if(o){var e=p(n);if(a!==parseInt(e.substring(1))){var i=v();g(i),s.anchor=i,_(!1),s.ensure(a,r),_(!0);return}}s.ensure(a,r)}c(()=>{var a=!1;d((r,e=0)=>{a=!0,t(e,r)}),a||t(-1,null)},u)}export{N as i};
+//# sourceMappingURL=BS02rxhz.js.map
