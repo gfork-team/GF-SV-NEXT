@@ -1,0 +1,2 @@
+import{X as w,a9 as T,aP as x,bc as E,z as O,d as Y,S as k}from"./C_RPn1AL.js";function n(r,a){return r===a||(r==null?void 0:r[k])===a}function B(r={},a,i,z){var p=w.r,S=O;return T(()=>{var f,t;return x(()=>{f=t,t=[],E(()=>{n(i(...t),r)||(a(r,...t),f&&n(i(...f),r)&&a(null,...f))})}),()=>{let s=S;for(;s!==p&&s.parent!==null&&s.parent.f&Y;)s=s.parent;const h=()=>{t&&n(i(...t),r)&&a(null,...t)},c=s.teardown;s.teardown=()=>{h(),c==null||c()}}}),r}export{B as b};
+//# sourceMappingURL=n5m0mDLr.js.map
