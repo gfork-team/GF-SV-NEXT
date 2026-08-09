@@ -1,2 +1,0 @@
-import"../chunks/Bzak7iHL.js";import{W as n,ac as a,K as s}from"../chunks/Cj8uXysE.js";import{s as p}from"../chunks/DhnHVPUH.js";const c=!0,i=()=>({}),d=Object.freeze(Object.defineProperty({__proto__:null,load:i,prerender:c},Symbol.toStringTag,{value:"Module"}));function f(o,r){var e=n(),t=a(e);p(t,()=>r.children),s(o,e)}export{f as component,d as universal};
-//# sourceMappingURL=0.DT_ap_ZC.js.map
