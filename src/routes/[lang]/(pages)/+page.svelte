@@ -354,7 +354,7 @@
 		font-size: clamp(19px, 3.2vw, 28px);
 		font-weight: 700; line-height: 1.4;
 		margin: 0 auto 26px;
-		max-width: 720px;
+		white-space: nowrap;
 		letter-spacing: -0.005em;
 		color: var(--md-sys-color-on-surface);
 	}
@@ -791,6 +791,7 @@
 	/* ─── Responsive ───────────────────── */
 	@media (max-width: 720px) {
 		.zh-hero { padding: 32px 18px 26px; }
+		.zh-hero-title { white-space: pre-line; max-width: 720px; }
 		.zh-quick-grid { grid-template-columns: 1fr 1fr; }
 		.zh-features { grid-template-columns: 1fr; }
 		.zh-url-inputs { flex-direction: column; }
