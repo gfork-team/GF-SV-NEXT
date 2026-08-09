@@ -354,7 +354,15 @@ let responsePerPage = $state(100);
 		e.preventDefault();
 		const form = e.target as HTMLFormElement;
 		const fd = new FormData(form);
-		const newParams: SearchParams = {};
+		const newParams: SearchParams = { ...getSearchParams() };
+
+		const formKeys = new Set<string>(['site', 'tz', 'entry_locales[]']);
+		for (const f of [...numericFilters, ...dateFilters]) {
+			formKeys.add(f.key);
+			formKeys.add(`${f.key}_operator`);
+		}
+		for (const key of formKeys) delete (newParams as Record<string, unknown>)[key];
+		delete (newParams as Record<string, unknown>).page;
 
 		for (const [key, value] of fd.entries()) {
 			if (key.endsWith('[]')) {
