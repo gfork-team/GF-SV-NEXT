@@ -11,7 +11,6 @@
 		organizationJsonLd,
 		breadcrumbJsonLd
 	} from '$lib/seo';
-	import Ad from '$components/Ad.svelte';
 	import { sendAudit } from '$lib/audit';
 	import { onMount } from 'svelte';
 	import { afterNavigate } from '$app/navigation';
@@ -204,7 +203,6 @@
 
 	{#if showAds}
 		<script async src="https://pagead2.googlesyndication-cn.com/pagead/js/adsbygoogle.js?client=ca-pub-3758644447684310" crossorigin="anonymous"></script>
-		<script>(function(){var t;function r(){var a=window.adsbygoogle||[];var u=document.querySelectorAll('ins.adsbygoogle:not([data-adsbygoogle-status])');if(u.length){a.push({});t=setTimeout(r,2500)}else{t=undefined}}setTimeout(function(){r()},3000);window.addEventListener('load',function(){if(!t){setTimeout(r,1000)}})})();</script>
 	{/if}
 	{#if showAds && gtmCode}
 		{@html `<script>${gtmCode}</script>`}
@@ -222,8 +220,6 @@
 
 <!-- 顶部细粉带（gov.cn 式，全站）：贴于顶栏下缘，替代顶栏阴影 -->
 <div class="zh-topbar" aria-hidden="true"></div>
-
-<div class="m3-nav-ad"><Ad type="fluid" /></div>
 
 {#if announceVisible}
 <div class="m3-announce-banner m3-announce--{announceType}">
@@ -383,13 +379,6 @@
 	:global(.m3-footer) {
 		position: relative;
 		z-index: 1;
-	}
-
-	.m3-nav-ad {
-		max-width: 1160px;
-		margin: 0 auto;
-		padding: 12px var(--md-sys-layout-side-margin, 16px) 0;
-		text-align: center;
 	}
 
 	.m3-announce-banner {

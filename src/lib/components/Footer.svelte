@@ -4,7 +4,6 @@
 	import { i18nConfig } from '$lib/i18n';
 	import type { Lang } from '$lib/i18n';
 	import { siteConfig } from '$lib/config';
-	import Ad from '$components/Ad.svelte';
 	import { goto } from '$app/navigation';
 
 	let { lang }: { lang: Lang } = $props();
@@ -74,10 +73,6 @@
 					class="m3-footer-sponsor-img"
 				/>
 			</a>
-		</div>
-
-		<div class="m3-footer-ad">
-			<Ad type="fluid" />
 		</div>
 
 		<!-- Bottom Bar -->
@@ -264,13 +259,6 @@
 
 	.m3-footer-sponsor-anchor {
 		display: inline-block;
-	}
-
-	/* AdSense */
-	.m3-footer-ad {
-		width: 100%;
-		max-width: 672px;
-		margin: 0 auto;
 	}
 
 	/* Divider */

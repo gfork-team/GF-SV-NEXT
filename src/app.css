@@ -397,9 +397,9 @@ a:hover { color: var(--md-sys-color-secondary); }
   }
 }
 
-/* Unfilled AdSense ads — hidden but space reserved */
+/* Unfilled AdSense ads — collapse empty slot (Google data-ad-status guide) */
 ins.adsbygoogle[data-ad-status="unfilled"] {
-  visibility: hidden !important;
+  display: none !important;
 }
 
 /* Elevated surface */
