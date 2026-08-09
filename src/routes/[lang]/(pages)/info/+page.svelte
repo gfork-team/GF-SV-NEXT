@@ -364,6 +364,9 @@
 			const hash = window.location.hash;
 			if (hash === '#google_vignette') return;
 			if (isHashValid(hash)) lastValidHash = hash;
+			// 哈希变化（脚本名 / 用户链接等内部跳转）时重载内容
+			clearTimeout(debounceTimer);
+			debounceTimer = setTimeout(initPage, 100);
 		};
 		window.addEventListener('hashchange', onHashChange);
 
@@ -465,7 +468,7 @@
 				<p style="color:var(--md-sys-color-on-surface-variant);margin-bottom:20px">{error}</p>
 				<button onclick={() => { error = ''; if (route) loadContent(route); else initPage(); }} class="md3-button">{t(lang, 'info.retry')}</button>
 			</div>
-		{:else if userData}
+		{:else if route?.pageType === 'users' && userData}
 			<!-- User page -->
 			<section class="md3-card if-user-card">
 				<header class="if-user-header">
@@ -662,7 +665,7 @@
 
 <style>
 	.info-page-root {
-		background: var(--md-sys-color-surface);
+		background: transparent;
 		min-height: 100vh;
 		color: var(--md-sys-color-on-surface);
 		padding: 24px 0;
@@ -693,7 +696,7 @@
 	}
 
 	/* ─── User page ───────────────────────────────────── */
-	.if-user-card { margin-bottom: 16px; padding: 24px; }
+	.if-user-card { margin-bottom: 16px; padding: 24px; background: var(--glass-bg); backdrop-filter: blur(var(--glass-blur)) saturate(180%); -webkit-backdrop-filter: blur(var(--glass-blur)) saturate(180%); box-shadow: var(--glass-shadow); }
 	.if-user-header { margin-bottom: 24px; }
 	.if-user-header h1 { margin-bottom: 16px; }
 
@@ -710,13 +713,16 @@
 
 	.if-script-list { list-style: none; padding: 0; margin: 0; }
 	.if-result-item {
-		border: 1px solid var(--md-sys-color-outline-variant);
+		border: 1px solid var(--glass-border);
 		border-radius: var(--md-sys-shape-corner-medium);
 		padding: 16px;
 		margin-bottom: 12px;
 		opacity: 0;
 		animation: if-fadeIn 0.3s ease-out forwards;
-		background: var(--md-sys-color-surface);
+		background: var(--glass-bg);
+		backdrop-filter: blur(var(--glass-blur)) saturate(180%);
+		-webkit-backdrop-filter: blur(var(--glass-blur)) saturate(180%);
+		box-shadow: var(--glass-shadow);
 		transition: box-shadow var(--md-sys-motion-duration-short) var(--md-sys-motion-easing-standard);
 	}
 	.if-result-item:hover { box-shadow: var(--md-sys-elevation-1); }
@@ -782,8 +788,8 @@
 	/* ─── GF content containers ───────────────────────── */
 	.if-content-area {
 		background: var(--glass-bg);
-		backdrop-filter: blur(var(--glass-blur));
-		-webkit-backdrop-filter: blur(var(--glass-blur));
+		backdrop-filter: blur(var(--glass-blur)) saturate(180%);
+		-webkit-backdrop-filter: blur(var(--glass-blur)) saturate(180%);
 		border: 1px solid var(--glass-border);
 		border-radius: var(--md-sys-shape-corner-medium);
 		padding: 24px;
@@ -1117,9 +1123,11 @@
 
 	.if-gf-feedback :global(.discussion) {
 		padding: 16px;
-		border: 1px solid var(--md-sys-color-outline-variant);
+		border: 1px solid var(--glass-border);
 		border-radius: var(--md-sys-shape-corner-small);
-		background: var(--md-sys-color-surface);
+		background: var(--glass-bg);
+		backdrop-filter: blur(var(--glass-blur)) saturate(180%);
+		-webkit-backdrop-filter: blur(var(--glass-blur)) saturate(180%);
 	}
 
 	.if-gf-feedback :global(.discussion-header) {

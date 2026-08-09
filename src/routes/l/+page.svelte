@@ -108,7 +108,7 @@
 		justify-content: center;
 		min-height: 100vh;
 		padding: 20px;
-		background: var(--md-sys-color-surface);
+		background: transparent;
 	}
 	.keywords-bg {
 		position: fixed;

@@ -747,7 +747,7 @@ onMount(() => {
 
 <style>
 	.lk-page {
-		background: var(--md-sys-color-surface);
+		background: transparent;
 		min-height: 100vh;
 		color: var(--md-sys-color-on-surface);
 	}
@@ -805,12 +805,15 @@ onMount(() => {
 		display: none;
 		position: fixed; top: 12px; left: 12px;
 		width: 40px; height: 40px;
-		background: var(--md-sys-color-primary);
-		color: var(--md-sys-color-on-primary);
-		border: none; border-radius: var(--md-sys-shape-corner-small);
+		background: var(--glass-bg);
+		backdrop-filter: blur(var(--glass-blur)) saturate(180%);
+		-webkit-backdrop-filter: blur(var(--glass-blur)) saturate(180%);
+		color: var(--md-sys-color-primary);
+		border: 1px solid var(--glass-border);
+		border-radius: 50%;
 		font-size: 20px; cursor: pointer;
 		z-index: 100;
-		box-shadow: var(--md-sys-elevation-3);
+		box-shadow: var(--glass-shadow);
 	}
 
 	.lk-sidebar-search {
@@ -886,6 +889,10 @@ onMount(() => {
 		align-items: center; justify-content: center;
 		padding: 60px 20px; min-height: 400px;
 		text-align: center;
+		background: var(--glass-bg);
+		backdrop-filter: blur(var(--glass-blur)) saturate(180%);
+		-webkit-backdrop-filter: blur(var(--glass-blur)) saturate(180%);
+		box-shadow: var(--glass-shadow);
 	}
 
 	.lk-spinner {
@@ -912,8 +919,8 @@ onMount(() => {
 
 	.lk-result-item {
 		background: var(--glass-bg);
-		backdrop-filter: blur(10px);
-		-webkit-backdrop-filter: blur(10px);
+		backdrop-filter: blur(var(--glass-blur)) saturate(180%);
+		-webkit-backdrop-filter: blur(var(--glass-blur)) saturate(180%);
 		border: 1px solid var(--glass-border);
 		border-radius: var(--md-sys-shape-corner-medium);
 		padding: 20px;

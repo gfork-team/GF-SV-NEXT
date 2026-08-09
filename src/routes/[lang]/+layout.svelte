@@ -39,8 +39,21 @@
 	let announceMsg = $derived(siteConfig.announce.message[lang] || siteConfig.announce.message['en'] || '');
 	let announceVisible = $derived(announceEnabled && announceMsg.length > 0);
 
+	// 回到顶部按钮：滚动超过阈值后显示
+	let showBackTop = $state(false);
+	let reducedMotion = $state(false);
+
+	function scrollToTop() {
+		window.scrollTo({ top: 0, behavior: reducedMotion ? 'auto' : 'smooth' });
+	}
+
 	onMount(() => {
 		initTheme();
+		reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+		const onScroll = () => { showBackTop = window.scrollY > 400; };
+		onScroll();
+		window.addEventListener('scroll', onScroll, { passive: true });
+
 		const mql = window.matchMedia('(prefers-color-scheme: dark)');
 		mql.addEventListener('change', () => handleSystemChange());
 
@@ -197,9 +210,6 @@
 	{/if}
 </svelte:head>
 
-<!-- 顶部细红带（gov.cn 式，全站） -->
-<div class="zh-topbar" aria-hidden="true"></div>
-
 <!-- 全站背景动效（政务红水墨光斑，自定义配色时整体隐藏） -->
 <div class="zh-bg" aria-hidden="true">
 	<span class="zh-bg-blob zh-bg-blob--a"></span>
@@ -208,6 +218,9 @@
 </div>
 
 <Nav {lang} />
+
+<!-- 顶部细粉带（gov.cn 式，全站）：贴于顶栏下缘，替代顶栏阴影 -->
+<div class="zh-topbar" aria-hidden="true"></div>
 
 <div class="m3-nav-ad"><Ad type="fluid" /></div>
 
@@ -236,14 +249,76 @@
 
 <Footer {lang} />
 
+<!-- 回到顶部按钮（右下角，material icon） -->
+<button
+	class="m3-back-top"
+	class:show={showBackTop}
+	onclick={scrollToTop}
+	aria-label="Back to top"
+	title="Back to top"
+>
+	<span class="material-symbols-outlined" aria-hidden="true">arrow_upward</span>
+</button>
+
 <style>
-	/* 顶部细红带（gov.cn 式）：默认配色下为政务红渐变，自定义配色回落主题色 */
+	/* 顶部细粉带（gov.cn 式）：默认配色下为粉紫渐变，自定义配色回落主题色。
+	   位于顶栏下方（粘性跟随），替代顶栏下缘的阴影线 */
 	.zh-topbar {
 		height: 4px;
+		position: sticky;
+		top: 72px;
+		z-index: 49;
 		background: linear-gradient(90deg, var(--md-sys-color-primary) 0%, var(--md-sys-color-primary) 100%);
 	}
 	:global(:root[data-zh-china="1"]) .zh-topbar {
 		background: linear-gradient(90deg, var(--zh-seal-deep), var(--zh-seal) 55%, var(--zh-seal-bright));
+	}
+	@media (max-width: 767px) {
+		.zh-topbar { top: 64px; }
+	}
+
+	/* 回到顶部按钮 */
+	.m3-back-top {
+		position: fixed;
+		right: 20px;
+		bottom: 24px;
+		z-index: 60;
+		width: 44px;
+		height: 44px;
+		display: flex;
+		align-items: center;
+		justify-content: center;
+		border: 1px solid var(--glass-border);
+		border-radius: 50%;
+		background: var(--glass-bg);
+		-webkit-backdrop-filter: blur(var(--glass-blur)) saturate(180%);
+		backdrop-filter: blur(var(--glass-blur)) saturate(180%);
+		color: var(--md-sys-color-primary);
+		box-shadow: var(--glass-shadow);
+		cursor: pointer;
+		opacity: 0;
+		visibility: hidden;
+		transform: translateY(12px);
+		transition: opacity 160ms ease-out, transform 160ms ease-out, visibility 160ms;
+	}
+	.m3-back-top.show {
+		opacity: 1;
+		visibility: visible;
+		transform: translateY(0);
+	}
+	.m3-back-top:hover { filter: brightness(1.06); box-shadow: var(--glass-shadow), 0 6px 16px rgba(0,0,0,0.08); }
+	.m3-back-top:active { transform: translateY(0) scale(.94); }
+	:global(:root[data-zh-china="1"]) .m3-back-top {
+		background: color-mix(in srgb, var(--zh-seal-bright) 62%, transparent);
+		-webkit-backdrop-filter: blur(var(--glass-blur)) saturate(180%);
+		backdrop-filter: blur(var(--glass-blur)) saturate(180%);
+		color: var(--zh-seal-deep);
+		border-color: rgba(238, 211, 229, 0.55);
+		box-shadow: inset 0 1px 0 rgba(255,255,255,0.6), 0 6px 16px rgba(221,170,204,.30);
+	}
+	.m3-back-top .material-symbols-outlined { font-size: 24px; line-height: 1; }
+	@media (prefers-reduced-motion: reduce) {
+		.m3-back-top { transition: none; }
 	}
 
 	/* 全站背景动效：固定浮层，缓慢漂移的光斑，所有配色下持续运动 */

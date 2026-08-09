@@ -22,16 +22,16 @@
   --md-sys-color-surface: #fafafa;
   --md-sys-color-on-surface: #1c1c1c;
 
-  /* ── Glassmorphism tokens ─────────────────── */
-  --glass-bg: #fafafa;
-  --glass-bg-hover: #f0f0f0;
-  --glass-bg-dark: #1e1e1e;
-  --glass-bg-dark-hover: #2a2a2a;
+  /* ── Glassmorphism tokens（Apple 液态玻璃）── */
+  --glass-bg: rgba(255, 255, 255, 0.60);
+  --glass-bg-hover: rgba(255, 255, 255, 0.74);
+  --glass-bg-dark: rgba(28, 30, 34, 0.52);
+  --glass-bg-dark-hover: rgba(28, 30, 34, 0.66);
   --glass-border: rgba(0, 0, 0, 0.12);
-  --glass-border-dark: rgba(255, 255, 255, 0.10);
-  --glass-blur: 16px;
-  --glass-shadow: 0 8px 32px rgba(0,0,0,0.06);
-  --glass-shadow-dark: 0 8px 32px rgba(0,0,0,0.20);
+  --glass-border-dark: rgba(255, 255, 255, 0.12);
+  --glass-blur: 20px;
+  --glass-shadow: inset 0 1px 0 rgba(255,255,255,0.5), 0 1px 2px rgba(0,0,0,0.03), 0 8px 32px rgba(0,0,0,0.06);
+  --glass-shadow-dark: inset 0 1px 0 rgba(255,255,255,0.06), 0 1px 2px rgba(0,0,0,0.2), 0 8px 32px rgba(0,0,0,0.20);
   --md-sys-color-surface-variant: #e8e8e8;
   --md-sys-color-on-surface-variant: #494949;
   --md-sys-color-surface-container: #f0f0f0;
@@ -131,11 +131,28 @@
 
     --md-sys-scrollbar-thumb: var(--md-sys-color-outline-variant);
     --md-sys-scrollbar-track: var(--md-sys-color-surface);
+
+    /* ── 暗色水墨覆盖层变量（默认配色 data-zh-china=1，系统暗色模式） ── */
+    --zh-ink: #e6e8ea;
+    --zh-ink-deep: #f5f7f9;
+    --zh-ink-soft: #aab2ba;
+    --zh-azure: #8fb6e8;
+    --zh-azure-soft: #6b93c2;
+    --zh-seal: #e3bcd2;
+    --zh-seal-deep: #9c6487;
+    --zh-seal-bright: #c98db0;
+    --zh-seal-soft: #3b2f38;
+    --zh-gold: #d4a94e;
+    --zh-gold-deep: #b98a1e;
+    --zh-ivory: #2a2d31;
+    --zh-ivory-bright: #23262a;
+    --zh-paper: #15181c;
+    --zh-line: #3a3f45;
   }
 }
 
 /*   Explicit user choice */
-[data-theme="dark"] {
+:root[data-theme="dark"] {
   color-scheme: dark;
 
   --md-sys-color-primary: #aaaaaa;
@@ -175,14 +192,33 @@
 
   --md-sys-scrollbar-thumb: var(--md-sys-color-outline-variant);
   --md-sys-scrollbar-track: var(--md-sys-color-surface);
+
+  /* ── 暗色水墨覆盖层变量（默认配色 data-zh-china=1） ── */
+  --zh-ink: #e6e8ea;
+  --zh-ink-deep: #f5f7f9;
+  --zh-ink-soft: #aab2ba;
+  --zh-azure: #8fb6e8;
+  --zh-azure-soft: #6b93c2;
+  --zh-seal: #e3bcd2;
+  --zh-seal-deep: #9c6487;
+  --zh-seal-bright: #c98db0;
+  --zh-seal-soft: #3b2f38;
+  --zh-gold: #d4a94e;
+  --zh-gold-deep: #b98a1e;
+  --zh-ivory: #2a2d31;
+  --zh-ivory-bright: #23262a;
+  --zh-paper: #15181c;
+  --zh-line: #3a3f45;
 }
 
-/* ═══ Glassmorphism Utilities ═══ */
+/* ═══ Glassmorphism Utilities（Apple 液态玻璃）═══ */
 .glass {
   background: var(--glass-bg);
   border: 1px solid var(--glass-border);
   box-shadow: var(--glass-shadow);
   border-radius: var(--md-sys-shape-corner-medium);
+  -webkit-backdrop-filter: blur(var(--glass-blur)) saturate(180%);
+  backdrop-filter: blur(var(--glass-blur)) saturate(180%);
 }
 .glass-hover:hover {
   background: var(--glass-bg-hover);
@@ -192,6 +228,8 @@
 .glass-nav {
   background: var(--glass-bg);
   border-bottom: 1px solid var(--glass-border);
+  -webkit-backdrop-filter: blur(var(--glass-blur)) saturate(180%);
+  backdrop-filter: blur(var(--glass-blur)) saturate(180%);
 }
 .glass-card {
   background: var(--glass-bg);
@@ -199,6 +237,8 @@
   box-shadow: var(--glass-shadow);
   border-radius: var(--md-sys-shape-corner-large);
   transition: all 0.3s ease;
+  -webkit-backdrop-filter: blur(var(--glass-blur)) saturate(180%);
+  backdrop-filter: blur(var(--glass-blur)) saturate(180%);
 }
 .glass-card:hover {
   background: var(--glass-bg-hover);
@@ -283,6 +323,18 @@ body {
   color: #1f1f1f;
   background: #ffffff;
   line-height: 1.5;
+}
+
+/* 暗色模式：自定义配色（data-zh-china="0"）回落 MD3 深色底；默认配色由 --zh-paper 接管 */
+:root[data-theme="dark"] body {
+  background: var(--md-sys-color-surface);
+  color: var(--md-sys-color-on-surface);
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme]) body {
+    background: var(--md-sys-color-surface);
+    color: var(--md-sys-color-on-surface);
+  }
 }
 
 /* 水墨政务配色（默认主题）覆盖全局底色与链接色 */

@@ -313,13 +313,24 @@
 	/* 榛樿涓婚锛堟棤鑷畾涔夐厤鑹诧級锛氭斂鍔＄畝绾?脳 鐧界幓鐠冿紙gov.cn 寮忥級 */
 	:global(:root[data-zh-china="1"]) .m3-nav-header {
 		height: 72px;
-		background: rgba(255,255,255,.82);
+		background: rgba(255,255,255,.68);
 		backdrop-filter: blur(20px) saturate(160%);
 		-webkit-backdrop-filter: blur(20px) saturate(160%);
-		box-shadow:
-			inset 0 -1px 0 rgba(0,0,0,.05),
-			0 4px 20px rgba(0,0,0,.04);
-		border-bottom: 1px solid var(--zh-line);
+		box-shadow: none;
+		border-bottom: none;
+	}
+	/* 默认主题暗色模式：深色玻璃顶栏 */
+	:global(:root[data-zh-china="1"][data-theme="dark"]) .m3-nav-header {
+		background: rgba(18,20,24,.7);
+		box-shadow: none;
+		border-bottom: none;
+	}
+	@media (prefers-color-scheme: dark) {
+		:global(:root[data-zh-china="1"]:not([data-theme])) .m3-nav-header {
+			background: rgba(18,20,24,.7);
+			box-shadow: none;
+			border-bottom: none;
+		}
 	}
 	.m3-nav-inner {
 		display: flex; align-items: center; justify-content: space-between;
