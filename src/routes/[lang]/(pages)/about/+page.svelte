@@ -72,5 +72,14 @@
 				<a href="mailto:{siteConfig.contactEmail}" style="color:var(--md-sys-color-primary)">{siteConfig.contactEmail}</a>
 			</p>
 		</div>
+
+		<!-- User Agreement -->
+		<div class="md3-card" style="margin-top:16px">
+			<h2 class="title-large" style="margin-bottom:12px">{t(lang, 'about.tos_title')}</h2>
+			<p style="color:var(--md-sys-color-on-surface-variant);line-height:1.6;font-size:14px">
+				{t(lang, 'about.tos_desc')}
+				<a href="/{lang}/tos" style="color:var(--md-sys-color-primary)">{t(lang, 'about.tos_link')}</a>
+			</p>
+		</div>
 	</div>
 </div>

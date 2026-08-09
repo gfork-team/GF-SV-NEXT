@@ -1,5 +1,6 @@
 <script lang="ts">
 	import { t, type Lang } from '$i18n';
+	import { siteConfig } from '$lib/config';
 	import type { PageData } from './$types';
 
 	let { data }: { data: PageData } = $props();
@@ -17,8 +18,7 @@
 		<h2 class="headline-small" style="text-align:center;margin-bottom:16px">{t(lang, 'feedback.title_page')}</h2>
 		<p style="margin-bottom:12px;color:var(--md-sys-color-on-surface-variant)">{t(lang, 'feedback.contact')}</p>
 		<p>
-			{t(lang, 'tos.email')}<br />
-			<strong>{t(lang, 'tos.email')}</strong>
+			<a href="mailto:{siteConfig.contactEmail}" style="color:var(--md-sys-color-primary)">{siteConfig.contactEmail}</a>
 		</p>
 	</section>
 </div>

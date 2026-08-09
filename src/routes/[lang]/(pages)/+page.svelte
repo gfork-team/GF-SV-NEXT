@@ -190,6 +190,8 @@
 						<a class="zh-hot-link" href="/{lang}/s?q={encodeURIComponent(t(lang, 'home.hot.1'))}" target="_blank" rel="noopener noreferrer">{t(lang, 'home.hot.1')}</a>
 						<a class="zh-hot-link" href="/{lang}/s?q={encodeURIComponent(t(lang, 'home.hot.2'))}" target="_blank" rel="noopener noreferrer">{t(lang, 'home.hot.2')}</a>
 						<a class="zh-hot-link" href="/{lang}/s?q={encodeURIComponent(t(lang, 'home.hot.3'))}" target="_blank" rel="noopener noreferrer">{t(lang, 'home.hot.3')}</a>
+						<a class="zh-hot-link" href="/{lang}/s?q={encodeURIComponent(t(lang, 'home.hot.4'))}" target="_blank" rel="noopener noreferrer">{t(lang, 'home.hot.4')}</a>
+						<a class="zh-hot-link" href="/{lang}/s?q={encodeURIComponent(t(lang, 'home.hot.5'))}" target="_blank" rel="noopener noreferrer">{t(lang, 'home.hot.5')}</a>
 					</div>
 				</form>
 			</div>
@@ -796,6 +798,7 @@
 		.zh-features { grid-template-columns: 1fr; }
 		.zh-url-inputs { flex-direction: column; }
 		.zh-intro { padding: 24px 18px; }
+		.zh-actions-row .zh-btn { white-space: normal; max-width: 100%; }
 	}
 	@media (max-width: 440px) {
 		.zh-quick-grid { grid-template-columns: 1fr; }

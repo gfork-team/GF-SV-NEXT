@@ -20,4 +20,4 @@
 	}
 </script>
 
-<RedirectInterstitial {lang} delaySec={siteConfig.redirects.searchDelaySec} {buildUrl} showAds={siteConfig.adsense.allowOnRedirectPages} metaDelaySec={1} />
+<RedirectInterstitial {lang} delaySec={siteConfig.redirects.searchDelaySec} {buildUrl} showAds={siteConfig.adsense.allowOnRedirectPages} />

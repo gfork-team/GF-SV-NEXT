@@ -3,48 +3,36 @@
 	import { t, type Lang } from '$i18n';
 	import Ad from '$components/Ad.svelte';
 
-	let { lang, delaySec, buildUrl, showAds = false, metaDelaySec }: { lang: Lang; delaySec: number; buildUrl: (lang: Lang) => string; showAds?: boolean; metaDelaySec?: number } = $props();
+	let { lang, delaySec, buildUrl, showAds = false }: { lang: Lang; delaySec: number; buildUrl: (lang: Lang) => string; showAds?: boolean } = $props();
 
 	let waitTemplate = $derived(t(lang, 'redirect.waiting'));
 	let loadingText = $derived(t(lang, 'redirect.loading'));
 	let skipText = $derived(t(lang, 'redirect.skip'));
-	// 倒计时结束后再停留 2 秒显示「正在加载中…」，再触发跳转
-	const LOADING_SECS = 2;
 
 	onMount(() => {
 		let countdown = delaySec;
 		let targetUrl = buildUrl(lang);
-		const meta = document.createElement('meta');
-		meta.httpEquiv = 'refresh';
-		meta.id = 'redirect-meta';
-		document.head.appendChild(meta);
 		const textEl = document.getElementById('redirect-countdown-text')!;
-
-		function update() {
-			targetUrl = buildUrl(lang);
-			// metaDelaySec 固定秒数跳转（不受显示倒计时影响），否则沿用倒计时 + 缓冲
-			meta.content = (metaDelaySec ?? countdown + LOADING_SECS) + ';url=' + targetUrl;
-		}
 
 		function tick() {
 			countdown--;
-			if (countdown <= 0) {
+			// 倒计时显示到 1 秒时立即开始跳转
+			if (countdown <= 1) {
 				clearInterval(interval);
 				textEl.textContent = loadingText;
+				window.location.assign(targetUrl);
 				return;
 			}
-			update();
 			textEl.textContent = waitTemplate.replace('{countdown}', String(countdown));
 		}
 
-		update();
-		window.addEventListener('hashchange', update);
+		window.addEventListener('hashchange', () => { targetUrl = buildUrl(lang); });
 		textEl.textContent = waitTemplate.replace('{countdown}', String(countdown));
 		const interval = setInterval(tick, 1000);
 
 		return () => {
 			clearInterval(interval);
-			window.removeEventListener('hashchange', update);
+			window.removeEventListener('hashchange', () => { targetUrl = buildUrl(lang); });
 		};
 	});
 </script>

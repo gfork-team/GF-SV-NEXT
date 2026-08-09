@@ -19,6 +19,7 @@
 	import { getColorFoucScript } from '$lib/colors';
 	import Nav from '$components/Nav.svelte';
 	import Footer from '$components/Footer.svelte';
+	import CookieConsent from '$components/CookieConsent.svelte';
 	import type { LayoutData } from './$types';
 
 	let { data, children }: { data: LayoutData; children: import('svelte').Snippet } = $props();
@@ -248,6 +249,8 @@
 </div>
 
 <Footer {lang} />
+
+<CookieConsent {lang} />
 
 <!-- 回到顶部按钮（右下角，material icon） -->
 <button
