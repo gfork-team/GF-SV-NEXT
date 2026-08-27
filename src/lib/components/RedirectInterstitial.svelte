@@ -10,9 +10,17 @@
 	let skipText = $derived(t(lang, 'redirect.skip'));
 
 	onMount(() => {
-		let countdown = delaySec;
 		let targetUrl = buildUrl(lang);
+		const updateTarget = () => { targetUrl = buildUrl(lang); };
 		const textEl = document.getElementById('redirect-countdown-text')!;
+
+		// 等待时间为 0：不做倒计时，立即跳转
+		if (delaySec <= 0) {
+			window.location.assign(targetUrl);
+			return;
+		}
+
+		let countdown = delaySec;
 
 		function tick() {
 			countdown--;
@@ -26,13 +34,13 @@
 			textEl.textContent = waitTemplate.replace('{countdown}', String(countdown));
 		}
 
-		window.addEventListener('hashchange', () => { targetUrl = buildUrl(lang); });
+		window.addEventListener('hashchange', updateTarget);
 		textEl.textContent = waitTemplate.replace('{countdown}', String(countdown));
 		const interval = setInterval(tick, 1000);
 
 		return () => {
 			clearInterval(interval);
-			window.removeEventListener('hashchange', () => { targetUrl = buildUrl(lang); });
+			window.removeEventListener('hashchange', updateTarget);
 		};
 	});
 </script>

@@ -100,8 +100,8 @@
   "greasyforkRegion": "cn",
 
   "redirects": {
-    "searchDelaySec": 3,
-    "downloadDelaySec": 3
+    "searchDelaySec": 0,
+    "downloadDelaySec": 0
   },
 
   "search": {

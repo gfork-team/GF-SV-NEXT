@@ -127,9 +127,10 @@
 		execute?: ScriptResult[];
 	}
 
-	let results = $state<ScriptResult[]>([]);
+let results = $state<ScriptResult[]>([]);
 	let loading = $state(false);
 	let error = $state('');
+	let placeholderMode = $state(false);
 	let sidebarOpen = $state(false);
 	let query = $state('');
 	let sortBy = $state('');
@@ -251,10 +252,12 @@ let responsePerPage = $state(100);
 		const params = getSearchParams();
 		console.log('=== 搜索开始 ===', { q: params.q, site: params.site, page: params.page });
 		if (!params.q && !params.site && !params.page) {
-			error = t(lang, 'lookup.no_search_content');
+			placeholderMode = true;
+			error = '';
 			return;
 		}
 
+		placeholderMode = false;
 		abortController?.abort();
 		abortController = new AbortController();
 		const signal = abortController.signal;
@@ -517,11 +520,12 @@ onMount(() => {
 			if (document.hidden && abortController) abortController.abort();
 		});
 
-		const params = syncFromHash();
+const params = syncFromHash();
 		if (params.q || params.site || params.page) {
 			doSearch();
 		} else {
-			error = t(lang, 'lookup.no_search_content');
+			placeholderMode = true;
+			error = '';
 		}
 
 		return () => {
@@ -656,13 +660,23 @@ onMount(() => {
 			<!-- Main content -->
 			<div class="lk-main">
 				<div style="margin-bottom:16px"><Ad type="auto" /></div>
-				<div style="margin-bottom:16px"><Ad type="fluid" /></div>
+<div style="margin-bottom:16px"><Ad type="fluid" /></div>
 				{#if loading}
 					<div class="md3-card lk-center-box">
 						<span class="material-icons lk-spinner">autorenew</span>
 						<div class="lk-loading-tip">
 							{t(lang, 'lookup.loading')}<br />
 							<small>{t(lang, 'lookup.warning')}</small>
+						</div>
+					</div>
+				{:else if placeholderMode}
+					<div class="md3-card lk-center-box lk-placeholder-box">
+						<span class="lk-placeholder-badge">{t(lang, 'lookup.placeholder_badge')}</span>
+						<h3 class="title-large" style="margin-bottom:12px">{t(lang, 'lookup.placeholder_title')}</h3>
+						<p style="color:var(--md-sys-color-on-surface-variant)">{t(lang, 'lookup.placeholder_desc')}</p>
+						<div class="lk-placeholder-example">
+							<span class="material-icons" style="font-size:18px">link</span>
+							<code>{t(lang, 'lookup.placeholder_example')}</code>
 						</div>
 					</div>
 				{:else if error}
@@ -910,12 +924,33 @@ onMount(() => {
 		color: var(--md-sys-color-primary);
 	}
 
-	.lk-loading-tip {
+.lk-loading-tip {
 		text-align: center; line-height: 1.6;
 		max-width: 500px; margin-top: 20px;
 		color: var(--md-sys-color-on-surface-variant);
 	}
 	.lk-loading-tip small { font-size: 0.9em; opacity: 0.7; }
+
+	.lk-placeholder-box { max-width: 560px; margin: 0 auto; }
+	.lk-placeholder-badge {
+		display: inline-block;
+		background: var(--md-sys-color-secondary-container);
+		color: var(--md-sys-color-on-secondary-container);
+		font-size: 12px; font-weight: 600;
+		letter-spacing: 0.5px;
+		padding: 4px 12px;
+		border-radius: var(--md-sys-shape-corner-full);
+		margin-bottom: 12px;
+	}
+	.lk-placeholder-example {
+		display: inline-flex; align-items: center; gap: 8px;
+		margin-top: 20px; padding: 10px 16px;
+		background: var(--md-sys-color-surface-container);
+		border: 1px solid var(--md-sys-color-outline-variant);
+		border-radius: var(--md-sys-shape-corner-small);
+		color: var(--md-sys-color-on-surface-variant);
+	}
+	.lk-placeholder-example code { font-family: var(--md-sys-code-font, monospace); font-size: 13px; }
 
 /* ─── Script list ─────────────────────────────────── */
 	.lk-script-list {

@@ -6,8 +6,24 @@
 	let delaySec = siteConfig.redirects.searchDelaySec;
 
 	onMount(() => {
-		let countdown = delaySec;
 		let targetUrl = '/en/lookup';
+		const sp = new URLSearchParams(window.location.search);
+		let hp = new URLSearchParams();
+		const hash = window.location.hash;
+		if (hash && hash.indexOf('#?') === 0) hp = new URLSearchParams(hash.substring(2));
+		const merged = new URLSearchParams();
+		sp.forEach((v, k) => { if (v) merged.set(k, v); });
+		hp.forEach((v, k) => { if (v) merged.set(k, v); });
+		const qs = merged.toString();
+		if (qs) targetUrl = '/en/lookup#?' + qs;
+
+		// 等待时间为 0：不做倒计时，立即跳转
+		if (delaySec <= 0) {
+			window.location.assign(targetUrl);
+			return;
+		}
+
+		let countdown = delaySec;
 		const meta = document.createElement('meta');
 		meta.httpEquiv = 'refresh';
 		meta.id = 'redirect-meta';

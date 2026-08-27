@@ -6,8 +6,17 @@
 	let delaySec = siteConfig.redirects.downloadDelaySec;
 
 	onMount(() => {
-		let countdown = delaySec;
 		let targetUrl = '/en/download';
+		const hash = window.location.hash;
+		if (hash && hash.indexOf('#/') === 0) targetUrl = window.location.origin + '/en/download' + hash;
+
+		// 等待时间为 0：不做倒计时，立即跳转
+		if (delaySec <= 0) {
+			window.location.assign(targetUrl);
+			return;
+		}
+
+		let countdown = delaySec;
 		const meta = document.createElement('meta');
 		meta.httpEquiv = 'refresh';
 		meta.id = 'redirect-meta';

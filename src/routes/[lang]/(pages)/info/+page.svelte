@@ -125,7 +125,7 @@
 		return res;
 	}
 
-	function redirectToMirror(r: RouteInfo, redirectDelay = 1000): void {
+	function redirectToMirror(r: RouteInfo, redirectDelay = 0): void {
 		const mirrorUrl = BACKUP_SITE + r.fullPath.replace(/\/detail$/, '');
 		error = t(lang, 'info.error_502').replace('{mirror}', mirrorUrl);
 		setTimeout(() => { window.location.href = mirrorUrl; }, redirectDelay);
@@ -136,6 +136,8 @@
 	let activeTab = $state<'info' | 'feedback'>('info');
 	let loading = $state(true);
 	let error = $state('');
+	let placeholderMode = $state(false);
+	let placeholderExample = $state('');
 
 	// detail
 	let scriptTitle = $state('');
@@ -418,11 +420,14 @@
 		const r = getRoute();
 		if (!r) {
 			initialParamChecked = true;
-			error = t(lang, 'info.invalid_hash');
 			loading = false;
+			error = '';
+			placeholderExample = t(lang, 'info.placeholder_example').replace('{locale}', gfLocale);
+			placeholderMode = true;
 			return;
 		}
 
+		placeholderMode = false;
 		if (!initialParamChecked) {
 			if (!isHashValid(window.location.hash) && isHashValid(lastValidHash)) {
 				showHashInvalidWarning();
@@ -461,6 +466,49 @@
 					{t(lang, 'info.loading')}
 				</div>
 			</div>
+		{:else if placeholderMode}
+			<!-- No-hash placeholder: default example content -->
+			<section class="md3-card if-placeholder-box">
+				<div class="if-ph-badge">{t(lang, 'info.placeholder_badge')}</div>
+				<h1 class="headline-large if-ph-title">{t(lang, 'info.placeholder_title')}</h1>
+				<p class="if-ph-desc">{t(lang, 'info.placeholder_desc')}</p>
+				<div class="if-ph-example">
+					<div class="if-ph-ex-head">
+						<h2>{t(lang, 'info.placeholder_example_head')}</h2>
+					</div>
+					<ol class="if-script-list if-ph-demo-list">
+						<li class="if-result-item">
+							<ul class="if-ph-usage">
+							<li><code>{placeholderExample}</code></li>
+						</ul>
+						<article>
+								<h2>
+									<span class="if-script-link is-demo">{t(lang, 'info.placeholder_title')}</span>
+									<span class="if-badge-js">JS</span>
+									<span class="if-sep">-</span>
+									<span class="if-script-desc">{t(lang, 'info.placeholder_desc')}</span>
+								</h2>
+								<div class="if-script-meta">
+									<dl class="if-stats">
+										<dt>{t(lang, 'lookup.author')}</dt>
+										<dd>{t(lang, 'info.placeholder_badge')}</dd>
+										<dt>{t(lang, 'lookup.daily_installs')}</dt>
+										<dd>1,024</dd>
+										<dt>{t(lang, 'lookup.total_installs')}</dt>
+										<dd>5,832</dd>
+										<dt>{t(lang, 'lookup.ratings')}</dt>
+										<dd><span class="if-good">98</span> / <span class="if-ok">1</span> / <span class="if-bad">0</span></dd>
+									</dl>
+								</div>
+							</article>
+						</li>
+					</ol>
+				</div>
+				<div class="if-ph-hint">
+					<span class="material-icons" style="font-size:20px">info</span>
+					<span>{t(lang, 'info.placeholder_desc')}</span>
+				</div>
+			</section>
 		{:else if error}
 			<div class="md3-card if-error-box">
 				<span class="material-icons" style="font-size:48px;color:var(--md-sys-color-error)">error_outline</span>
@@ -1229,5 +1277,46 @@
 	.if-spinner-sm {
 		font-size: 28px; animation: if-spin 0.5s linear infinite;
 		color: var(--md-sys-color-primary);
+	}
+
+	/* ── No-hash placeholder ─────────────────────────── */
+	.if-placeholder-box {
+		padding: 32px;
+		max-width: 760px;
+		margin: 0 auto;
+		animation: if-fadeIn 0.3s ease;
+	}
+	.if-ph-badge {
+		display: inline-block;
+		background: var(--md-sys-color-secondary-container);
+		color: var(--md-sys-color-on-secondary-container);
+		font-size: 12px; font-weight: 600;
+		letter-spacing: 0.5px;
+		padding: 4px 12px;
+		border-radius: var(--md-sys-shape-corner-full);
+		margin-bottom: 12px;
+	}
+	.if-ph-title { margin: 0 0 8px; }
+	.if-ph-desc { color: var(--md-sys-color-on-surface-variant); font-size: 15px; line-height: 1.6; margin: 0 0 20px; }
+	.if-ph-example { border-top: 1px solid var(--md-sys-color-outline-variant); padding-top: 20px; }
+	.if-ph-ex-head h2 { font-size: 15px; font-weight: 600; color: var(--md-sys-color-on-surface); margin: 0 0 12px; }
+	.if-ph-usage { list-style: none; padding: 0 0 12px; margin: 0; }
+	.if-ph-usage code {
+		display: inline-block; padding: 8px 14px;
+		background: var(--md-sys-color-surface-container);
+		border: 1px solid var(--md-sys-color-outline-variant);
+		border-radius: var(--md-sys-shape-corner-small);
+		font-size: 13px; word-break: break-all;
+	}
+	.if-ph-demo-list { padding: 0; list-style: none; }
+	.if-ph-demo-list .if-result-item { animation: if-fadeIn 0.3s ease; }
+	.if-script-link.is-demo { color: var(--md-sys-color-on-surface); cursor: default; }
+	.if-ph-hint {
+		display: flex; align-items: center; gap: 10px;
+		margin-top: 20px; padding: 12px 16px;
+		background: var(--md-sys-color-surface-container-low);
+		border: 1px solid var(--md-sys-color-outline-variant);
+		border-radius: var(--md-sys-shape-corner-small);
+		font-size: 13px; color: var(--md-sys-color-on-surface-variant);
 	}
 </style>

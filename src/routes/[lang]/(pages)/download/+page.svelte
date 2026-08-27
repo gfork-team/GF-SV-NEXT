@@ -9,10 +9,9 @@
 
 	const DLC = siteConfig.download;
 
-	let stage = $state<string>('init');
+let stage = $state<string>('init');
 	let progress = $state(0);
 	let progressText = $state('');
-	let errorMsg = $state('');
 	let scriptPath = $state('');
 	let userIP = $state('');
 	let bestDomain = $state('');
@@ -137,7 +136,6 @@
 		const path = getScriptPath();
 		if (!path) {
 			stage = 'no-path';
-			errorMsg = '请在URL中添加脚本路径';
 			updateProgress(0, '等待路径');
 			return;
 		}
@@ -159,7 +157,7 @@
 			cacheHit = true;
 			stage = 'success';
 			updateProgress(100, '完成');
-			redirectWithMeta(finalUrl, 1);
+			redirectWithMeta(finalUrl, 0);
 			return;
 		}
 
@@ -198,7 +196,7 @@
 			await new Promise((r) => setTimeout(r, 500));
 			stage = 'success';
 			updateProgress(100, '完成');
-			redirectWithMeta(finalUrl, 1);
+			redirectWithMeta(finalUrl, 0);
 		} else {
 			const domains = getDownloadDomains();
 			const fb = domains[Math.floor(Math.random() * domains.length)]!;
@@ -206,7 +204,7 @@
 			finalUrl = `${fb}/scripts/${scriptPath}`;
 			stage = 'fallback';
 			updateProgress(100, '使用备用方案');
-			redirectWithMeta(finalUrl, 1);
+			redirectWithMeta(finalUrl, 0);
 		}
 	}
 
@@ -232,11 +230,17 @@
 			{#if stage === 'no-path'}
 				<div class="dl-icon"><span class="material-icons">link</span></div>
 				<h1>{t(lang, 'download.title')}</h1>
-				<p class="dl-desc">{errorMsg}</p>
+				<p class="dl-desc">{t(lang, 'download.no_path_title')}</p>
 				<div class="dl-tip">
-					{DLC.useQueryString
-						? '使用方式: 在URL后加上 ?path=your-script-path.user.js'
-						: '使用方式: 在URL后加上 #/your-script-path.user.js'}
+					{t(lang, 'download.no_path_desc')}
+				</div>
+				<div class="dl-url">{DLC.useQueryString ? '?path=example/your-script.user.js' : '#/example/your-script.user.js'}</div>
+				<div class="dl-tip">
+					{t(lang, 'download.no_path_example')}
+					<a href="/{lang}/l#/amidist/example.user.js" class="dl-example-link" rel="nofollow">#/.../example.user.js</a>
+				</div>
+				<div style="margin-top:20px">
+					<a href="/{lang}" class="md3-outlined-button">{t(lang, 'download.back_home')}</a>
 				</div>
 			{/if}
 
@@ -362,6 +366,7 @@
 	.dl-btn { display: inline-flex; align-items: center; gap: 6px; margin-top: 24px; padding: 10px 24px; background: var(--md-sys-color-primary); color: var(--md-sys-color-on-primary); border-radius: var(--md-sys-shape-corner-full); text-decoration: none; font-size: 14px; font-weight: 500; }
 	.dl-btn:hover { filter: brightness(1.1); }
 	.dl-btn .material-icons { font-size: 18px; }
+	.dl-example-link { color: var(--md-sys-color-primary); font-family: var(--md-sys-code-font, monospace); font-size: 13px; word-break: break-all; }
 	.dl-progress-bar { width: 100%; max-width: 400px; height: 4px; background: var(--md-sys-color-surface-container-highest); border-radius: 2px; margin: 16px auto 0; overflow: hidden; }
 	.dl-progress-fill { height: 100%; background: var(--md-sys-color-primary); border-radius: 2px; transition: width 0.3s ease; }
 	@media (max-width: 899px) {
