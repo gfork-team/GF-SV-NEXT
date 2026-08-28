@@ -1,0 +1,2 @@
+import"../chunks/Bzak7iHL.js";import{aL as s,aI as d,ag as l,bd as g}from"../chunks/C_RPn1AL.js";import{i as a}from"../chunks/BjwONf60.js";import{R as c}from"../chunks/CzH1pzPE.js";function f(o,t){s(t,!0);let n=g(()=>t.data.lang);function r(i){const e=window.location.hash;return window.location.origin+"/"+i+"/download"+(e&&e.indexOf("#/")===0?e:"")}c(o,{get lang(){return l(n)},get delaySec(){return a.redirects.downloadDelaySec},buildUrl:r,get showAds(){return a.adsense.allowOnRedirectPages}}),d()}export{f as component};
+//# sourceMappingURL=15.Disu9Ycy.js.map
