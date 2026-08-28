@@ -15,6 +15,10 @@
 </svelte:head>
 
 <div class="width-constraint" style="padding-top:32px;padding-bottom:32px">
+	<div style="text-align:center;margin:0 0 24px">
+		<Ad type="fluid" />
+	</div>
+
 	<section class="text-content">
 		<h3>{t(lang, 'applist.desktop_browsers')}</h3>
 

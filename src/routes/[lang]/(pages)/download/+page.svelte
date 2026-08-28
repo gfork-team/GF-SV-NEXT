@@ -150,10 +150,10 @@ let stage = $state<string>('init');
 		const cached = getCached();
 		if (cached) {
 			stage = 'checking-cache';
-			updateProgress(50, '校验缓存');
-			await new Promise((r) => setTimeout(r, DLC.cacheTimeout));
 			bestDomain = cached;
 			finalUrl = `${cached}/scripts/${scriptPath}`;
+			updateProgress(50, '校验缓存');
+			await new Promise((r) => setTimeout(r, DLC.cacheTimeout));
 			cacheHit = true;
 			stage = 'success';
 			updateProgress(100, '完成');
@@ -312,6 +312,7 @@ let stage = $state<string>('init');
 		<!-- 侧栏：广告框 -->
 		{#if siteConfig.adsense.allowOnDownloadPage}
 		<aside class="dl-side">
+			<div class="dl-ad-box"><Ad type="sidebar" /></div>
 			<div class="dl-ad-box"><Ad type="auto" /></div>
 			<div class="dl-ad-box"><Ad type="fluid" /></div>
 		</aside>

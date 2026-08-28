@@ -42,6 +42,11 @@
 
 <div class="width-constraint">
 	<section class="hp-page">
+		<!-- AD: Top -->
+		<div style="text-align:center;margin:0 0 24px">
+			<Ad type="fluid" />
+		</div>
+
 		<!-- ── Getting Started ───────────────────────────── -->
 		<section class="hp-section">
 			<h2 class="hp-section-title">

@@ -55,6 +55,11 @@
 			<li>有些脚本会在页面上添加控制按钮或菜单，你可以通过这些界面调整脚本功能</li>
 		</ol>
 
+		<!-- AD: Mid content -->
+		<div style="text-align:center;margin:24px 0">
+			<Ad type="horizontal" />
+		</div>
+
 		<h3>{t(lang, 'installing.notes_title')}</h3>
 		<ol style="color:var(--md-sys-color-on-surface-variant);line-height:1.8;padding-left:2em">
 			<li>尽量从可信来源安装脚本</li>

@@ -1,5 +1,6 @@
 <script lang="ts">
 	import { t, type Lang } from '$i18n';
+	import Ad from '$components/Ad.svelte';
 	import type { PageData } from './$types';
 
 	let { data }: { data: PageData } = $props();
@@ -19,6 +20,11 @@
 		<p style="color:var(--md-sys-color-on-surface-variant)">{t(lang, 'tos.preamble')}</p>
 
 		<hr class="md3-divider" />
+
+		<!-- AD: After preamble -->
+		<div style="text-align:center;margin:16px 0">
+			<Ad type="horizontal" />
+		</div>
 
 		<h3>{t(lang, 'tos.section1_title')}</h3>
 		<p style="color:var(--md-sys-color-on-surface-variant)">{@html t(lang, 'tos.section1_1')}</p>
@@ -57,5 +63,10 @@
 
 		<hr class="md3-divider" />
 		<p style="text-align:center"><strong>{t(lang, 'tos.thanks')}</strong></p>
+
+		<!-- AD: Bottom -->
+		<div style="text-align:center;margin:16px 0">
+			<Ad type="autorelaxed" />
+		</div>
 	</section>
 </div>

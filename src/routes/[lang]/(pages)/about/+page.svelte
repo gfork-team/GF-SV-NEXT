@@ -1,6 +1,7 @@
 <script lang="ts">
 	import { t, type Lang } from '$i18n';
 	import { siteConfig } from '$lib/config';
+	import Ad from '$components/Ad.svelte';
 	import type { PageData } from './$types';
 
 	let { data }: { data: PageData } = $props();
@@ -55,6 +56,11 @@
 			</ul>
 		</div>
 
+		<!-- AD: After features -->
+		<div style="text-align:center;margin:16px 0">
+			<Ad type="auto" />
+		</div>
+
 		<!-- Open Source -->
 		<div class="md3-card" style="margin-top:16px">
 			<h2 class="title-large" style="margin-bottom:12px">{t(lang, 'about.opensource_title')}</h2>
@@ -80,6 +86,11 @@
 				{t(lang, 'about.tos_desc')}
 				<a href="/{lang}/tos" style="color:var(--md-sys-color-primary)">{t(lang, 'about.tos_link')}</a>
 			</p>
+		</div>
+
+		<!-- AD: Bottom -->
+		<div style="text-align:center;margin:16px 0">
+			<Ad type="autorelaxed" />
 		</div>
 	</div>
 </div>

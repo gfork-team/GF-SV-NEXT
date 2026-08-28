@@ -1,6 +1,7 @@
 <script lang="ts">
 	import { t, type Lang } from '$i18n';
 	import { siteConfig } from '$lib/config';
+	import Ad from '$components/Ad.svelte';
 	import type { PageData } from './$types';
 
 	let { data }: { data: PageData } = $props();
@@ -20,5 +21,10 @@
 		<p>
 			<a href="mailto:{siteConfig.contactEmail}" style="color:var(--md-sys-color-primary)">{siteConfig.contactEmail}</a>
 		</p>
+
+		<!-- AD: Bottom -->
+		<div style="text-align:center;margin:16px 0">
+			<Ad type="fluid" />
+		</div>
 	</section>
 </div>

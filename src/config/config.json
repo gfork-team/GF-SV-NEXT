@@ -37,7 +37,8 @@
       "fluid": "1394739154",
       "auto": "4095096984",
       "sidebar": "4497590737",
-      "autorelaxed": "3934604756"
+      "autorelaxed": "3934604756",
+      "horizontal": "4095096984"
     },
     "fluidLayoutKey": "-gy+2i+5x-ek+82",
     "allowOnRedirectPages": true,
@@ -57,7 +58,6 @@
 
   "downloadNodes": [
     "https://static-sg-apse1-primary-mirror-aws-s3-cloudfront-public-cdn.dahi.edu.eu.org",
-    "https://static-sg-apse1-primary-mirror-aws-s3-cloudfront-public-cdn.dahi.edu.eu.org.cdn.cloudflare.net",
     "https://tencent.api-data-abtest-config.dahi.edu.eu.org",
     "https://api-data-aws-abtest-config.dahi.edu.eu.org"
   ],

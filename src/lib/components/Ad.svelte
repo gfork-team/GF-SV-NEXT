@@ -1,9 +1,12 @@
 <script lang="ts">
   import { onMount } from 'svelte';
+  import { siteConfig } from '$lib/config';
 
-  const CLIENT = 'ca-pub-3758644447684310';
+  // 兜底账号 / 槽位，与 config.json adsense 块保持对齐；
+  // 部署期可通过 config.json 直接换 publisherId / slot ID，无需改代码。
+  const CLIENT_FALLBACK = 'ca-pub-3758644447684310';
 
-  const SLOTS: Record<string, { slot: string; style: string; format?: string; layoutKey?: string; fullWidthResponsive?: boolean }> = {
+  const SLOTS_FALLBACK: Record<string, { slot: string; style: string; format?: string; layoutKey?: string; fullWidthResponsive?: boolean }> = {
     fluid:       { slot: '1394739154', style: 'display:block;min-height:90px',                     format: 'fluid',       layoutKey: '-gy+2i+5x-ek+82' },
     auto:        { slot: '4095096984', style: 'display:block;min-height:250px',                    format: 'auto',        fullWidthResponsive: true },
     sidebar:     { slot: '4497590737', style: 'display:inline-block;width:190px;height:570px;min-height:570px' },
@@ -12,7 +15,11 @@
   };
 
   let { type = 'auto' }: { type?: string } = $props();
-  let cfg = $derived(SLOTS[type] || SLOTS.auto);
+
+  let adClient = $derived(siteConfig.adsense.publisherId || CLIENT_FALLBACK);
+  let typeCfg = $derived(SLOTS_FALLBACK[type] || SLOTS_FALLBACK.auto);
+  let cfgSlots = $derived((siteConfig.adsense.slots ?? {}) as Record<string, string>);
+  let slot = $derived(cfgSlots[type] || typeCfg.slot);
   let container: HTMLElement;
 
   onMount(() => {
@@ -30,10 +37,10 @@
 <ins
   bind:this={container}
   class="adsbygoogle"
-  style={cfg.style}
-  data-ad-client={CLIENT}
-  data-ad-slot={cfg.slot}
-  data-ad-format={cfg.format}
-  data-ad-layout-key={cfg.layoutKey}
-  data-full-width-responsive={cfg.fullWidthResponsive ? 'true' : undefined}
+  style={typeCfg.style}
+  data-ad-client={adClient}
+  data-ad-slot={slot}
+  data-ad-format={typeCfg.format}
+  data-ad-layout-key={typeCfg.layoutKey}
+  data-full-width-responsive={typeCfg.fullWidthResponsive ? 'true' : undefined}
 ></ins>

@@ -236,6 +236,11 @@
 			</div>
 		</section>
 
+		<!-- ═══ AD: After quick services ═══ -->
+		<div style="text-align:center;margin:24px 0">
+			<Ad type="horizontal" />
+		</div>
+
 		<!-- ═══ Features ═══ -->
 		<section class="zh-section" data-reveal style="--reveal-delay:120ms">
 			<div class="zh-section-head">
