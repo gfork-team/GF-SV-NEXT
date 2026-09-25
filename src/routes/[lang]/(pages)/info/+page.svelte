@@ -115,7 +115,7 @@
 	// ─── API config ──────────────────────────────────────────────────────
 	const INFO_API = siteConfig.infoApi.primary;
 	const FETCH_TIMEOUT_MS = 5000;
-	const BACKUP_SITE = 'https://gfork.zh-hk.eu.org';
+	const RETRY_DELAYS_MS = [600, 1500];
 
 	async function fetchJson(url: string, signal: AbortSignal): Promise<Response> {
 		const res = await fetch(url, {
@@ -125,10 +125,29 @@
 		return res;
 	}
 
-	function redirectToMirror(r: RouteInfo, redirectDelay = 0): void {
-		const mirrorUrl = BACKUP_SITE + r.fullPath.replace(/\/detail$/, '');
-		error = t(lang, 'info.error_502').replace('{mirror}', mirrorUrl);
-		setTimeout(() => { window.location.href = mirrorUrl; }, redirectDelay);
+	function isTransientError(e: unknown): boolean {
+		const err = e as Error;
+		const msg = err?.message || '';
+		const name = err?.name || '';
+		if (name === 'AbortError') return false;
+		const isTimeout = name === 'TimeoutError' || msg.includes('timeout') || msg.includes('timed out');
+		const isNetworkFail = name === 'TypeError' || msg.includes('Failed to fetch') || msg.includes('NetworkError') || msg.includes('fetch failed');
+		const isServerError = /HTTP 5\d\d/.test(msg);
+		return isTimeout || isNetworkFail || isServerError;
+	}
+
+	async function withRetry<T>(fn: () => Promise<T>, signal: AbortSignal): Promise<T> {
+		let attempt = 0;
+		while (true) {
+			try {
+				return await fn();
+			} catch (e) {
+				if (signal.aborted) throw new DOMException('Aborted', 'AbortError');
+				if (!isTransientError(e) || attempt >= RETRY_DELAYS_MS.length) throw e;
+				await new Promise((resolve) => setTimeout(resolve, RETRY_DELAYS_MS[attempt++]));
+				if (signal.aborted) throw new DOMException('Aborted', 'AbortError');
+			}
+		}
 	}
 
 	// ─── Page state ──────────────────────────────────────────────────────
@@ -263,9 +282,9 @@
 
 		try {
 			if (r.pageType === 'users') {
-				await loadUserPage(r, signal);
+				await withRetry(() => loadUserPage(r, signal), signal);
 			} else if (r.pageType === 'feedback') {
-				await loadFeedbackPage(r, signal);
+				await withRetry(() => loadFeedbackPage(r, signal), signal);
 			} else if (r.pageType === 'redirect') {
 				const url = new URL(window.location.href);
 				url.hash = `#/${gfLocale}/scripts/${r.scriptId}/detail`;
@@ -275,19 +294,12 @@
 				await loadContent({ ...r, pageType: 'detail', fullPath: url.hash.substring(1) });
 				return;
 			} else {
-				await loadDetailPage(r, signal);
+				await withRetry(() => loadDetailPage(r, signal), signal);
 			}
 		} catch (e) {
 			if ((e as Error).name !== 'AbortError') {
 				const msg = (e as Error).message || '';
-				const name = (e as Error).name || '';
-				const isTimeout = name === 'TimeoutError' || msg.includes('timeout') || msg.includes('timed out');
-				const isNetworkFail = name === 'TypeError' || msg.includes('Failed to fetch') || msg.includes('NetworkError') || msg.includes('fetch failed');
-				if ((isTimeout || isNetworkFail || msg.includes('502') || msg.includes('503') || msg.includes('504')) && route) {
-					redirectToMirror(route);
-				} else {
-					error = `${t(lang, 'info.generic_error')}: ${msg}`;
-				}
+				error = isTransientError(e) ? t(lang, 'info.error_502') : `${t(lang, 'info.generic_error')}: ${msg}`;
 			}
 		} finally {
 			loading = false;
@@ -322,28 +334,23 @@
 	}
 
 		async function goToFeedbackPage(page: number): Promise<void> {
-			if (!route || page < 1 || page > feedbackTotalPages || feedbackLoading) return;
+			const target = route;
+			if (!target || page < 1 || page > feedbackTotalPages || feedbackLoading) return;
 			feedbackLoading = true;
-			try {
-				abortController?.abort();
-				abortController = new AbortController();
-				await loadFeedbackPage(route, abortController.signal, page);
-				document.getElementById('feedback-list')?.scrollIntoView({ behavior: 'smooth' });
-			} catch (e) {
-				if ((e as Error).name !== 'AbortError') {
-					const msg = (e as Error).message || '';
-					const name = (e as Error).name || '';
-					const isTimeout = name === 'TimeoutError' || msg.includes('timeout') || msg.includes('timed out');
-					const isNetworkFail = name === 'TypeError' || msg.includes('Failed to fetch') || msg.includes('NetworkError') || msg.includes('fetch failed');
-					if (isTimeout || isNetworkFail || msg.includes('502') || msg.includes('503') || msg.includes('504')) {
-						redirectToMirror(route);
-					} else {
-						error = `${t(lang, 'info.generic_error')}: ${msg}`;
-					}
-				}
-			} finally {
-				feedbackLoading = false;
+		try {
+			abortController?.abort();
+			abortController = new AbortController();
+			const signal = abortController.signal;
+			await withRetry(() => loadFeedbackPage(target, signal, page), signal);
+			document.getElementById('feedback-list')?.scrollIntoView({ behavior: 'smooth' });
+		} catch (e) {
+			if ((e as Error).name !== 'AbortError') {
+				const msg = (e as Error).message || '';
+				error = isTransientError(e) ? t(lang, 'info.error_502') : `${t(lang, 'info.generic_error')}: ${msg}`;
 			}
+		} finally {
+			feedbackLoading = false;
+		}
 		}
 
 	async function loadUserPage(r: RouteInfo, signal: AbortSignal): Promise<void> {
@@ -633,22 +640,6 @@
 					</a>
 				</div>
 
-				{#if activeTab === 'info'}
-				<!-- Install row -->
-				<div class="if-install-row">
-					<a href="/{lang}/l#/{installPath}" class="md3-button" target="_blank" rel="noopener noreferrer">
-						{t(lang, 'info.install')}
-					</a>
-					<a href="/{lang}/installing" class="if-help-link" title={t(lang, 'info.install_help')} rel="nofollow">?</a>
-					{#if installLink}
-						<details class="if-install-details">
-							<summary>{t(lang, 'info.install_details')}</summary>
-							<code>{installLink}</code>
-						</details>
-					{/if}
-				</div>
-			{/if}
-
 				<!-- Info Tab — ads fill empty content spots -->
 				{#if activeTab === 'info'}
 					{#if scriptHeaderHtml}
@@ -656,6 +647,20 @@
 					{:else if scriptTitle}
 						<h2 class="if-script-page-title">{scriptTitle}</h2>
 					{/if}
+
+					<!-- Install row (moved after script description) -->
+					<div class="if-install-row">
+						<a href="/{lang}/l#/{installPath}" class="md3-button" target="_blank" rel="noopener noreferrer">
+							{t(lang, 'info.install')}
+						</a>
+						<a href="/{lang}/installing" class="if-help-link" title={t(lang, 'info.install_help')} rel="nofollow">?</a>
+						{#if installLink}
+							<details class="if-install-details">
+								<summary>{t(lang, 'info.install_details')}</summary>
+								<code>{installLink}</code>
+							</details>
+						{/if}
+					</div>
 
 					{#if scriptMetaHtml}
 						<div class="if-content-area if-gf-meta" id="script-meta" use:processLinks={gfLocale}>{@html scriptMetaHtml}</div>

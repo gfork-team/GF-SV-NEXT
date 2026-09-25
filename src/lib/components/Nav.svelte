@@ -139,7 +139,7 @@
 
 			<!-- Theme selector -->
 			<div class="m3-theme-selector">
-				<button class="m3-theme-btn" onclick={() => showThemeDropdown = !showThemeDropdown} aria-label="Theme">
+				<button class="m3-theme-btn" onclick={() => showThemeDropdown = !showThemeDropdown}>
 					{#if theme === 'light'}
 						<svg class="m3-theme-icon" fill="currentColor" viewBox="0 0 24 24">
 							<path d="M12 3V1m0 22v-2M4.22 4.22l1.42 1.42m12.72 12.72l1.42 1.42M1 12h2m18 0h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42M12 7a5 5 0 110 10 5 5 0 010-10z"/>
@@ -295,6 +295,7 @@
 		--zh-seal-deep: #c86b8a;
 		--zh-seal-bright: #eed3e5;
 		--zh-seal-soft: #f8edf4;
+		--zh-seal-ink: #a34a6b;
 		--zh-gold: #b98a1e;
 		--zh-gold-deep: #9a731a;
 		--zh-ivory: #f5f5f5;
@@ -386,9 +387,9 @@
 			color 160ms ease-out,
 			background 160ms ease-out;
 	}
-	:global(:root[data-zh-china="1"]) .m3-nav-link:hover { color: var(--zh-seal); background: rgba(221,170,204,.14); }
+	:global(:root[data-zh-china="1"]) .m3-nav-link:hover { color: var(--zh-seal-ink); background: rgba(221,170,204,.14); }
 	:global(:root[data-zh-china="1"]) .m3-nav-link:active { transform: scale(.96); transition: none; }
-	:global(:root[data-zh-china="1"]) .m3-nav-link--active { color: var(--zh-seal) !important; font-weight: 600; }
+	:global(:root[data-zh-china="1"]) .m3-nav-link--active { color: var(--zh-seal-ink) !important; font-weight: 600; }
 	:global(:root[data-zh-china="1"]) .m3-nav-link--active:after,
 	:global(:root[data-zh-china="1"]) .m3-nav-link:hover:after {
 		content: ''; position: absolute; left: 50%; bottom: 2px;
@@ -458,7 +459,7 @@
 	:global(:root[data-zh-china="1"]) .m3-color-btn {
 		border-radius: 999px; color: var(--zh-ink);
 	}
-	:global(:root[data-zh-china="1"]) .m3-color-btn:hover { background: var(--zh-paper); color: var(--zh-seal); }
+	:global(:root[data-zh-china="1"]) .m3-color-btn:hover { background: var(--zh-paper); color: var(--zh-seal-ink); }
 	.m3-color-icon { width: 20px; height: 20px; }
 	.m3-color-dropdown {
 		position: absolute; right: 0; top: calc(100% + 8px);
@@ -633,7 +634,7 @@
 	.m3-drawer-item:hover { background: var(--md-sys-color-surface-variant); color: var(--md-sys-color-on-surface); }
 	.m3-drawer-item--active { color: var(--md-sys-color-primary) !important; background: var(--md-sys-color-primary-container) !important; }
 	:global(:root[data-zh-china="1"]) .m3-drawer-item { border-radius: 6px; }
-	:global(:root[data-zh-china="1"]) .m3-drawer-item--active { color: var(--zh-seal) !important; background: rgba(221,170,204,.14) !important; font-weight: 600; }
+	:global(:root[data-zh-china="1"]) .m3-drawer-item--active { color: var(--zh-seal-ink) !important; background: rgba(221,170,204,.14) !important; font-weight: 600; }
 	.m3-drawer-divider { height: 1px; background: var(--md-sys-color-outline-variant); margin: 8px; }
 	.m3-drawer-lang-label { padding: 8px 16px; font-size: var(--md-sys-typescale-label-medium); color: var(--md-sys-color-on-surface-variant); }
 

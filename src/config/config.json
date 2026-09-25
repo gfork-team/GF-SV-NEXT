@@ -111,6 +111,8 @@
   "seo": {
     "twitterHandle": "",
     "defaultOgImage": "/android-chrome-512x512.png",
+    "defaultOgImageWidth": 512,
+    "defaultOgImageHeight": 512,
     "googleVerification": "",
     "baiduVerification": "",
     "bingVerification": ""

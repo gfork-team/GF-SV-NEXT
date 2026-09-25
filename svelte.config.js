@@ -18,16 +18,20 @@ const config = {
 		}),
 		prerender: {
 			entries: [
+				'/',
 				...allLangs.flatMap(l => pages.map(p => `/${l}${p}`)),
 				'/s',
-				'/l'
+				'/l',
+				'/sitemap.xml',
+				'/robots.txt'
 			],
 			crawl: true,
 			handleHttpError: ({ path, message }) => {
 				console.warn(`Prerender warning for ${path}: ${message}`);
 				return;
 			},
-			handleUnseenRoutes: 'ignore'
+			// 有「声明可预渲染但没被渲染」的路由时直接在构建日志里报错，避免再次静默丢页
+			handleUnseenRoutes: 'warn'
 		},
 		paths: {
 			base: process.env.VITE_BUILD_BASE_PATH || '',

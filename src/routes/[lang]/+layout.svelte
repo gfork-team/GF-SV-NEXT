@@ -9,6 +9,7 @@
 		cleanPathFrom,
 		websiteJsonLd,
 		organizationJsonLd,
+		webPageJsonLd,
 		breadcrumbJsonLd
 	} from '$lib/seo';
 	import { sendAudit } from '$lib/audit';
@@ -125,6 +126,13 @@
 	let pageDesc = $derived(t(lang, routeMeta.descKey));
 	let canonical = $derived(canonicalUrl(lang, cleanPathFrom(page.url.pathname)));
 	let ogImage = $derived(siteUrl(siteConfig.seo.defaultOgImage));
+	// 跳转中间页不进索引；其余页面放开图片/摘要抓取上限，争取富媒体展示
+	let isInterstitial = $derived(cleanPath === '/s' || cleanPath === '/l');
+	let robotsContent = $derived(
+		isInterstitial
+			? 'noindex, follow'
+			: 'index, follow, max-image-preview:large, max-snippet:-1, max-video-preview:-1'
+	);
 	let gtmId = siteConfig.adsense.gtmId;
 	let gtmCode = $derived(gtmId
 		? `(function(w,d,s,l,i){w[l]=w[l]||[];w[l].push({'gtm.start':new Date().getTime(),event:'gtm.js'});var f=d.getElementsByTagName(s)[0],j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src='https://www.googletagmanager.com/gtm.js?id=${gtmId}';f.parentNode.insertBefore(j,f);})(window,document,'script','dataLayer','${gtmId}');`
@@ -140,29 +148,55 @@
 	<!-- Anti-FOUC（paint 前同步套用本地配色，杜绝闪变） -->
 	{@html `<script>${getColorFoucScript()}</script>`}
 
+	<!-- Robots directive（跳转中间页 noindex；正文页放开摘要/图片抓取上限） -->
+	<meta name="robots" content={robotsContent} />
+
 	<!-- Canonical URL (no trailing slash, Uniform URL) -->
 	<link rel="canonical" href={canonical} />
 
 	<!-- Open Graph -->
 	<meta property="og:site_name" content={siteConfig.name} />
 	<meta property="og:locale" content={OG_LOCALES[lang]} />
+	{#each i18nConfig.supportedLangs as altLang}
+		{#if altLang !== lang}
+			<meta property="og:locale:alternate" content={OG_LOCALES[altLang]} />
+		{/if}
+	{/each}
 	<meta property="og:type" content={routeMeta.ogType || 'website'} />
 	<meta property="og:title" content={pageTitle} />
 	<meta property="og:description" content={pageDesc} />
 	<meta property="og:url" content={canonical} />
 	<meta property="og:image" content={ogImage} />
+	<meta property="og:image:type" content="image/png" />
+	<meta property="og:image:width" content={String(siteConfig.seo.defaultOgImageWidth)} />
+	<meta property="og:image:height" content={String(siteConfig.seo.defaultOgImageHeight)} />
 	<meta property="og:image:alt" content={siteConfig.name} />
 
 	<!-- Twitter Card -->
 	<meta name="twitter:card" content="summary_large_image" />
+	{#if siteConfig.seo.twitterHandle}
+		<meta name="twitter:site" content={siteConfig.seo.twitterHandle} />
+	{/if}
 	<meta name="twitter:title" content={pageTitle} />
 	<meta name="twitter:description" content={pageDesc} />
 	<meta name="twitter:image" content={ogImage} />
+
+	<!-- 搜索引擎站长验证（config.json → seo.*，留空则不输出） -->
+	{#if siteConfig.seo.googleVerification}
+		<meta name="google-site-verification" content={siteConfig.seo.googleVerification} />
+	{/if}
+	{#if siteConfig.seo.baiduVerification}
+		<meta name="baidu-site-verification" content={siteConfig.seo.baiduVerification} />
+	{/if}
+	{#if siteConfig.seo.bingVerification}
+		<meta name="msvalidate.01" content={siteConfig.seo.bingVerification} />
+	{/if}
 
 	<!-- Structured data: WebSite + Organization (site-wide) -->
 	{#if cleanPath !== '/s' && cleanPath !== '/l'}
 		{@html `<script type="application/ld+json">${websiteJsonLd(lang)}</script>`}
 		{@html `<script type="application/ld+json">${organizationJsonLd()}</script>`}
+		{@html `<script type="application/ld+json">${webPageJsonLd(lang, cleanPath, pageTitle, pageDesc)}</script>`}
 
 		<!-- Structured data: BreadcrumbList (auto-derived from path) -->
 		{#if cleanPath !== '/'}

@@ -80,8 +80,35 @@ export function organizationJsonLd(): string {
 		name: siteConfig.name,
 		alternateName: 'GFork',
 		url: siteConfig.url + '/',
-		logo: { '@type': 'ImageObject', url: siteUrl(siteConfig.seo.defaultOgImage) },
-		sameAs: [siteConfig.github.org, siteConfig.github.gfHomeSvelteKit].filter(Boolean)
+		logo: {
+			'@type': 'ImageObject',
+			url: siteUrl(siteConfig.seo.defaultOgImage),
+			width: siteConfig.seo.defaultOgImageWidth,
+			height: siteConfig.seo.defaultOgImageHeight
+		},
+		sameAs: [
+			...new Set(
+				[siteConfig.github.org, siteConfig.github.gfHomeNext, siteConfig.github.gfHomeSvelteKit].filter(
+					Boolean
+				)
+			)
+		]
+	};
+	return escapeJsonLd(JSON.stringify(ld));
+}
+
+/** 当前页 WebPage JSON-LD（与 canonical / OG 同源，全部路由可用）。 */
+export function webPageJsonLd(lang: Lang, cleanPath: string, title: string, description: string): string {
+	const url = canonicalUrl(lang, cleanPath);
+	const ld = {
+		'@context': 'https://schema.org',
+		'@type': 'WebPage',
+		'@id': `${url}#webpage`,
+		url,
+		name: title,
+		description,
+		inLanguage: OG_LOCALES[lang],
+		isPartOf: { '@id': `${siteConfig.url}/#website` }
 	};
 	return escapeJsonLd(JSON.stringify(ld));
 }

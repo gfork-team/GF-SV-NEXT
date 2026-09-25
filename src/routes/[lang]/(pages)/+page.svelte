@@ -117,7 +117,7 @@
 <svelte:head>
 <title>{t(lang, 'meta.home_title')}</title>
 	<meta name="description" content={t(lang, 'meta.home_desc')} />
-	<meta name="keywords" content="greasyfork, mirror, proxy, userscript, greasyfork镜像, 油猴脚本, 脚本加速, greasyfork加速, user scripts, tampermonkey" />
+	<meta name="keywords" content={t(lang, 'meta.home_keywords')} />
 </svelte:head>
 
 <div class="zh-home">
@@ -329,6 +329,7 @@
 		--zh-seal-deep: #c86b8a;
 		--zh-seal-bright: #eed3e5;
 		--zh-seal-soft: #f8edf4;
+		--zh-seal-ink: #a34a6b;
 		--zh-gold: #b98a1e;
 		--zh-gold-deep: #9a731a;
 		--zh-ivory: #f5f5f5;
@@ -486,7 +487,7 @@
 	:global(:root[data-zh-china="1"]) .zh-hot-link { color: var(--zh-azure); }
 	.zh-hot-link:hover { text-decoration: none; }
 	:global(:root[data-zh-china="1"]) .zh-hot-link:hover {
-		color: var(--zh-seal);
+		color: var(--zh-seal-ink);
 		background: rgba(221,170,204,.10);
 	}
 	:global(:root[data-zh-china="1"]) .zh-hot-link:focus-visible { outline: 2px solid var(--zh-seal); outline-offset: 2px; }
@@ -508,7 +509,7 @@
 		padding-left: 12px;
 	}
 	:global(:root[data-zh-china="1"]) .zh-section-title {
-		color: var(--zh-seal);
+		color: var(--zh-seal-ink);
 		padding-left: 12px;
 	}
 	.zh-section-title:before {
@@ -526,7 +527,7 @@
 		transition: color 160ms ease-out;
 	}
 	:global(:root[data-zh-china="1"]) .zh-section-more { color: var(--zh-ink-soft); }
-	:global(:root[data-zh-china="1"]) .zh-section-more:hover { color: var(--zh-seal); }
+	:global(:root[data-zh-china="1"]) .zh-section-more:hover { color: var(--zh-seal-ink); }
 
 	/* ─── 卡片（白底，Cloudflare 式） ─────── */
 	.zh-card {
@@ -642,7 +643,7 @@
 		margin: 2px 0 6px;
 		letter-spacing: -0.005em;
 	}
-	:global(:root[data-zh-china="1"]) .zh-feature-title { color: var(--zh-seal); }
+	:global(:root[data-zh-china="1"]) .zh-feature-title { color: var(--zh-seal-ink); }
 	.zh-feature-desc {
 		font-size: 13px; line-height: 1.6;
 		color: var(--md-sys-color-on-surface-variant);

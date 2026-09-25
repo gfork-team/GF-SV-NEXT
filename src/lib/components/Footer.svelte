@@ -10,7 +10,7 @@
 	const year = getCurrentYear();
 
 	const footerLinks = [
-		{ href: '/', key: 'nav.home' },
+		{ href: '', key: 'nav.home' },
 		{ href: '/search', key: 'nav.search' },
 		{ href: '/help', key: 'nav.help' },
 		{ href: '/about', key: 'nav.about' }
@@ -31,7 +31,7 @@
 
 		<!-- Brand + Quick Links -->
 		<div class="m3-footer-top">
-			<a class="m3-footer-brand" href="/{lang}" data-sveltekit-preload-data="hover" aria-label={t(lang, 'site.name')}>
+			<a class="m3-footer-brand" href="/{lang}" data-sveltekit-preload-data="hover">
 				<img
 					src="/img/gforkg.svg"
 					alt=""
@@ -57,13 +57,13 @@
 
 		<!-- Sponsor Section -->
 		<div class="m3-footer-sponsor">
-			<h4 class="m3-footer-sponsor-text">
+			<p class="m3-footer-sponsor-text">
 				{t(lang, 'footer.sponsor_title')}
 				<a href={siteConfig.sponsor.url} target="_blank" rel="noopener noreferrer" class="m3-footer-link">
 					{siteConfig.sponsor.name}
 				</a>
 				{t(lang, 'footer.sponsor_title_suffix') || ''}
-			</h4>
+			</p>
 
 			<a href={siteConfig.sponsor.url} target="_blank" rel="noopener noreferrer" class="m3-footer-sponsor-anchor">
 				<img
@@ -248,6 +248,10 @@
 		color: var(--md-sys-color-on-surface-variant);
 		line-height: 1.5;
 	}
+	.m3-footer-sponsor-text a {
+		text-decoration: underline;
+		text-underline-offset: 2px;
+	}
 
 	.m3-footer-sponsor-img {
 		width: 360px;
@@ -291,13 +295,8 @@
 		user-select: none;
 	}
 
-	.m3-footer-copyright {
-		opacity: .7;
-	}
-
 	.m3-footer-version {
 		margin-left: 6px;
-		opacity: .8;
 	}
 	.m3-footer-version a {
 		font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;

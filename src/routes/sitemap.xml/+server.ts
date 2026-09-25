@@ -10,6 +10,7 @@ const STATIC_PAGES = [
 	{ path: '/about', priority: '0.6' },
 	{ path: '/applist', priority: '0.6' },
 	{ path: '/installing', priority: '0.6' },
+	{ path: '/info', priority: '0.5' },
 	{ path: '/tos', priority: '0.4' },
 	{ path: '/feedback', priority: '0.4' }
 ];
@@ -51,3 +52,5 @@ ${urlEntries}</urlset>`;
 		}
 	});
 }
+
+export const prerender = true;

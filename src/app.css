@@ -142,6 +142,7 @@
     --zh-seal-deep: #9c6487;
     --zh-seal-bright: #c98db0;
     --zh-seal-soft: #3b2f38;
+    --zh-seal-ink: #e3bcd2;
     --zh-gold: #d4a94e;
     --zh-gold-deep: #b98a1e;
     --zh-ivory: #2a2d31;
@@ -203,6 +204,7 @@
   --zh-seal-deep: #9c6487;
   --zh-seal-bright: #c98db0;
   --zh-seal-soft: #3b2f38;
+  --zh-seal-ink: #e3bcd2;
   --zh-gold: #d4a94e;
   --zh-gold-deep: #b98a1e;
   --zh-ivory: #2a2d31;
@@ -318,7 +320,7 @@ html {
 
 /* 首帧纯白：主题颜色在 hydrate 读取配置后应用 */
 body {
-  font-family: 'Noto Serif SC', 'Inter', system-ui, -apple-system, serif;
+  font-family: 'Noto Sans SC', 'Inter', system-ui, -apple-system, sans-serif;
   font-size: var(--md-sys-typescale-body-medium);
   color: #1f1f1f;
   background: #ffffff;
@@ -346,11 +348,13 @@ body {
   color: var(--zh-azure);
   transition: color 160ms ease-out;
 }
-:root[data-zh-china="1"] a:hover { color: var(--zh-seal); }
+:root[data-zh-china="1"] a:hover { color: var(--zh-seal-ink); }
 
 /* 按钮形态的链接保持按钮文字色，不被链接色覆盖（否则默认配色下文字与底色同色不可见） */
 :root[data-zh-china="1"] a.md3-button,
-:root[data-zh-china="1"] a.md3-button:hover {
+:root[data-zh-china="1"] a.md3-button:hover,
+:root[data-zh-china="1"] a.dl-btn,
+:root[data-zh-china="1"] a.dl-btn:hover {
   color: var(--md-sys-color-on-primary);
 }
 :root[data-zh-china="1"] a.md3-tonal-button,
@@ -363,8 +367,9 @@ body {
 }
 
 @media (min-width: 768px) {
-  body {
-    font-family: 'Noto Sans SC', 'Inter', system-ui, -apple-system, sans-serif;
+  h1, h2, h3, h4, h5, h6, .headline-large, .headline-medium, .headline-small,
+  .title-large, .title-medium, .title-small {
+    font-family: 'Noto Serif SC', 'Inter', system-ui, -apple-system, serif;
   }
 }
 
