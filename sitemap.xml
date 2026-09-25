@@ -1,39 +1,489 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
-    <url>
-        <loc>https://home.greasyfork.org.cn/zh-hans</loc>
-        <lastmod>2025-06-04</lastmod>
-        <changefreq>monthly</changefreq>
-        <priority>1.0</priority>  <!-- 最高優先級（主頁或主要語言） -->
-    </url>
-    <url>
-        <loc>https://home.greasyfork.org.cn/ja</loc>
-        <lastmod>2025-06-04</lastmod>
-        <changefreq>monthly</changefreq>
-        <priority>0.6</priority>  <!-- 次要語言，稍低於主語言 -->
-    </url>
-    <url>
-        <loc>https://home.greasyfork.org.cn/en</loc>
-        <lastmod>2025-06-04</lastmod>
-        <changefreq>monthly</changefreq>
-        <priority>0.6</priority>  <!-- 英文頁面，權重再低一些 -->
-    </url>
-    <url>
-        <loc>https://home.greasyfork.org.cn/page/applist</loc>
-        <lastmod>2025-06-04</lastmod>
-        <changefreq>monthly</changefreq>
-        <priority>0.5</priority>  <!-- 功能性頁面，最低優先級 -->
-    </url>
-    <url>
-        <loc>https://home.greasyfork.org.cn/page/applist</loc>
-        <lastmod>2025-06-04</lastmod>
-        <changefreq>monthly</changefreq>
-        <priority>0.5</priority>  <!-- 功能性頁面，最低優先級 -->
-    </url>
-    <url>
-        <loc>https://home.greasyfork.org.cn/page/installing-user-scripts</loc>
-        <lastmod>2025-06-04</lastmod>
-        <changefreq>monthly</changefreq>
-        <priority>0.5</priority>  <!-- 功能性頁面，最低優先級 -->
-    </url>
+<urlset
+  xmlns="http://www.sitemaps.org/schemas/sitemap/0.9"
+  xmlns:xhtml="http://www.w3.org/1999/xhtml">
+  <url>
+    <loc>https://home.greasyfork.org.cn/zh-hans</loc>
+    <lastmod>2026-09-25</lastmod>
+    <changefreq>daily</changefreq>
+    <priority>1.0</priority>
+    <xhtml:link rel="alternate" hreflang="zh-CN" href="https://home.greasyfork.org.cn/zh-hans" />
+    <xhtml:link rel="alternate" hreflang="zh-TW" href="https://home.greasyfork.org.cn/zh-hant" />
+    <xhtml:link rel="alternate" hreflang="en" href="https://home.greasyfork.org.cn/en" />
+    <xhtml:link rel="alternate" hreflang="ja" href="https://home.greasyfork.org.cn/ja" />
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://home.greasyfork.org.cn/zh-hans" />
+  </url>
+  <url>
+    <loc>https://home.greasyfork.org.cn/zh-hans/download</loc>
+    <lastmod>2026-09-25</lastmod>
+    <changefreq>daily</changefreq>
+    <priority>0.9</priority>
+    <xhtml:link rel="alternate" hreflang="zh-CN" href="https://home.greasyfork.org.cn/zh-hans/download" />
+    <xhtml:link rel="alternate" hreflang="zh-TW" href="https://home.greasyfork.org.cn/zh-hant/download" />
+    <xhtml:link rel="alternate" hreflang="en" href="https://home.greasyfork.org.cn/en/download" />
+    <xhtml:link rel="alternate" hreflang="ja" href="https://home.greasyfork.org.cn/ja/download" />
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://home.greasyfork.org.cn/zh-hans/download" />
+  </url>
+  <url>
+    <loc>https://home.greasyfork.org.cn/zh-hans/lookup</loc>
+    <lastmod>2026-09-25</lastmod>
+    <changefreq>daily</changefreq>
+    <priority>0.9</priority>
+    <xhtml:link rel="alternate" hreflang="zh-CN" href="https://home.greasyfork.org.cn/zh-hans/lookup" />
+    <xhtml:link rel="alternate" hreflang="zh-TW" href="https://home.greasyfork.org.cn/zh-hant/lookup" />
+    <xhtml:link rel="alternate" hreflang="en" href="https://home.greasyfork.org.cn/en/lookup" />
+    <xhtml:link rel="alternate" hreflang="ja" href="https://home.greasyfork.org.cn/ja/lookup" />
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://home.greasyfork.org.cn/zh-hans/lookup" />
+  </url>
+  <url>
+    <loc>https://home.greasyfork.org.cn/zh-hans/search</loc>
+    <lastmod>2026-09-25</lastmod>
+    <changefreq>daily</changefreq>
+    <priority>0.8</priority>
+    <xhtml:link rel="alternate" hreflang="zh-CN" href="https://home.greasyfork.org.cn/zh-hans/search" />
+    <xhtml:link rel="alternate" hreflang="zh-TW" href="https://home.greasyfork.org.cn/zh-hant/search" />
+    <xhtml:link rel="alternate" hreflang="en" href="https://home.greasyfork.org.cn/en/search" />
+    <xhtml:link rel="alternate" hreflang="ja" href="https://home.greasyfork.org.cn/ja/search" />
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://home.greasyfork.org.cn/zh-hans/search" />
+  </url>
+  <url>
+    <loc>https://home.greasyfork.org.cn/zh-hans/help</loc>
+    <lastmod>2026-09-25</lastmod>
+    <changefreq>daily</changefreq>
+    <priority>0.7</priority>
+    <xhtml:link rel="alternate" hreflang="zh-CN" href="https://home.greasyfork.org.cn/zh-hans/help" />
+    <xhtml:link rel="alternate" hreflang="zh-TW" href="https://home.greasyfork.org.cn/zh-hant/help" />
+    <xhtml:link rel="alternate" hreflang="en" href="https://home.greasyfork.org.cn/en/help" />
+    <xhtml:link rel="alternate" hreflang="ja" href="https://home.greasyfork.org.cn/ja/help" />
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://home.greasyfork.org.cn/zh-hans/help" />
+  </url>
+  <url>
+    <loc>https://home.greasyfork.org.cn/zh-hans/about</loc>
+    <lastmod>2026-09-25</lastmod>
+    <changefreq>daily</changefreq>
+    <priority>0.6</priority>
+    <xhtml:link rel="alternate" hreflang="zh-CN" href="https://home.greasyfork.org.cn/zh-hans/about" />
+    <xhtml:link rel="alternate" hreflang="zh-TW" href="https://home.greasyfork.org.cn/zh-hant/about" />
+    <xhtml:link rel="alternate" hreflang="en" href="https://home.greasyfork.org.cn/en/about" />
+    <xhtml:link rel="alternate" hreflang="ja" href="https://home.greasyfork.org.cn/ja/about" />
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://home.greasyfork.org.cn/zh-hans/about" />
+  </url>
+  <url>
+    <loc>https://home.greasyfork.org.cn/zh-hans/applist</loc>
+    <lastmod>2026-09-25</lastmod>
+    <changefreq>daily</changefreq>
+    <priority>0.6</priority>
+    <xhtml:link rel="alternate" hreflang="zh-CN" href="https://home.greasyfork.org.cn/zh-hans/applist" />
+    <xhtml:link rel="alternate" hreflang="zh-TW" href="https://home.greasyfork.org.cn/zh-hant/applist" />
+    <xhtml:link rel="alternate" hreflang="en" href="https://home.greasyfork.org.cn/en/applist" />
+    <xhtml:link rel="alternate" hreflang="ja" href="https://home.greasyfork.org.cn/ja/applist" />
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://home.greasyfork.org.cn/zh-hans/applist" />
+  </url>
+  <url>
+    <loc>https://home.greasyfork.org.cn/zh-hans/installing</loc>
+    <lastmod>2026-09-25</lastmod>
+    <changefreq>daily</changefreq>
+    <priority>0.6</priority>
+    <xhtml:link rel="alternate" hreflang="zh-CN" href="https://home.greasyfork.org.cn/zh-hans/installing" />
+    <xhtml:link rel="alternate" hreflang="zh-TW" href="https://home.greasyfork.org.cn/zh-hant/installing" />
+    <xhtml:link rel="alternate" hreflang="en" href="https://home.greasyfork.org.cn/en/installing" />
+    <xhtml:link rel="alternate" hreflang="ja" href="https://home.greasyfork.org.cn/ja/installing" />
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://home.greasyfork.org.cn/zh-hans/installing" />
+  </url>
+  <url>
+    <loc>https://home.greasyfork.org.cn/zh-hans/info</loc>
+    <lastmod>2026-09-25</lastmod>
+    <changefreq>daily</changefreq>
+    <priority>0.5</priority>
+    <xhtml:link rel="alternate" hreflang="zh-CN" href="https://home.greasyfork.org.cn/zh-hans/info" />
+    <xhtml:link rel="alternate" hreflang="zh-TW" href="https://home.greasyfork.org.cn/zh-hant/info" />
+    <xhtml:link rel="alternate" hreflang="en" href="https://home.greasyfork.org.cn/en/info" />
+    <xhtml:link rel="alternate" hreflang="ja" href="https://home.greasyfork.org.cn/ja/info" />
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://home.greasyfork.org.cn/zh-hans/info" />
+  </url>
+  <url>
+    <loc>https://home.greasyfork.org.cn/zh-hans/tos</loc>
+    <lastmod>2026-09-25</lastmod>
+    <changefreq>daily</changefreq>
+    <priority>0.4</priority>
+    <xhtml:link rel="alternate" hreflang="zh-CN" href="https://home.greasyfork.org.cn/zh-hans/tos" />
+    <xhtml:link rel="alternate" hreflang="zh-TW" href="https://home.greasyfork.org.cn/zh-hant/tos" />
+    <xhtml:link rel="alternate" hreflang="en" href="https://home.greasyfork.org.cn/en/tos" />
+    <xhtml:link rel="alternate" hreflang="ja" href="https://home.greasyfork.org.cn/ja/tos" />
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://home.greasyfork.org.cn/zh-hans/tos" />
+  </url>
+  <url>
+    <loc>https://home.greasyfork.org.cn/zh-hans/feedback</loc>
+    <lastmod>2026-09-25</lastmod>
+    <changefreq>daily</changefreq>
+    <priority>0.4</priority>
+    <xhtml:link rel="alternate" hreflang="zh-CN" href="https://home.greasyfork.org.cn/zh-hans/feedback" />
+    <xhtml:link rel="alternate" hreflang="zh-TW" href="https://home.greasyfork.org.cn/zh-hant/feedback" />
+    <xhtml:link rel="alternate" hreflang="en" href="https://home.greasyfork.org.cn/en/feedback" />
+    <xhtml:link rel="alternate" hreflang="ja" href="https://home.greasyfork.org.cn/ja/feedback" />
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://home.greasyfork.org.cn/zh-hans/feedback" />
+  </url>
+  <url>
+    <loc>https://home.greasyfork.org.cn/zh-hant</loc>
+    <lastmod>2026-09-25</lastmod>
+    <changefreq>daily</changefreq>
+    <priority>1.0</priority>
+    <xhtml:link rel="alternate" hreflang="zh-CN" href="https://home.greasyfork.org.cn/zh-hans" />
+    <xhtml:link rel="alternate" hreflang="zh-TW" href="https://home.greasyfork.org.cn/zh-hant" />
+    <xhtml:link rel="alternate" hreflang="en" href="https://home.greasyfork.org.cn/en" />
+    <xhtml:link rel="alternate" hreflang="ja" href="https://home.greasyfork.org.cn/ja" />
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://home.greasyfork.org.cn/zh-hans" />
+  </url>
+  <url>
+    <loc>https://home.greasyfork.org.cn/zh-hant/download</loc>
+    <lastmod>2026-09-25</lastmod>
+    <changefreq>daily</changefreq>
+    <priority>0.9</priority>
+    <xhtml:link rel="alternate" hreflang="zh-CN" href="https://home.greasyfork.org.cn/zh-hans/download" />
+    <xhtml:link rel="alternate" hreflang="zh-TW" href="https://home.greasyfork.org.cn/zh-hant/download" />
+    <xhtml:link rel="alternate" hreflang="en" href="https://home.greasyfork.org.cn/en/download" />
+    <xhtml:link rel="alternate" hreflang="ja" href="https://home.greasyfork.org.cn/ja/download" />
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://home.greasyfork.org.cn/zh-hans/download" />
+  </url>
+  <url>
+    <loc>https://home.greasyfork.org.cn/zh-hant/lookup</loc>
+    <lastmod>2026-09-25</lastmod>
+    <changefreq>daily</changefreq>
+    <priority>0.9</priority>
+    <xhtml:link rel="alternate" hreflang="zh-CN" href="https://home.greasyfork.org.cn/zh-hans/lookup" />
+    <xhtml:link rel="alternate" hreflang="zh-TW" href="https://home.greasyfork.org.cn/zh-hant/lookup" />
+    <xhtml:link rel="alternate" hreflang="en" href="https://home.greasyfork.org.cn/en/lookup" />
+    <xhtml:link rel="alternate" hreflang="ja" href="https://home.greasyfork.org.cn/ja/lookup" />
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://home.greasyfork.org.cn/zh-hans/lookup" />
+  </url>
+  <url>
+    <loc>https://home.greasyfork.org.cn/zh-hant/search</loc>
+    <lastmod>2026-09-25</lastmod>
+    <changefreq>daily</changefreq>
+    <priority>0.8</priority>
+    <xhtml:link rel="alternate" hreflang="zh-CN" href="https://home.greasyfork.org.cn/zh-hans/search" />
+    <xhtml:link rel="alternate" hreflang="zh-TW" href="https://home.greasyfork.org.cn/zh-hant/search" />
+    <xhtml:link rel="alternate" hreflang="en" href="https://home.greasyfork.org.cn/en/search" />
+    <xhtml:link rel="alternate" hreflang="ja" href="https://home.greasyfork.org.cn/ja/search" />
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://home.greasyfork.org.cn/zh-hans/search" />
+  </url>
+  <url>
+    <loc>https://home.greasyfork.org.cn/zh-hant/help</loc>
+    <lastmod>2026-09-25</lastmod>
+    <changefreq>daily</changefreq>
+    <priority>0.7</priority>
+    <xhtml:link rel="alternate" hreflang="zh-CN" href="https://home.greasyfork.org.cn/zh-hans/help" />
+    <xhtml:link rel="alternate" hreflang="zh-TW" href="https://home.greasyfork.org.cn/zh-hant/help" />
+    <xhtml:link rel="alternate" hreflang="en" href="https://home.greasyfork.org.cn/en/help" />
+    <xhtml:link rel="alternate" hreflang="ja" href="https://home.greasyfork.org.cn/ja/help" />
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://home.greasyfork.org.cn/zh-hans/help" />
+  </url>
+  <url>
+    <loc>https://home.greasyfork.org.cn/zh-hant/about</loc>
+    <lastmod>2026-09-25</lastmod>
+    <changefreq>daily</changefreq>
+    <priority>0.6</priority>
+    <xhtml:link rel="alternate" hreflang="zh-CN" href="https://home.greasyfork.org.cn/zh-hans/about" />
+    <xhtml:link rel="alternate" hreflang="zh-TW" href="https://home.greasyfork.org.cn/zh-hant/about" />
+    <xhtml:link rel="alternate" hreflang="en" href="https://home.greasyfork.org.cn/en/about" />
+    <xhtml:link rel="alternate" hreflang="ja" href="https://home.greasyfork.org.cn/ja/about" />
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://home.greasyfork.org.cn/zh-hans/about" />
+  </url>
+  <url>
+    <loc>https://home.greasyfork.org.cn/zh-hant/applist</loc>
+    <lastmod>2026-09-25</lastmod>
+    <changefreq>daily</changefreq>
+    <priority>0.6</priority>
+    <xhtml:link rel="alternate" hreflang="zh-CN" href="https://home.greasyfork.org.cn/zh-hans/applist" />
+    <xhtml:link rel="alternate" hreflang="zh-TW" href="https://home.greasyfork.org.cn/zh-hant/applist" />
+    <xhtml:link rel="alternate" hreflang="en" href="https://home.greasyfork.org.cn/en/applist" />
+    <xhtml:link rel="alternate" hreflang="ja" href="https://home.greasyfork.org.cn/ja/applist" />
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://home.greasyfork.org.cn/zh-hans/applist" />
+  </url>
+  <url>
+    <loc>https://home.greasyfork.org.cn/zh-hant/installing</loc>
+    <lastmod>2026-09-25</lastmod>
+    <changefreq>daily</changefreq>
+    <priority>0.6</priority>
+    <xhtml:link rel="alternate" hreflang="zh-CN" href="https://home.greasyfork.org.cn/zh-hans/installing" />
+    <xhtml:link rel="alternate" hreflang="zh-TW" href="https://home.greasyfork.org.cn/zh-hant/installing" />
+    <xhtml:link rel="alternate" hreflang="en" href="https://home.greasyfork.org.cn/en/installing" />
+    <xhtml:link rel="alternate" hreflang="ja" href="https://home.greasyfork.org.cn/ja/installing" />
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://home.greasyfork.org.cn/zh-hans/installing" />
+  </url>
+  <url>
+    <loc>https://home.greasyfork.org.cn/zh-hant/info</loc>
+    <lastmod>2026-09-25</lastmod>
+    <changefreq>daily</changefreq>
+    <priority>0.5</priority>
+    <xhtml:link rel="alternate" hreflang="zh-CN" href="https://home.greasyfork.org.cn/zh-hans/info" />
+    <xhtml:link rel="alternate" hreflang="zh-TW" href="https://home.greasyfork.org.cn/zh-hant/info" />
+    <xhtml:link rel="alternate" hreflang="en" href="https://home.greasyfork.org.cn/en/info" />
+    <xhtml:link rel="alternate" hreflang="ja" href="https://home.greasyfork.org.cn/ja/info" />
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://home.greasyfork.org.cn/zh-hans/info" />
+  </url>
+  <url>
+    <loc>https://home.greasyfork.org.cn/zh-hant/tos</loc>
+    <lastmod>2026-09-25</lastmod>
+    <changefreq>daily</changefreq>
+    <priority>0.4</priority>
+    <xhtml:link rel="alternate" hreflang="zh-CN" href="https://home.greasyfork.org.cn/zh-hans/tos" />
+    <xhtml:link rel="alternate" hreflang="zh-TW" href="https://home.greasyfork.org.cn/zh-hant/tos" />
+    <xhtml:link rel="alternate" hreflang="en" href="https://home.greasyfork.org.cn/en/tos" />
+    <xhtml:link rel="alternate" hreflang="ja" href="https://home.greasyfork.org.cn/ja/tos" />
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://home.greasyfork.org.cn/zh-hans/tos" />
+  </url>
+  <url>
+    <loc>https://home.greasyfork.org.cn/zh-hant/feedback</loc>
+    <lastmod>2026-09-25</lastmod>
+    <changefreq>daily</changefreq>
+    <priority>0.4</priority>
+    <xhtml:link rel="alternate" hreflang="zh-CN" href="https://home.greasyfork.org.cn/zh-hans/feedback" />
+    <xhtml:link rel="alternate" hreflang="zh-TW" href="https://home.greasyfork.org.cn/zh-hant/feedback" />
+    <xhtml:link rel="alternate" hreflang="en" href="https://home.greasyfork.org.cn/en/feedback" />
+    <xhtml:link rel="alternate" hreflang="ja" href="https://home.greasyfork.org.cn/ja/feedback" />
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://home.greasyfork.org.cn/zh-hans/feedback" />
+  </url>
+  <url>
+    <loc>https://home.greasyfork.org.cn/en</loc>
+    <lastmod>2026-09-25</lastmod>
+    <changefreq>daily</changefreq>
+    <priority>1.0</priority>
+    <xhtml:link rel="alternate" hreflang="zh-CN" href="https://home.greasyfork.org.cn/zh-hans" />
+    <xhtml:link rel="alternate" hreflang="zh-TW" href="https://home.greasyfork.org.cn/zh-hant" />
+    <xhtml:link rel="alternate" hreflang="en" href="https://home.greasyfork.org.cn/en" />
+    <xhtml:link rel="alternate" hreflang="ja" href="https://home.greasyfork.org.cn/ja" />
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://home.greasyfork.org.cn/zh-hans" />
+  </url>
+  <url>
+    <loc>https://home.greasyfork.org.cn/en/download</loc>
+    <lastmod>2026-09-25</lastmod>
+    <changefreq>daily</changefreq>
+    <priority>0.9</priority>
+    <xhtml:link rel="alternate" hreflang="zh-CN" href="https://home.greasyfork.org.cn/zh-hans/download" />
+    <xhtml:link rel="alternate" hreflang="zh-TW" href="https://home.greasyfork.org.cn/zh-hant/download" />
+    <xhtml:link rel="alternate" hreflang="en" href="https://home.greasyfork.org.cn/en/download" />
+    <xhtml:link rel="alternate" hreflang="ja" href="https://home.greasyfork.org.cn/ja/download" />
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://home.greasyfork.org.cn/zh-hans/download" />
+  </url>
+  <url>
+    <loc>https://home.greasyfork.org.cn/en/lookup</loc>
+    <lastmod>2026-09-25</lastmod>
+    <changefreq>daily</changefreq>
+    <priority>0.9</priority>
+    <xhtml:link rel="alternate" hreflang="zh-CN" href="https://home.greasyfork.org.cn/zh-hans/lookup" />
+    <xhtml:link rel="alternate" hreflang="zh-TW" href="https://home.greasyfork.org.cn/zh-hant/lookup" />
+    <xhtml:link rel="alternate" hreflang="en" href="https://home.greasyfork.org.cn/en/lookup" />
+    <xhtml:link rel="alternate" hreflang="ja" href="https://home.greasyfork.org.cn/ja/lookup" />
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://home.greasyfork.org.cn/zh-hans/lookup" />
+  </url>
+  <url>
+    <loc>https://home.greasyfork.org.cn/en/search</loc>
+    <lastmod>2026-09-25</lastmod>
+    <changefreq>daily</changefreq>
+    <priority>0.8</priority>
+    <xhtml:link rel="alternate" hreflang="zh-CN" href="https://home.greasyfork.org.cn/zh-hans/search" />
+    <xhtml:link rel="alternate" hreflang="zh-TW" href="https://home.greasyfork.org.cn/zh-hant/search" />
+    <xhtml:link rel="alternate" hreflang="en" href="https://home.greasyfork.org.cn/en/search" />
+    <xhtml:link rel="alternate" hreflang="ja" href="https://home.greasyfork.org.cn/ja/search" />
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://home.greasyfork.org.cn/zh-hans/search" />
+  </url>
+  <url>
+    <loc>https://home.greasyfork.org.cn/en/help</loc>
+    <lastmod>2026-09-25</lastmod>
+    <changefreq>daily</changefreq>
+    <priority>0.7</priority>
+    <xhtml:link rel="alternate" hreflang="zh-CN" href="https://home.greasyfork.org.cn/zh-hans/help" />
+    <xhtml:link rel="alternate" hreflang="zh-TW" href="https://home.greasyfork.org.cn/zh-hant/help" />
+    <xhtml:link rel="alternate" hreflang="en" href="https://home.greasyfork.org.cn/en/help" />
+    <xhtml:link rel="alternate" hreflang="ja" href="https://home.greasyfork.org.cn/ja/help" />
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://home.greasyfork.org.cn/zh-hans/help" />
+  </url>
+  <url>
+    <loc>https://home.greasyfork.org.cn/en/about</loc>
+    <lastmod>2026-09-25</lastmod>
+    <changefreq>daily</changefreq>
+    <priority>0.6</priority>
+    <xhtml:link rel="alternate" hreflang="zh-CN" href="https://home.greasyfork.org.cn/zh-hans/about" />
+    <xhtml:link rel="alternate" hreflang="zh-TW" href="https://home.greasyfork.org.cn/zh-hant/about" />
+    <xhtml:link rel="alternate" hreflang="en" href="https://home.greasyfork.org.cn/en/about" />
+    <xhtml:link rel="alternate" hreflang="ja" href="https://home.greasyfork.org.cn/ja/about" />
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://home.greasyfork.org.cn/zh-hans/about" />
+  </url>
+  <url>
+    <loc>https://home.greasyfork.org.cn/en/applist</loc>
+    <lastmod>2026-09-25</lastmod>
+    <changefreq>daily</changefreq>
+    <priority>0.6</priority>
+    <xhtml:link rel="alternate" hreflang="zh-CN" href="https://home.greasyfork.org.cn/zh-hans/applist" />
+    <xhtml:link rel="alternate" hreflang="zh-TW" href="https://home.greasyfork.org.cn/zh-hant/applist" />
+    <xhtml:link rel="alternate" hreflang="en" href="https://home.greasyfork.org.cn/en/applist" />
+    <xhtml:link rel="alternate" hreflang="ja" href="https://home.greasyfork.org.cn/ja/applist" />
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://home.greasyfork.org.cn/zh-hans/applist" />
+  </url>
+  <url>
+    <loc>https://home.greasyfork.org.cn/en/installing</loc>
+    <lastmod>2026-09-25</lastmod>
+    <changefreq>daily</changefreq>
+    <priority>0.6</priority>
+    <xhtml:link rel="alternate" hreflang="zh-CN" href="https://home.greasyfork.org.cn/zh-hans/installing" />
+    <xhtml:link rel="alternate" hreflang="zh-TW" href="https://home.greasyfork.org.cn/zh-hant/installing" />
+    <xhtml:link rel="alternate" hreflang="en" href="https://home.greasyfork.org.cn/en/installing" />
+    <xhtml:link rel="alternate" hreflang="ja" href="https://home.greasyfork.org.cn/ja/installing" />
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://home.greasyfork.org.cn/zh-hans/installing" />
+  </url>
+  <url>
+    <loc>https://home.greasyfork.org.cn/en/info</loc>
+    <lastmod>2026-09-25</lastmod>
+    <changefreq>daily</changefreq>
+    <priority>0.5</priority>
+    <xhtml:link rel="alternate" hreflang="zh-CN" href="https://home.greasyfork.org.cn/zh-hans/info" />
+    <xhtml:link rel="alternate" hreflang="zh-TW" href="https://home.greasyfork.org.cn/zh-hant/info" />
+    <xhtml:link rel="alternate" hreflang="en" href="https://home.greasyfork.org.cn/en/info" />
+    <xhtml:link rel="alternate" hreflang="ja" href="https://home.greasyfork.org.cn/ja/info" />
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://home.greasyfork.org.cn/zh-hans/info" />
+  </url>
+  <url>
+    <loc>https://home.greasyfork.org.cn/en/tos</loc>
+    <lastmod>2026-09-25</lastmod>
+    <changefreq>daily</changefreq>
+    <priority>0.4</priority>
+    <xhtml:link rel="alternate" hreflang="zh-CN" href="https://home.greasyfork.org.cn/zh-hans/tos" />
+    <xhtml:link rel="alternate" hreflang="zh-TW" href="https://home.greasyfork.org.cn/zh-hant/tos" />
+    <xhtml:link rel="alternate" hreflang="en" href="https://home.greasyfork.org.cn/en/tos" />
+    <xhtml:link rel="alternate" hreflang="ja" href="https://home.greasyfork.org.cn/ja/tos" />
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://home.greasyfork.org.cn/zh-hans/tos" />
+  </url>
+  <url>
+    <loc>https://home.greasyfork.org.cn/en/feedback</loc>
+    <lastmod>2026-09-25</lastmod>
+    <changefreq>daily</changefreq>
+    <priority>0.4</priority>
+    <xhtml:link rel="alternate" hreflang="zh-CN" href="https://home.greasyfork.org.cn/zh-hans/feedback" />
+    <xhtml:link rel="alternate" hreflang="zh-TW" href="https://home.greasyfork.org.cn/zh-hant/feedback" />
+    <xhtml:link rel="alternate" hreflang="en" href="https://home.greasyfork.org.cn/en/feedback" />
+    <xhtml:link rel="alternate" hreflang="ja" href="https://home.greasyfork.org.cn/ja/feedback" />
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://home.greasyfork.org.cn/zh-hans/feedback" />
+  </url>
+  <url>
+    <loc>https://home.greasyfork.org.cn/ja</loc>
+    <lastmod>2026-09-25</lastmod>
+    <changefreq>daily</changefreq>
+    <priority>1.0</priority>
+    <xhtml:link rel="alternate" hreflang="zh-CN" href="https://home.greasyfork.org.cn/zh-hans" />
+    <xhtml:link rel="alternate" hreflang="zh-TW" href="https://home.greasyfork.org.cn/zh-hant" />
+    <xhtml:link rel="alternate" hreflang="en" href="https://home.greasyfork.org.cn/en" />
+    <xhtml:link rel="alternate" hreflang="ja" href="https://home.greasyfork.org.cn/ja" />
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://home.greasyfork.org.cn/zh-hans" />
+  </url>
+  <url>
+    <loc>https://home.greasyfork.org.cn/ja/download</loc>
+    <lastmod>2026-09-25</lastmod>
+    <changefreq>daily</changefreq>
+    <priority>0.9</priority>
+    <xhtml:link rel="alternate" hreflang="zh-CN" href="https://home.greasyfork.org.cn/zh-hans/download" />
+    <xhtml:link rel="alternate" hreflang="zh-TW" href="https://home.greasyfork.org.cn/zh-hant/download" />
+    <xhtml:link rel="alternate" hreflang="en" href="https://home.greasyfork.org.cn/en/download" />
+    <xhtml:link rel="alternate" hreflang="ja" href="https://home.greasyfork.org.cn/ja/download" />
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://home.greasyfork.org.cn/zh-hans/download" />
+  </url>
+  <url>
+    <loc>https://home.greasyfork.org.cn/ja/lookup</loc>
+    <lastmod>2026-09-25</lastmod>
+    <changefreq>daily</changefreq>
+    <priority>0.9</priority>
+    <xhtml:link rel="alternate" hreflang="zh-CN" href="https://home.greasyfork.org.cn/zh-hans/lookup" />
+    <xhtml:link rel="alternate" hreflang="zh-TW" href="https://home.greasyfork.org.cn/zh-hant/lookup" />
+    <xhtml:link rel="alternate" hreflang="en" href="https://home.greasyfork.org.cn/en/lookup" />
+    <xhtml:link rel="alternate" hreflang="ja" href="https://home.greasyfork.org.cn/ja/lookup" />
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://home.greasyfork.org.cn/zh-hans/lookup" />
+  </url>
+  <url>
+    <loc>https://home.greasyfork.org.cn/ja/search</loc>
+    <lastmod>2026-09-25</lastmod>
+    <changefreq>daily</changefreq>
+    <priority>0.8</priority>
+    <xhtml:link rel="alternate" hreflang="zh-CN" href="https://home.greasyfork.org.cn/zh-hans/search" />
+    <xhtml:link rel="alternate" hreflang="zh-TW" href="https://home.greasyfork.org.cn/zh-hant/search" />
+    <xhtml:link rel="alternate" hreflang="en" href="https://home.greasyfork.org.cn/en/search" />
+    <xhtml:link rel="alternate" hreflang="ja" href="https://home.greasyfork.org.cn/ja/search" />
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://home.greasyfork.org.cn/zh-hans/search" />
+  </url>
+  <url>
+    <loc>https://home.greasyfork.org.cn/ja/help</loc>
+    <lastmod>2026-09-25</lastmod>
+    <changefreq>daily</changefreq>
+    <priority>0.7</priority>
+    <xhtml:link rel="alternate" hreflang="zh-CN" href="https://home.greasyfork.org.cn/zh-hans/help" />
+    <xhtml:link rel="alternate" hreflang="zh-TW" href="https://home.greasyfork.org.cn/zh-hant/help" />
+    <xhtml:link rel="alternate" hreflang="en" href="https://home.greasyfork.org.cn/en/help" />
+    <xhtml:link rel="alternate" hreflang="ja" href="https://home.greasyfork.org.cn/ja/help" />
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://home.greasyfork.org.cn/zh-hans/help" />
+  </url>
+  <url>
+    <loc>https://home.greasyfork.org.cn/ja/about</loc>
+    <lastmod>2026-09-25</lastmod>
+    <changefreq>daily</changefreq>
+    <priority>0.6</priority>
+    <xhtml:link rel="alternate" hreflang="zh-CN" href="https://home.greasyfork.org.cn/zh-hans/about" />
+    <xhtml:link rel="alternate" hreflang="zh-TW" href="https://home.greasyfork.org.cn/zh-hant/about" />
+    <xhtml:link rel="alternate" hreflang="en" href="https://home.greasyfork.org.cn/en/about" />
+    <xhtml:link rel="alternate" hreflang="ja" href="https://home.greasyfork.org.cn/ja/about" />
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://home.greasyfork.org.cn/zh-hans/about" />
+  </url>
+  <url>
+    <loc>https://home.greasyfork.org.cn/ja/applist</loc>
+    <lastmod>2026-09-25</lastmod>
+    <changefreq>daily</changefreq>
+    <priority>0.6</priority>
+    <xhtml:link rel="alternate" hreflang="zh-CN" href="https://home.greasyfork.org.cn/zh-hans/applist" />
+    <xhtml:link rel="alternate" hreflang="zh-TW" href="https://home.greasyfork.org.cn/zh-hant/applist" />
+    <xhtml:link rel="alternate" hreflang="en" href="https://home.greasyfork.org.cn/en/applist" />
+    <xhtml:link rel="alternate" hreflang="ja" href="https://home.greasyfork.org.cn/ja/applist" />
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://home.greasyfork.org.cn/zh-hans/applist" />
+  </url>
+  <url>
+    <loc>https://home.greasyfork.org.cn/ja/installing</loc>
+    <lastmod>2026-09-25</lastmod>
+    <changefreq>daily</changefreq>
+    <priority>0.6</priority>
+    <xhtml:link rel="alternate" hreflang="zh-CN" href="https://home.greasyfork.org.cn/zh-hans/installing" />
+    <xhtml:link rel="alternate" hreflang="zh-TW" href="https://home.greasyfork.org.cn/zh-hant/installing" />
+    <xhtml:link rel="alternate" hreflang="en" href="https://home.greasyfork.org.cn/en/installing" />
+    <xhtml:link rel="alternate" hreflang="ja" href="https://home.greasyfork.org.cn/ja/installing" />
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://home.greasyfork.org.cn/zh-hans/installing" />
+  </url>
+  <url>
+    <loc>https://home.greasyfork.org.cn/ja/info</loc>
+    <lastmod>2026-09-25</lastmod>
+    <changefreq>daily</changefreq>
+    <priority>0.5</priority>
+    <xhtml:link rel="alternate" hreflang="zh-CN" href="https://home.greasyfork.org.cn/zh-hans/info" />
+    <xhtml:link rel="alternate" hreflang="zh-TW" href="https://home.greasyfork.org.cn/zh-hant/info" />
+    <xhtml:link rel="alternate" hreflang="en" href="https://home.greasyfork.org.cn/en/info" />
+    <xhtml:link rel="alternate" hreflang="ja" href="https://home.greasyfork.org.cn/ja/info" />
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://home.greasyfork.org.cn/zh-hans/info" />
+  </url>
+  <url>
+    <loc>https://home.greasyfork.org.cn/ja/tos</loc>
+    <lastmod>2026-09-25</lastmod>
+    <changefreq>daily</changefreq>
+    <priority>0.4</priority>
+    <xhtml:link rel="alternate" hreflang="zh-CN" href="https://home.greasyfork.org.cn/zh-hans/tos" />
+    <xhtml:link rel="alternate" hreflang="zh-TW" href="https://home.greasyfork.org.cn/zh-hant/tos" />
+    <xhtml:link rel="alternate" hreflang="en" href="https://home.greasyfork.org.cn/en/tos" />
+    <xhtml:link rel="alternate" hreflang="ja" href="https://home.greasyfork.org.cn/ja/tos" />
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://home.greasyfork.org.cn/zh-hans/tos" />
+  </url>
+  <url>
+    <loc>https://home.greasyfork.org.cn/ja/feedback</loc>
+    <lastmod>2026-09-25</lastmod>
+    <changefreq>daily</changefreq>
+    <priority>0.4</priority>
+    <xhtml:link rel="alternate" hreflang="zh-CN" href="https://home.greasyfork.org.cn/zh-hans/feedback" />
+    <xhtml:link rel="alternate" hreflang="zh-TW" href="https://home.greasyfork.org.cn/zh-hant/feedback" />
+    <xhtml:link rel="alternate" hreflang="en" href="https://home.greasyfork.org.cn/en/feedback" />
+    <xhtml:link rel="alternate" hreflang="ja" href="https://home.greasyfork.org.cn/ja/feedback" />
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://home.greasyfork.org.cn/zh-hans/feedback" />
+  </url>
 </urlset>
