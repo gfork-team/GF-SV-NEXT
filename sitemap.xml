@@ -4,7 +4,7 @@
   xmlns:xhtml="http://www.w3.org/1999/xhtml">
   <url>
     <loc>https://home.greasyfork.org.cn/zh-hans</loc>
-    <lastmod>2026-09-25</lastmod>
+    <lastmod>2026-10-02</lastmod>
     <changefreq>daily</changefreq>
     <priority>1.0</priority>
     <xhtml:link rel="alternate" hreflang="zh-CN" href="https://home.greasyfork.org.cn/zh-hans" />
@@ -15,7 +15,7 @@
   </url>
   <url>
     <loc>https://home.greasyfork.org.cn/zh-hans/download</loc>
-    <lastmod>2026-09-25</lastmod>
+    <lastmod>2026-10-02</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.9</priority>
     <xhtml:link rel="alternate" hreflang="zh-CN" href="https://home.greasyfork.org.cn/zh-hans/download" />
@@ -26,7 +26,7 @@
   </url>
   <url>
     <loc>https://home.greasyfork.org.cn/zh-hans/lookup</loc>
-    <lastmod>2026-09-25</lastmod>
+    <lastmod>2026-10-02</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.9</priority>
     <xhtml:link rel="alternate" hreflang="zh-CN" href="https://home.greasyfork.org.cn/zh-hans/lookup" />
@@ -37,7 +37,7 @@
   </url>
   <url>
     <loc>https://home.greasyfork.org.cn/zh-hans/search</loc>
-    <lastmod>2026-09-25</lastmod>
+    <lastmod>2026-10-02</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.8</priority>
     <xhtml:link rel="alternate" hreflang="zh-CN" href="https://home.greasyfork.org.cn/zh-hans/search" />
@@ -48,7 +48,7 @@
   </url>
   <url>
     <loc>https://home.greasyfork.org.cn/zh-hans/help</loc>
-    <lastmod>2026-09-25</lastmod>
+    <lastmod>2026-10-02</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.7</priority>
     <xhtml:link rel="alternate" hreflang="zh-CN" href="https://home.greasyfork.org.cn/zh-hans/help" />
@@ -59,7 +59,7 @@
   </url>
   <url>
     <loc>https://home.greasyfork.org.cn/zh-hans/about</loc>
-    <lastmod>2026-09-25</lastmod>
+    <lastmod>2026-10-02</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.6</priority>
     <xhtml:link rel="alternate" hreflang="zh-CN" href="https://home.greasyfork.org.cn/zh-hans/about" />
@@ -70,7 +70,7 @@
   </url>
   <url>
     <loc>https://home.greasyfork.org.cn/zh-hans/applist</loc>
-    <lastmod>2026-09-25</lastmod>
+    <lastmod>2026-10-02</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.6</priority>
     <xhtml:link rel="alternate" hreflang="zh-CN" href="https://home.greasyfork.org.cn/zh-hans/applist" />
@@ -81,7 +81,7 @@
   </url>
   <url>
     <loc>https://home.greasyfork.org.cn/zh-hans/installing</loc>
-    <lastmod>2026-09-25</lastmod>
+    <lastmod>2026-10-02</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.6</priority>
     <xhtml:link rel="alternate" hreflang="zh-CN" href="https://home.greasyfork.org.cn/zh-hans/installing" />
@@ -92,7 +92,7 @@
   </url>
   <url>
     <loc>https://home.greasyfork.org.cn/zh-hans/info</loc>
-    <lastmod>2026-09-25</lastmod>
+    <lastmod>2026-10-02</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.5</priority>
     <xhtml:link rel="alternate" hreflang="zh-CN" href="https://home.greasyfork.org.cn/zh-hans/info" />
@@ -103,7 +103,7 @@
   </url>
   <url>
     <loc>https://home.greasyfork.org.cn/zh-hans/tos</loc>
-    <lastmod>2026-09-25</lastmod>
+    <lastmod>2026-10-02</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.4</priority>
     <xhtml:link rel="alternate" hreflang="zh-CN" href="https://home.greasyfork.org.cn/zh-hans/tos" />
@@ -114,7 +114,7 @@
   </url>
   <url>
     <loc>https://home.greasyfork.org.cn/zh-hans/feedback</loc>
-    <lastmod>2026-09-25</lastmod>
+    <lastmod>2026-10-02</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.4</priority>
     <xhtml:link rel="alternate" hreflang="zh-CN" href="https://home.greasyfork.org.cn/zh-hans/feedback" />
@@ -125,7 +125,7 @@
   </url>
   <url>
     <loc>https://home.greasyfork.org.cn/zh-hant</loc>
-    <lastmod>2026-09-25</lastmod>
+    <lastmod>2026-10-02</lastmod>
     <changefreq>daily</changefreq>
     <priority>1.0</priority>
     <xhtml:link rel="alternate" hreflang="zh-CN" href="https://home.greasyfork.org.cn/zh-hans" />
@@ -136,7 +136,7 @@
   </url>
   <url>
     <loc>https://home.greasyfork.org.cn/zh-hant/download</loc>
-    <lastmod>2026-09-25</lastmod>
+    <lastmod>2026-10-02</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.9</priority>
     <xhtml:link rel="alternate" hreflang="zh-CN" href="https://home.greasyfork.org.cn/zh-hans/download" />
@@ -147,7 +147,7 @@
   </url>
   <url>
     <loc>https://home.greasyfork.org.cn/zh-hant/lookup</loc>
-    <lastmod>2026-09-25</lastmod>
+    <lastmod>2026-10-02</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.9</priority>
     <xhtml:link rel="alternate" hreflang="zh-CN" href="https://home.greasyfork.org.cn/zh-hans/lookup" />
@@ -158,7 +158,7 @@
   </url>
   <url>
     <loc>https://home.greasyfork.org.cn/zh-hant/search</loc>
-    <lastmod>2026-09-25</lastmod>
+    <lastmod>2026-10-02</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.8</priority>
     <xhtml:link rel="alternate" hreflang="zh-CN" href="https://home.greasyfork.org.cn/zh-hans/search" />
@@ -169,7 +169,7 @@
   </url>
   <url>
     <loc>https://home.greasyfork.org.cn/zh-hant/help</loc>
-    <lastmod>2026-09-25</lastmod>
+    <lastmod>2026-10-02</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.7</priority>
     <xhtml:link rel="alternate" hreflang="zh-CN" href="https://home.greasyfork.org.cn/zh-hans/help" />
@@ -180,7 +180,7 @@
   </url>
   <url>
     <loc>https://home.greasyfork.org.cn/zh-hant/about</loc>
-    <lastmod>2026-09-25</lastmod>
+    <lastmod>2026-10-02</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.6</priority>
     <xhtml:link rel="alternate" hreflang="zh-CN" href="https://home.greasyfork.org.cn/zh-hans/about" />
@@ -191,7 +191,7 @@
   </url>
   <url>
     <loc>https://home.greasyfork.org.cn/zh-hant/applist</loc>
-    <lastmod>2026-09-25</lastmod>
+    <lastmod>2026-10-02</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.6</priority>
     <xhtml:link rel="alternate" hreflang="zh-CN" href="https://home.greasyfork.org.cn/zh-hans/applist" />
@@ -202,7 +202,7 @@
   </url>
   <url>
     <loc>https://home.greasyfork.org.cn/zh-hant/installing</loc>
-    <lastmod>2026-09-25</lastmod>
+    <lastmod>2026-10-02</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.6</priority>
     <xhtml:link rel="alternate" hreflang="zh-CN" href="https://home.greasyfork.org.cn/zh-hans/installing" />
@@ -213,7 +213,7 @@
   </url>
   <url>
     <loc>https://home.greasyfork.org.cn/zh-hant/info</loc>
-    <lastmod>2026-09-25</lastmod>
+    <lastmod>2026-10-02</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.5</priority>
     <xhtml:link rel="alternate" hreflang="zh-CN" href="https://home.greasyfork.org.cn/zh-hans/info" />
@@ -224,7 +224,7 @@
   </url>
   <url>
     <loc>https://home.greasyfork.org.cn/zh-hant/tos</loc>
-    <lastmod>2026-09-25</lastmod>
+    <lastmod>2026-10-02</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.4</priority>
     <xhtml:link rel="alternate" hreflang="zh-CN" href="https://home.greasyfork.org.cn/zh-hans/tos" />
@@ -235,7 +235,7 @@
   </url>
   <url>
     <loc>https://home.greasyfork.org.cn/zh-hant/feedback</loc>
-    <lastmod>2026-09-25</lastmod>
+    <lastmod>2026-10-02</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.4</priority>
     <xhtml:link rel="alternate" hreflang="zh-CN" href="https://home.greasyfork.org.cn/zh-hans/feedback" />
@@ -246,7 +246,7 @@
   </url>
   <url>
     <loc>https://home.greasyfork.org.cn/en</loc>
-    <lastmod>2026-09-25</lastmod>
+    <lastmod>2026-10-02</lastmod>
     <changefreq>daily</changefreq>
     <priority>1.0</priority>
     <xhtml:link rel="alternate" hreflang="zh-CN" href="https://home.greasyfork.org.cn/zh-hans" />
@@ -257,7 +257,7 @@
   </url>
   <url>
     <loc>https://home.greasyfork.org.cn/en/download</loc>
-    <lastmod>2026-09-25</lastmod>
+    <lastmod>2026-10-02</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.9</priority>
     <xhtml:link rel="alternate" hreflang="zh-CN" href="https://home.greasyfork.org.cn/zh-hans/download" />
@@ -268,7 +268,7 @@
   </url>
   <url>
     <loc>https://home.greasyfork.org.cn/en/lookup</loc>
-    <lastmod>2026-09-25</lastmod>
+    <lastmod>2026-10-02</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.9</priority>
     <xhtml:link rel="alternate" hreflang="zh-CN" href="https://home.greasyfork.org.cn/zh-hans/lookup" />
@@ -279,7 +279,7 @@
   </url>
   <url>
     <loc>https://home.greasyfork.org.cn/en/search</loc>
-    <lastmod>2026-09-25</lastmod>
+    <lastmod>2026-10-02</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.8</priority>
     <xhtml:link rel="alternate" hreflang="zh-CN" href="https://home.greasyfork.org.cn/zh-hans/search" />
@@ -290,7 +290,7 @@
   </url>
   <url>
     <loc>https://home.greasyfork.org.cn/en/help</loc>
-    <lastmod>2026-09-25</lastmod>
+    <lastmod>2026-10-02</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.7</priority>
     <xhtml:link rel="alternate" hreflang="zh-CN" href="https://home.greasyfork.org.cn/zh-hans/help" />
@@ -301,7 +301,7 @@
   </url>
   <url>
     <loc>https://home.greasyfork.org.cn/en/about</loc>
-    <lastmod>2026-09-25</lastmod>
+    <lastmod>2026-10-02</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.6</priority>
     <xhtml:link rel="alternate" hreflang="zh-CN" href="https://home.greasyfork.org.cn/zh-hans/about" />
@@ -312,7 +312,7 @@
   </url>
   <url>
     <loc>https://home.greasyfork.org.cn/en/applist</loc>
-    <lastmod>2026-09-25</lastmod>
+    <lastmod>2026-10-02</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.6</priority>
     <xhtml:link rel="alternate" hreflang="zh-CN" href="https://home.greasyfork.org.cn/zh-hans/applist" />
@@ -323,7 +323,7 @@
   </url>
   <url>
     <loc>https://home.greasyfork.org.cn/en/installing</loc>
-    <lastmod>2026-09-25</lastmod>
+    <lastmod>2026-10-02</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.6</priority>
     <xhtml:link rel="alternate" hreflang="zh-CN" href="https://home.greasyfork.org.cn/zh-hans/installing" />
@@ -334,7 +334,7 @@
   </url>
   <url>
     <loc>https://home.greasyfork.org.cn/en/info</loc>
-    <lastmod>2026-09-25</lastmod>
+    <lastmod>2026-10-02</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.5</priority>
     <xhtml:link rel="alternate" hreflang="zh-CN" href="https://home.greasyfork.org.cn/zh-hans/info" />
@@ -345,7 +345,7 @@
   </url>
   <url>
     <loc>https://home.greasyfork.org.cn/en/tos</loc>
-    <lastmod>2026-09-25</lastmod>
+    <lastmod>2026-10-02</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.4</priority>
     <xhtml:link rel="alternate" hreflang="zh-CN" href="https://home.greasyfork.org.cn/zh-hans/tos" />
@@ -356,7 +356,7 @@
   </url>
   <url>
     <loc>https://home.greasyfork.org.cn/en/feedback</loc>
-    <lastmod>2026-09-25</lastmod>
+    <lastmod>2026-10-02</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.4</priority>
     <xhtml:link rel="alternate" hreflang="zh-CN" href="https://home.greasyfork.org.cn/zh-hans/feedback" />
@@ -367,7 +367,7 @@
   </url>
   <url>
     <loc>https://home.greasyfork.org.cn/ja</loc>
-    <lastmod>2026-09-25</lastmod>
+    <lastmod>2026-10-02</lastmod>
     <changefreq>daily</changefreq>
     <priority>1.0</priority>
     <xhtml:link rel="alternate" hreflang="zh-CN" href="https://home.greasyfork.org.cn/zh-hans" />
@@ -378,7 +378,7 @@
   </url>
   <url>
     <loc>https://home.greasyfork.org.cn/ja/download</loc>
-    <lastmod>2026-09-25</lastmod>
+    <lastmod>2026-10-02</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.9</priority>
     <xhtml:link rel="alternate" hreflang="zh-CN" href="https://home.greasyfork.org.cn/zh-hans/download" />
@@ -389,7 +389,7 @@
   </url>
   <url>
     <loc>https://home.greasyfork.org.cn/ja/lookup</loc>
-    <lastmod>2026-09-25</lastmod>
+    <lastmod>2026-10-02</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.9</priority>
     <xhtml:link rel="alternate" hreflang="zh-CN" href="https://home.greasyfork.org.cn/zh-hans/lookup" />
@@ -400,7 +400,7 @@
   </url>
   <url>
     <loc>https://home.greasyfork.org.cn/ja/search</loc>
-    <lastmod>2026-09-25</lastmod>
+    <lastmod>2026-10-02</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.8</priority>
     <xhtml:link rel="alternate" hreflang="zh-CN" href="https://home.greasyfork.org.cn/zh-hans/search" />
@@ -411,7 +411,7 @@
   </url>
   <url>
     <loc>https://home.greasyfork.org.cn/ja/help</loc>
-    <lastmod>2026-09-25</lastmod>
+    <lastmod>2026-10-02</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.7</priority>
     <xhtml:link rel="alternate" hreflang="zh-CN" href="https://home.greasyfork.org.cn/zh-hans/help" />
@@ -422,7 +422,7 @@
   </url>
   <url>
     <loc>https://home.greasyfork.org.cn/ja/about</loc>
-    <lastmod>2026-09-25</lastmod>
+    <lastmod>2026-10-02</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.6</priority>
     <xhtml:link rel="alternate" hreflang="zh-CN" href="https://home.greasyfork.org.cn/zh-hans/about" />
@@ -433,7 +433,7 @@
   </url>
   <url>
     <loc>https://home.greasyfork.org.cn/ja/applist</loc>
-    <lastmod>2026-09-25</lastmod>
+    <lastmod>2026-10-02</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.6</priority>
     <xhtml:link rel="alternate" hreflang="zh-CN" href="https://home.greasyfork.org.cn/zh-hans/applist" />
@@ -444,7 +444,7 @@
   </url>
   <url>
     <loc>https://home.greasyfork.org.cn/ja/installing</loc>
-    <lastmod>2026-09-25</lastmod>
+    <lastmod>2026-10-02</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.6</priority>
     <xhtml:link rel="alternate" hreflang="zh-CN" href="https://home.greasyfork.org.cn/zh-hans/installing" />
@@ -455,7 +455,7 @@
   </url>
   <url>
     <loc>https://home.greasyfork.org.cn/ja/info</loc>
-    <lastmod>2026-09-25</lastmod>
+    <lastmod>2026-10-02</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.5</priority>
     <xhtml:link rel="alternate" hreflang="zh-CN" href="https://home.greasyfork.org.cn/zh-hans/info" />
@@ -466,7 +466,7 @@
   </url>
   <url>
     <loc>https://home.greasyfork.org.cn/ja/tos</loc>
-    <lastmod>2026-09-25</lastmod>
+    <lastmod>2026-10-02</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.4</priority>
     <xhtml:link rel="alternate" hreflang="zh-CN" href="https://home.greasyfork.org.cn/zh-hans/tos" />
@@ -477,7 +477,7 @@
   </url>
   <url>
     <loc>https://home.greasyfork.org.cn/ja/feedback</loc>
-    <lastmod>2026-09-25</lastmod>
+    <lastmod>2026-10-02</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.4</priority>
     <xhtml:link rel="alternate" hreflang="zh-CN" href="https://home.greasyfork.org.cn/zh-hans/feedback" />

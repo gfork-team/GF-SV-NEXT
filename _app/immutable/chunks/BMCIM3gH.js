@@ -1,0 +1,2 @@
+function t(a){const e=new URLSearchParams;for(const[n,r]of Object.entries(a))if(!(r==null||r===""))if(Array.isArray(r))for(const s of r)s!=null&&s!==""&&e.append(n,s);else e.append(n,r);return e.toString()}function i(a){const e={};for(const[n,r]of new URLSearchParams(a).entries())r!==""&&(n.endsWith("[]")?(Array.isArray(e[n])||(e[n]=[]),e[n].push(r)):e[n]=r);return e}export{i as p,t as s};
+//# sourceMappingURL=BMCIM3gH.js.map

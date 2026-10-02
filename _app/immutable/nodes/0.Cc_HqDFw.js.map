@@ -1,0 +1,1 @@
+{"version":3,"file":"0.Cc_HqDFw.js","sources":["../../../../../../src/routes/+layout.ts","../../../../../../src/routes/+layout.svelte"],"sourcesContent":["export const prerender = true;\n","<script lang=\"ts\">\n\timport '../app.css';\n\n\tlet { children } = $props();\n</script>\n\n{@render children()}\n"],"names":["prerender"],"mappings":"4HAAO,MAAMA,EAAY,2HCAzB,4CAIQ"}
