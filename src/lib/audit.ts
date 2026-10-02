@@ -18,7 +18,10 @@ const FLUSH_INTERVAL = 2000;
 function flush() {
 	if (queue.length === 0) return;
 	const endpoint = auditEndpoint();
-	if (!endpoint) { queue.length = 0; return; }
+	if (!endpoint) {
+		queue.length = 0;
+		return;
+	}
 
 	const batch = queue.splice(0);
 	const body = JSON.stringify(batch.length === 1 ? batch[0] : batch);
@@ -27,14 +30,22 @@ function flush() {
 	if (navigator.sendBeacon) {
 		navigator.sendBeacon(url, new Blob([body], { type: 'application/json' }));
 	} else {
-		fetch(url, { method: 'POST', body, headers: { 'Content-Type': 'application/json' }, keepalive: true }).catch(() => {});
+		fetch(url, {
+			method: 'POST',
+			body,
+			headers: { 'Content-Type': 'application/json' },
+			keepalive: true
+		}).catch(() => {});
 	}
 }
 
 /** Schedule a deferred flush (batches rapid events). */
 function scheduleFlush() {
 	if (flushTimer) return;
-	flushTimer = setTimeout(() => { flushTimer = null; flush(); }, FLUSH_INTERVAL);
+	flushTimer = setTimeout(() => {
+		flushTimer = null;
+		flush();
+	}, FLUSH_INTERVAL);
 }
 
 /** Queue an audit event. No-op when audit.enabled=false. */
@@ -46,12 +57,15 @@ export function sendAudit(type: AuditType, extra?: Partial<AuditPayload>) {
 		path: extra?.path,
 		lang: extra?.lang,
 		referrer: extra?.referrer,
-		payload: extra?.payload,
+		payload: extra?.payload
 	});
 
 	// Error events flush immediately; others batch
 	if (type === 'error') {
-		if (flushTimer) { clearTimeout(flushTimer); flushTimer = null; }
+		if (flushTimer) {
+			clearTimeout(flushTimer);
+			flushTimer = null;
+		}
 		flush();
 	} else {
 		scheduleFlush();

@@ -3,7 +3,19 @@ import { vitePreprocess } from '@sveltejs/vite-plugin-svelte';
 import { cdnEnabled, cdnStatic, buildBasePath } from './src/lib/cdn-toggle.ts';
 
 const allLangs = ['zh-hans', 'zh-hant', 'en', 'ja'];
-const pages = ['', '/download', '/lookup', '/search', '/help', '/about', '/tos', '/feedback', '/applist', '/installing', '/info'];
+const pages = [
+	'',
+	'/download',
+	'/lookup',
+	'/search',
+	'/help',
+	'/about',
+	'/tos',
+	'/feedback',
+	'/applist',
+	'/installing',
+	'/info'
+];
 
 /** @type {import('@sveltejs/kit').Config} */
 const config = {
@@ -19,7 +31,7 @@ const config = {
 		prerender: {
 			entries: [
 				'/',
-				...allLangs.flatMap(l => pages.map(p => `/${l}${p}`)),
+				...allLangs.flatMap((l) => pages.map((p) => `/${l}${p}`)),
 				'/s',
 				'/l',
 				'/sitemap.xml',
@@ -31,13 +43,14 @@ const config = {
 				return;
 			},
 			// 有「声明可预渲染但没被渲染」的路由时直接在构建日志里报错，避免再次静默丢页
-			handleUnseenRoutes: 'warn'
+			handleUnseenRoutes: 'warn',
+			// 站内大量 `/#?q=...` 形式的 hash 查询链接（搜索框 / 热门词）不是锚点，
+			// 爬虫会误当成缺失的 id，这里显式忽略
+			handleMissingId: 'ignore'
 		},
 		paths: {
 			base: process.env.VITE_BUILD_BASE_PATH || '',
-			assets: cdnEnabled
-				? `${cdnStatic}${buildBasePath}`
-				: (process.env.VITE_BUILD_BASE_PATH || '')
+			assets: cdnEnabled ? `${cdnStatic}${buildBasePath}` : process.env.VITE_BUILD_BASE_PATH || ''
 		},
 		alias: {
 			$components: 'src/lib/components',

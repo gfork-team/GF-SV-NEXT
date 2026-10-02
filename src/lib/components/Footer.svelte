@@ -1,4 +1,4 @@
-﻿<script lang="ts">
+<script lang="ts">
 	import { t } from '$lib/i18n';
 	import { getCurrentYear } from '$lib/utils';
 	import { i18nConfig } from '$lib/i18n';
@@ -28,7 +28,6 @@
 
 <footer class="m3-footer">
 	<div class="m3-footer-inner">
-
 		<!-- Brand + Quick Links -->
 		<div class="m3-footer-top">
 			<a class="m3-footer-brand" href="/{lang}" data-sveltekit-preload-data="hover">
@@ -47,7 +46,7 @@
 			</a>
 
 			<nav class="m3-footer-links" aria-label={t(lang, 'site.name')}>
-				{#each footerLinks as link}
+				{#each footerLinks as link (link.href)}
 					<a href="/{lang}{link.href}" class="m3-footer-link" data-sveltekit-preload-data="hover">
 						{t(lang, link.key)}
 					</a>
@@ -59,13 +58,23 @@
 		<div class="m3-footer-sponsor">
 			<p class="m3-footer-sponsor-text">
 				{t(lang, 'footer.sponsor_title')}
-				<a href={siteConfig.sponsor.url} target="_blank" rel="noopener noreferrer" class="m3-footer-link">
+				<a
+					href={siteConfig.sponsor.url}
+					target="_blank"
+					rel="noopener noreferrer"
+					class="m3-footer-link"
+				>
 					{siteConfig.sponsor.name}
 				</a>
 				{t(lang, 'footer.sponsor_title_suffix') || ''}
 			</p>
 
-			<a href={siteConfig.sponsor.url} target="_blank" rel="noopener noreferrer" class="m3-footer-sponsor-anchor">
+			<a
+				href={siteConfig.sponsor.url}
+				target="_blank"
+				rel="noopener noreferrer"
+				class="m3-footer-sponsor-anchor"
+			>
 				<img
 					src={siteConfig.sponsor.image}
 					alt={t(lang, 'footer.sponsor_alt')}
@@ -88,7 +97,11 @@
 					{t(lang, 'footer.copyright').replace('{year}', String(year))}
 					{#if __APP_VERSION__ && __APP_VERSION__ !== 'dev'}
 						<span class="m3-footer-version">
-							<a href={`${siteConfig.github.org}/commit/${__APP_VERSION__}`} target="_blank" rel="noopener noreferrer">
+							<a
+								href={`${siteConfig.github.org}/commit/${__APP_VERSION__}`}
+								target="_blank"
+								rel="noopener noreferrer"
+							>
 								v{__APP_VERSION__}
 							</a>
 						</span>
@@ -106,7 +119,7 @@
 					<option value="" disabled selected>
 						{t(lang, 'language.select')}
 					</option>
-					{#each i18nConfig.supportedLangs as l}
+					{#each i18nConfig.supportedLangs as l (l)}
 						<option value={l} data-language-url="/{l}" selected={l === lang}>
 							{t(lang, `lang.${l}`)}
 						</option>
@@ -177,9 +190,9 @@
 	.m3-footer-brand-img {
 		width: 44px;
 		height: 44px;
-		border-radius: 12px;
+		border-radius: var(--md-sys-shape-corner-medium);
 		background: var(--md-sys-color-surface);
-		box-shadow: 0 1px 2px rgba(0, 0, 0, .03), 0 8px 24px rgba(0, 0, 0, .04);
+		border: 1px solid var(--md-sys-color-outline-variant);
 	}
 
 	.m3-footer-brand-text {
@@ -291,7 +304,7 @@
 	}
 
 	.m3-footer-sep {
-		opacity: .6;
+		opacity: 0.6;
 		user-select: none;
 	}
 
@@ -328,7 +341,8 @@
 		border: 1px solid var(--md-sys-color-outline);
 		border-radius: var(--md-sys-shape-corner-extra-small);
 		cursor: pointer;
-		transition: border-color var(--md-sys-motion-duration-short) var(--md-sys-motion-easing-standard);
+		transition: border-color var(--md-sys-motion-duration-short)
+			var(--md-sys-motion-easing-standard);
 		outline: none;
 	}
 	.m3-footer-lang-select:focus {

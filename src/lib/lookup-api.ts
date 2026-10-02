@@ -3,7 +3,7 @@ import { siteConfig, getPrimaryLookupNodes, getBackupLookupNodes } from '$lib/co
 export interface ScriptSuggestion {
 	id: number;
 	name: string;
-	installs: number;
+	installs: number | null;
 }
 
 async function generateSS(): Promise<string> {
@@ -12,7 +12,10 @@ async function generateSS(): Promise<string> {
 	const data = new TextEncoder().encode(input);
 	const hashBuffer = await crypto.subtle.digest('SHA-256', data);
 	const hashArray = Array.from(new Uint8Array(hashBuffer));
-	return hashArray.map((b) => b.toString(16).padStart(2, '0')).join('').substring(0, siteConfig.lookupSignature.ssLength);
+	return hashArray
+		.map((b) => b.toString(16).padStart(2, '0'))
+		.join('')
+		.substring(0, siteConfig.lookupSignature.ssLength);
 }
 
 /**
@@ -42,7 +45,10 @@ export async function fetchScriptSuggestions(
 				url = `${node.endpoint}/${ss}`;
 				options = {
 					method: 'POST',
-					headers: { Accept: 'application/json', 'Content-Type': 'application/x-www-form-urlencoded' },
+					headers: {
+						Accept: 'application/json',
+						'Content-Type': 'application/x-www-form-urlencoded'
+					},
 					body: new URLSearchParams(params).toString(),
 					mode: 'cors' as RequestMode,
 					signal
@@ -80,8 +86,19 @@ export async function fetchScriptSuggestions(
 			return list
 				.slice(0, limit)
 				.map((it) => {
-					const item = it as { id?: number; name?: string; daily_installs?: number };
-					return { id: Number(item.id) || 0, name: item.name || '', installs: Number(item.daily_installs) || 0 };
+					const item = it as {
+						id?: number;
+						name?: string;
+						daily_installs?: number | string | null;
+					};
+					// 缺失就保留 null，别谎报 0；formatCount 会显示为「—」
+					const raw = item.daily_installs;
+					const installs = raw == null || raw === '' ? null : Number(raw);
+					return {
+						id: Number(item.id) || 0,
+						name: item.name || '',
+						installs: Number.isFinite(installs) ? installs : null
+					};
 				})
 				.filter((it) => it.id > 0 && it.name);
 		} catch {

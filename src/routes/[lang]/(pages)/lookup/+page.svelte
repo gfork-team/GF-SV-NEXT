@@ -1,7 +1,7 @@
 <script lang="ts">
 	import { onMount } from 'svelte';
 	import { page } from '$app/state';
-	import { t, type Lang, i18nConfig } from '$i18n';
+	import { t, type Lang } from '$i18n';
 	import { siteConfig, getPrimaryLookupNodes, getBackupLookupNodes } from '$lib/config';
 	import Ad from '$components/Ad.svelte';
 	import { sendAudit } from '$lib/audit';
@@ -9,7 +9,13 @@
 
 	let { data }: { data: PageData } = $props();
 	let lang: Lang = $derived(data.lang);
-
+	import Chip from '$components/Chip.svelte';
+	import Icon from '$components/Icon.svelte';
+	import ScriptCard from '$components/ScriptCard.svelte';
+	import SearchBar from '$components/SearchBar.svelte';
+	import Skeleton from '$components/Skeleton.svelte';
+	import type { ScriptSummary } from '$lib/scripts-api';
+	import { stringifySearchParams } from '$lib/search-params';
 	const PRIMARY_NODES = getPrimaryLookupNodes();
 	const BACKUP_NODES = getBackupLookupNodes();
 
@@ -70,6 +76,8 @@
 	}
 
 	function setHashParams(params: SearchParams): void {
+		// 临时查询串构造器，序列化后立即丢弃
+		// eslint-disable-next-line svelte/prefer-svelte-reactivity
 		const search = new URLSearchParams();
 		for (const [key, value] of Object.entries(params)) {
 			if (value == null || value === '') continue;
@@ -80,36 +88,16 @@
 			}
 		}
 		const qs = search.toString();
+		// 仅用于拼 hash 后交给 history.pushState，函数结束即丢弃
+		// eslint-disable-next-line svelte/prefer-svelte-reactivity
 		const url = new URL(window.location.href);
 		url.hash = qs ? `#?${qs}` : '#';
 		window.history.pushState({}, '', url);
+		// pushState 不触发 hashchange，但 ownHash 必须跟着走，否则下次外部 hashchange 会被误判成自身改动而跳过
+		ownHash = url.hash;
 	}
 
-	interface ScriptResult {
-		id: number;
-		name: string;
-		description: string;
-		daily_installs: number;
-		total_installs: number;
-		good_ratings: number;
-		ok_ratings: number;
-		bad_ratings: number;
-		fan_score: number | string;
-		created_at: string;
-		code_updated_at: string;
-		code_url: string;
-		users?: { id: number; name: string; created_at?: string; url?: string }[];
-		url?: string;
-		namespace?: string;
-		support_url?: string | null;
-		contribution_url?: string | null;
-		contribution_amount?: string | null;
-		license?: string;
-		version?: string;
-		locale?: string;
-		deleted?: boolean;
-		code_size?: number;
-	}
+	type ScriptResult = ScriptSummary;
 
 	interface SearchApiResponse {
 		model: string;
@@ -127,17 +115,17 @@
 		execute?: ScriptResult[];
 	}
 
-let results = $state<ScriptResult[]>([]);
+	let results = $state<ScriptResult[]>([]);
 	let loading = $state(false);
 	let error = $state('');
 	let placeholderMode = $state(false);
-	let sidebarOpen = $state(false);
+	let filtersOpen = $state(false);
 	let query = $state('');
 	let sortBy = $state('');
 	let filterLocale = $state('0');
 	let currentPage = $state('1');
 	let advancedParams = $state<SearchParams>({});
-let responsePerPage = $state(100);
+	let responsePerPage = $state(100);
 	let abortController: AbortController | null = $state(null);
 
 	async function generateSS(): Promise<string> {
@@ -146,7 +134,10 @@ let responsePerPage = $state(100);
 		const data = new TextEncoder().encode(input);
 		const hashBuffer = await crypto.subtle.digest('SHA-256', data);
 		const hashArray = Array.from(new Uint8Array(hashBuffer));
-		return hashArray.map((b) => b.toString(16).padStart(2, '0')).join('').substring(0, siteConfig.lookupSignature.ssLength);
+		return hashArray
+			.map((b) => b.toString(16).padStart(2, '0'))
+			.join('')
+			.substring(0, siteConfig.lookupSignature.ssLength);
 	}
 
 	async function fetchFromNode(
@@ -154,7 +145,6 @@ let responsePerPage = $state(100);
 		signal: AbortSignal,
 		timeoutMs = 15000
 	): Promise<{ success: boolean; data?: SearchApiResponse; node?: ApiNode; error?: string }> {
-		console.log(`[${node.id}] 开始请求`);
 		try {
 			const params = { ...getSearchParams() };
 			const ss = await generateSS();
@@ -163,18 +153,21 @@ let responsePerPage = $state(100);
 			let options: RequestInit;
 
 			if (node.method === 'POST') {
-				const body = new URLSearchParams(params as Record<string, string>).toString();
+				const body = stringifySearchParams(params);
 				url = `${node.endpoint}/${ss}`;
 				options = {
 					method: 'POST',
-					headers: { Accept: 'application/json', 'Content-Type': 'application/x-www-form-urlencoded' },
+					headers: {
+						Accept: 'application/json',
+						'Content-Type': 'application/x-www-form-urlencoded'
+					},
 					body,
 					mode: 'cors' as RequestMode,
 					signal
 				};
 			} else {
-				(params as Record<string, string>).ss = ss;
-				const qs = new URLSearchParams(params as Record<string, string>).toString();
+				params.ss = ss;
+				const qs = stringifySearchParams(params);
 				url = qs ? `${node.endpoint}?${qs}` : node.endpoint;
 				options = {
 					method: 'GET',
@@ -190,9 +183,7 @@ let responsePerPage = $state(100);
 			const res = await Promise.race([fetch(url, options), timeout]);
 
 			if (!(res instanceof Response) || !res.ok) {
-				const status = (res as Response).status || 'network error';
-				console.log(`[${node.id}] ❌ HTTP ${status}`);
-				throw new Error(`HTTP ${status}`);
+				throw new Error(`HTTP ${(res as Response).status || 'network error'}`);
 			}
 
 			let json: unknown;
@@ -207,18 +198,22 @@ let responsePerPage = $state(100);
 				json = await (res as Response).json();
 			}
 
-			const data = json as SearchApiResponse;
-
-			console.log(`[${node.id}] ✅ 200 | ${(data.query ?? data.execute)?.length ?? 0}条结果`);
-			return { success: true, data: data, node };
+			return { success: true, data: json as SearchApiResponse, node };
 		} catch (e) {
-			console.log(`[${node.id}] ❌ ${e instanceof Error ? e.message : 'Unknown error'}`);
 			return { success: false, error: e instanceof Error ? e.message : 'Unknown error', node };
 		}
 	}
 
-	async function raceNodes(nodes: ApiNode[], signal: AbortSignal): Promise<{ success: boolean; data?: SearchApiResponse; node?: ApiNode; failedNodes?: string[]; message?: string }> {
-		console.log(`竞速开始，共${nodes.length}个节点: ${nodes.map(n => n.id).join(', ')}`);
+	async function raceNodes(
+		nodes: ApiNode[],
+		signal: AbortSignal
+	): Promise<{
+		success: boolean;
+		data?: SearchApiResponse;
+		node?: ApiNode;
+		failedNodes?: string[];
+		message?: string;
+	}> {
 		return new Promise((resolve) => {
 			let resolved = false;
 			let completed = 0;
@@ -226,22 +221,21 @@ let responsePerPage = $state(100);
 
 			nodes.forEach(async (node) => {
 				const result = await fetchFromNode(node, signal);
-				if (resolved) {
-					console.log(`[${node.id}] 已被忽略（已有节点胜出）`);
-					return;
-				}
+				if (resolved) return;
 				completed++;
 
 				if (result.success) {
 					resolved = true;
-					console.log(`🏆 竞速胜出: ${node.id}`);
 					resolve({ success: true, data: result.data, node: result.node });
 				} else {
 					failed.push(node.id);
 					if (completed === nodes.length) {
 						resolved = true;
-						console.log(`竞速全部失败: ${failed.join(', ')}`);
-						resolve({ success: false, failedNodes: failed, message: `所有节点请求失败: ${failed.join(', ')}` });
+						resolve({
+							success: false,
+							failedNodes: failed,
+							message: `所有节点请求失败: ${failed.join(', ')}`
+						});
 					}
 				}
 			});
@@ -250,7 +244,6 @@ let responsePerPage = $state(100);
 
 	async function doSearch(): Promise<void> {
 		const params = getSearchParams();
-		console.log('=== 搜索开始 ===', { q: params.q, site: params.site, page: params.page });
 		if (!params.q && !params.site && !params.page) {
 			placeholderMode = true;
 			error = '';
@@ -267,7 +260,6 @@ let responsePerPage = $state(100);
 
 		const allNodes = [...PRIMARY_NODES, ...BACKUP_NODES];
 
-		console.log('--- 第1轮竞速 ---');
 		const result = await raceNodes(allNodes, signal);
 		if (result.success && result.data) {
 			abortController.abort();
@@ -277,10 +269,9 @@ let responsePerPage = $state(100);
 
 		const maxRetries = 6;
 		for (let attempt = 0; attempt < maxRetries; attempt++) {
-			await new Promise(r => setTimeout(r, 500));
+			await new Promise((r) => setTimeout(r, 500));
 			if (signal.aborted) return;
 			const randomNode = allNodes[Math.floor(Math.random() * allNodes.length)];
-			console.log(`--- 重试${attempt + 1}/${maxRetries}: 随机节点 ${randomNode.id} ---`);
 			const retryResult = await fetchFromNode(randomNode, signal);
 			if (retryResult.success && retryResult.data) {
 				abortController.abort();
@@ -291,11 +282,12 @@ let responsePerPage = $state(100);
 
 		error = result.message || 'All API requests failed';
 		loading = false;
-		console.log('=== 搜索结束: 全部失败 ===', result.message);
 	}
 
 	function handleResults(data: SearchApiResponse): void {
-		if ((data as unknown as { redirect?: boolean; target_url?: string; message?: string }).redirect) {
+		if (
+			(data as unknown as { redirect?: boolean; target_url?: string; message?: string }).redirect
+		) {
 			const r = data as unknown as { target_url: string; message: string };
 			alert(r.message || 'Redirecting to Greasyfork Official Site');
 			window.location.href = r.target_url;
@@ -306,8 +298,9 @@ let responsePerPage = $state(100);
 		if (resultList && Array.isArray(resultList)) {
 			results = resultList.map((item) => ({
 				...item,
-				fan_score: typeof item.fan_score === 'string' ? parseFloat(item.fan_score) || 0 : item.fan_score,
-			}));
+				fan_score:
+					typeof item.fan_score === 'string' ? parseFloat(item.fan_score) || 0 : item.fan_score
+			})) as ScriptResult[];
 			responsePerPage = data.options?.per_page || 100;
 
 			if (siteConfig.audit.enabled) {
@@ -321,8 +314,8 @@ let responsePerPage = $state(100);
 						sort: sp.sort || '',
 						filter_locale: sp.filter_locale || '',
 						page: sp.page || '1',
-						hit_count: resultList.length,
-					},
+						hit_count: resultList.length
+					}
 				});
 			}
 		} else {
@@ -338,10 +331,6 @@ let responsePerPage = $state(100);
 		return parts.length > 0 ? `${parts.join(' ')} - ZGF` : `${t(lang, 'lookup.title')} - ZGF`;
 	});
 
-	function updateTitle() {
-		document.title = pageTitle;
-	}
-
 	function syncFromHash(): SearchParams {
 		const p = getSearchParams();
 		query = p.q || '';
@@ -349,7 +338,6 @@ let responsePerPage = $state(100);
 		filterLocale = p.filter_locale || '0';
 		currentPage = p.page || '1';
 		advancedParams = p;
-		updateTitle();
 		return p;
 	}
 
@@ -359,6 +347,8 @@ let responsePerPage = $state(100);
 		const fd = new FormData(form);
 		const newParams: SearchParams = { ...getSearchParams() };
 
+		// 同步用完的 key 集合，不存进 $state
+		// eslint-disable-next-line svelte/prefer-svelte-reactivity
 		const formKeys = new Set<string>(['site', 'tz', 'entry_locales[]']);
 		for (const f of [...numericFilters, ...dateFilters]) {
 			formKeys.add(f.key);
@@ -388,16 +378,13 @@ let responsePerPage = $state(100);
 		doSearch();
 	}
 
-	function handleSearch(e: Event): void {
-		e.preventDefault();
-		const form = e.target as HTMLFormElement;
-		const q = (form.querySelector('input[name="q"]') as HTMLInputElement)?.value?.trim();
-		if (!q) return;
+	function handleSearch(q: string): void {
 		const p = getSearchParams();
-		const ps = new URLSearchParams({ q, sort: p.sort || '', filter_locale: p.filter_locale || '0' });
-		if (p.site) ps.set('site', p.site);
-		form.action = `/${lang}/lookup#?${ps.toString()}`;
-		form.submit();
+		const next: SearchParams = { ...p, q };
+		delete next.page;
+		setHashParams(next);
+		syncFromHash();
+		doSearch();
 	}
 
 	function handleSort(value: string): void {
@@ -414,40 +401,11 @@ let responsePerPage = $state(100);
 		doSearch();
 	}
 
-	function formatDateTime(raw: string): string {
-		if (!raw) return '—';
-		const d = new Date(raw);
-		const locale = i18nConfig.langNames[lang];
-		return d.toLocaleString(locale, {
-			year: 'numeric', month: '2-digit', day: '2-digit',
-			hour: '2-digit', minute: '2-digit', hour12: false
-		}).replace(/\//g, '-');
-	}
-
-	function escapeHtml(text: string): string {
-		const div = document.createElement('div');
-		div.textContent = text;
-		return div.innerHTML;
-	}
-
-	function getScriptInfoUrl(script: ScriptResult): string {
-		const locale = i18nConfig.langNames[lang];
-		return `/${lang}/info#/${locale}/scripts/${script.id}/detail`;
-	}
-
-	function getDownloadUrl(script: ScriptResult): string {
-		if (script.code_url) {
-			const path = script.code_url.replace('https://update.greasyfork.org/scripts/', '');
-			return `/${lang}/l#/${path}`;
-		}
-		return '#';
-	}
-
-	function getAuthorUrl(script: ScriptResult): string {
-		const userId = script.users?.[0]?.id;
-		if (!userId) return '#';
-		const locale = i18nConfig.langNames[lang];
-		return `/${lang}/info#/${locale}/users/${userId}`;
+	function goToPage(next: string): void {
+		const p = { ...getSearchParams(), page: next };
+		setHashParams(p);
+		syncFromHash();
+		doSearch();
 	}
 
 	// ─── Sort / filter option definitions (keys resolved at render time) ───
@@ -493,34 +451,55 @@ let responsePerPage = $state(100);
 	];
 
 	// ─── Lifecycle ──────────────────────────────────────────────────
+	let hashTimer: ReturnType<typeof setTimeout>;
 	let popstateTimer: ReturnType<typeof setTimeout>;
 
-	function onHashChanged() {
-		const hash = window.location.hash;
-		if (hash === '#google_vignette') return;
-		if (isHashValid(hash)) lastValidHash = hash;
+	/*
+	 * 站内 setHashParams 会先改 hash 再自己 sync+search，所以 hashchange 必须去重，
+	 * 否则每次翻页/改筛选都会重复请求一次。这里比对 hash，相同就直接跳过。
+	 */
+	let ownHash = '';
+
+	function scheduleFromLocation() {
+		clearTimeout(hashTimer);
+		hashTimer = setTimeout(() => {
+			if (window.location.hash === '#google_vignette') return;
+			const hash = window.location.hash;
+			if (hash === ownHash) return;
+			ownHash = hash;
+			if (isHashValid(hash)) lastValidHash = hash;
+			syncFromHash();
+			doSearch();
+		}, 100);
 	}
 
-onMount(() => {
+	function onHashChanged() {
+		scheduleFromLocation();
+	}
+
+	onMount(() => {
 		if (window.location.hash === '#google_vignette') return;
 
+		ownHash = window.location.hash;
 		window.addEventListener('hashchange', onHashChanged);
 
 		const debouncedPop = () => {
 			clearTimeout(popstateTimer);
 			popstateTimer = setTimeout(() => {
 				if (window.location.hash === '#google_vignette') return;
+				ownHash = window.location.hash;
 				syncFromHash();
 				doSearch();
 			}, 100);
 		};
 		window.addEventListener('popstate', debouncedPop);
 
-		document.addEventListener('visibilitychange', () => {
+		const onVisibility = () => {
 			if (document.hidden && abortController) abortController.abort();
-		});
+		};
+		document.addEventListener('visibilitychange', onVisibility);
 
-const params = syncFromHash();
+		const params = syncFromHash();
 		if (params.q || params.site || params.page) {
 			doSearch();
 		} else {
@@ -531,549 +510,513 @@ const params = syncFromHash();
 		return () => {
 			window.removeEventListener('hashchange', onHashChanged);
 			window.removeEventListener('popstate', debouncedPop);
+			document.removeEventListener('visibilitychange', onVisibility);
 		};
 	});
 </script>
 
 <svelte:head>
-<title>{pageTitle}</title>
+	<title>{pageTitle}</title>
 	<meta name="description" content={t(lang, 'lookup.description')} />
-	<meta name="keywords" content="userscript search, greasyfork lookup, script search, browser scripts, greasyfork scripts, user scripts" />
-	<link rel="stylesheet" href="https://fonts.googleapis.com/icon?family=Material+Icons" />
+	<meta
+		name="keywords"
+		content="userscript search, greasyfork lookup, script search, browser scripts, greasyfork scripts, user scripts"
+	/>
 </svelte:head>
 
 <section class="lk-page">
-	<button class="lk-sidebar-toggle" class:open={sidebarOpen} onclick={() => (sidebarOpen = !sidebarOpen)}>
-		{sidebarOpen ? '✕' : '☰'}
-	</button>
+	<div class="lk-layout" class:lk-layout--open={filtersOpen}>
+		<button
+			class="ui-btn ui-btn--outlined lk-filters-toggle"
+			aria-expanded={filtersOpen}
+			aria-controls="lk-filters"
+			onclick={() => (filtersOpen = !filtersOpen)}
+		>
+			<Icon name={filtersOpen ? 'close' : 'filter'} size={18} />
+			{t(lang, 'lookup.sidebar_title')}
+		</button>
 
-	<div class="width-constraint">
-		<div class="lk-layout" class:sidebar-open={sidebarOpen}>
-			<!-- Sidebar — first in DOM for higher rendering priority -->
-			<aside class="lk-sidebar" class:open={sidebarOpen}>
-				<div class="lk-sidebar-title">{t(lang, 'lookup.sidebar_title')}</div>
+		<aside class="lk-sidebar" class:open={filtersOpen} id="lk-filters">
+			<div class="lk-sidebar__search">
+				<SearchBar id="lk" {lang} initialQuery={query} onsearch={handleSearch} />
+			</div>
 
-				<form class="lk-sidebar-search" target="_blank" onsubmit={handleSearch}>
-					<input
-						type="search"
-						name="q"
-						bind:value={query}
-						placeholder={t(lang, 'lookup.sidebar_search')}
-					/>
-					<button type="submit" class="search-icon-btn" aria-label={t(lang, 'lookup.sidebar_search')}>
-						<svg width="20" height="20" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-							<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
-						</svg>
-					</button>
-				</form>
-
-				<!-- Sort options -->
-				<div class="lk-option-group">
-					<div class="lk-option-label">{t(lang, 'lookup.sidebar_sort')}</div>
-					<div class="lk-chip-row">
-						{#each sortOptions as opt}
-							<button
-								class="md3-chip"
-								class:md3-chip--selected={sortBy === opt.value}
-								onclick={e => { e.preventDefault(); handleSort(opt.value); }}
-							>
-								{t(lang, opt.key)}
-							</button>
-						{/each}
-					</div>
+			<div class="lk-option-group">
+				<div class="lk-option-label">
+					<Icon name="sort" size={16} />
+					{t(lang, 'lookup.sidebar_sort')}
 				</div>
-
-				<!-- Language filter -->
-				<div class="lk-option-group">
-					<div class="lk-option-label">{t(lang, 'lookup.sidebar_lang')}</div>
-					<div class="lk-chip-row">
-						<button class="md3-chip" class:md3-chip--selected={filterLocale === '0'} onclick={e => { e.preventDefault(); handleLangFilter('0'); }}>
-							{t(lang, 'lookup.lang_all')}
-						</button>
-						<button class="md3-chip" class:md3-chip--selected={filterLocale === '1'} onclick={e => { e.preventDefault(); handleLangFilter('1'); }}>
-							{t(lang, 'lookup.lang_zh')}
-						</button>
-					</div>
-				</div>
-
-				<!-- Advanced filters -->
-				<div class="lk-option-group">
-					<details>
-						<summary class="lk-advanced-summary">{t(lang, 'lookup.sidebar_advanced')}</summary>
-						<form class="lk-advanced-form" onsubmit={applyFilter}>
-							<div class="lk-filter-group">
-								<input name="site" placeholder={t(lang, 'lookup.filter_site_placeholder')} value={advancedParams.site || ''} />
-							</div>
-
-							{#each numericFilters as filter}
-								<div class="lk-filter-group">
-									<label for="{filter.key}_operator">{t(lang, filter.labelKey)}:</label>
-									<div class="lk-filter-row">
-										<select id="{filter.key}_operator" name="{filter.key}_operator" value={advancedParams[filter.key + '_operator'] || 'gt'}>
-											<option value="gt">{t(lang, 'lookup.operator.gt')}</option>
-											<option value="lt">{t(lang, 'lookup.operator.lt')}</option>
-											<option value="eq">{t(lang, 'lookup.operator.eq')}</option>
-										</select>
-										<input type={filter.type} name={filter.key} placeholder={t(lang, 'lookup.filter_value_placeholder')} step={filter.step || ''} value={advancedParams[filter.key] || ''} />
-									</div>
-								</div>
-							{/each}
-
-							{#each dateFilters as filter}
-								<div class="lk-filter-group">
-									<label for="{filter.key}_operator">{t(lang, filter.labelKey)}:</label>
-									<div class="lk-filter-row">
-										<select id="{filter.key}_operator" name="{filter.key}_operator" value={advancedParams[filter.key + '_operator'] || 'gt'}>
-											<option value="gt">{t(lang, 'lookup.operator.after')}</option>
-											<option value="lt">{t(lang, 'lookup.operator.before')}</option>
-										</select>
-										<input type="datetime-local" name={filter.key} value={advancedParams[filter.key] || ''} />
-									</div>
-								</div>
-							{/each}
-
-							<div class="lk-filter-group">
-								<label for="entry_locales">{t(lang, 'lookup.filter_script_lang')}:</label>
-								<select name="entry_locales[]" multiple size="5" id="entry_locales" value={advancedParams['entry_locales[]'] || []}>
-									{#each localeOptions as loc}
-										<option value={loc.value}>{loc.label}</option>
-									{/each}
-								</select>
-								<small class="lk-filter-hint">{t(lang, 'lookup.filter_multi_hint')}</small>
-							</div>
-
-							<input type="hidden" name="tz" value={Intl.DateTimeFormat().resolvedOptions().timeZone} />
-
-							<div class="lk-filter-actions">
-								<button type="submit" class="md3-button lk-filter-btn">{t(lang, 'lookup.filter_apply')}</button>
-								<button type="button" class="md3-outlined-button lk-filter-btn" onclick={clearFilters}>{t(lang, 'lookup.filter_clear')}</button>
-							</div>
-						</form>
-					</details>
-				</div>
-
-				<div style="margin-top:16px;text-align:center">
-					<Ad type="sidebar" />
-				</div>
-			</aside>
-
-			<!-- Main content -->
-			<div class="lk-main">
-				<div style="margin-bottom:16px"><Ad type="auto" /></div>
-<div style="margin-bottom:16px"><Ad type="fluid" /></div>
-				{#if loading}
-					<div class="md3-card lk-center-box">
-						<span class="material-icons lk-spinner">autorenew</span>
-						<div class="lk-loading-tip">
-							{t(lang, 'lookup.loading')}<br />
-							<small>{t(lang, 'lookup.warning')}</small>
-						</div>
-					</div>
-				{:else if placeholderMode}
-					<div class="md3-card lk-center-box lk-placeholder-box">
-						<span class="lk-placeholder-badge">{t(lang, 'lookup.placeholder_badge')}</span>
-						<h3 class="title-large" style="margin-bottom:12px">{t(lang, 'lookup.placeholder_title')}</h3>
-						<p style="color:var(--md-sys-color-on-surface-variant)">{t(lang, 'lookup.placeholder_desc')}</p>
-						<div class="lk-placeholder-example">
-							<span class="material-icons" style="font-size:18px">link</span>
-							<code>{t(lang, 'lookup.placeholder_example')}</code>
-						</div>
-					</div>
-				{:else if error}
-					<div class="md3-card lk-center-box">
-						<h3 class="title-large" style="margin-bottom:12px">{t(lang, 'lookup.load_failed')}</h3>
-						<p style="color:var(--md-sys-color-on-surface-variant)">{error}</p>
-						{#if !query}
-							<p style="margin-top:16px;color:var(--md-sys-color-on-surface-variant)">{t(lang, 'lookup.search_prompt')}</p>
-						{/if}
-					</div>
-				{:else if results.length === 0 && query}
-					<div class="md3-card lk-center-box">
-						<p style="color:var(--md-sys-color-on-surface-variant)">{t(lang, 'lookup.no_results')}</p>
-					</div>
-				{:else if results.length > 0}
-<ol class="lk-script-list">
-						{#each results as script (script.id)}
-							<li class="lk-result-item" style="">
-								<article>
-									<h2>
-										<a class="lk-script-link" href={getScriptInfoUrl(script)} target="_blank" rel="noopener noreferrer">
-											{script.name || t(lang, 'lookup.unnamed')}
-										</a>
-										<span class="lk-badge-js" title="User Script">JS</span>
-										<span class="lk-sep">-</span>
-										<span class="lk-script-desc">{escapeHtml(script.description || t(lang, 'lookup.no_description'))}</span>
-									</h2>
-									<div class="lk-script-meta">
-										<dl class="lk-stats">
-											<dt>{t(lang, 'lookup.author')}</dt>
-											<dd><a href={getAuthorUrl(script)} target="_blank" rel="noopener noreferrer">{escapeHtml(script.users?.[0]?.name || t(lang, 'lookup.unknown_author'))}</a></dd>
-											<dt>{t(lang, 'lookup.daily_installs')}</dt>
-											<dd>{script.daily_installs || 0}</dd>
-											<dt>{t(lang, 'lookup.total_installs')}</dt>
-											<dd>{script.total_installs || 0}</dd>
-											<dt>{t(lang, 'lookup.ratings')}</dt>
-											<dd class="lk-ratings-cell" data-rating-score={script.fan_score || 0}>
-												<span class="lk-good" title={t(lang, 'lookup.ratings_good')}>{script.good_ratings || 0}</span>
-												<span class="lk-ok" title={t(lang, 'lookup.ratings_ok')}>{script.ok_ratings || 0}</span>
-												<span class="lk-bad" title={t(lang, 'lookup.ratings_bad')}>{script.bad_ratings || 0}</span>
-												{#if (script.good_ratings || 0) + (script.ok_ratings || 0) + (script.bad_ratings || 0) > 0}
-													{@const g = script.good_ratings || 0}
-													{@const o = script.ok_ratings || 0}
-													{@const b = script.bad_ratings || 0}
-													{@const total = g + o + b}
-													<span class="lk-rating-bar">
-														<span class="lk-rating-bar-good" style="width:{(g / total * 100).toFixed(1)}%"></span>
-														<span class="lk-rating-bar-ok" style="width:{(o / total * 100).toFixed(1)}%"></span>
-														<span class="lk-rating-bar-bad" style="width:{(b / total * 100).toFixed(1)}%"></span>
-													</span>
-												{/if}
-											</dd>
-											<dt>{t(lang, 'lookup.created')}</dt>
-											<dd>{formatDateTime(script.created_at)}</dd>
-											<dt>{t(lang, 'lookup.updated')}</dt>
-											<dd>{formatDateTime(script.code_updated_at)}</dd>
-										</dl>
-										<div class="lk-install-area">
-											<a href={getDownloadUrl(script)} class="md3-button" target="_blank" rel="noopener noreferrer">
-												{t(lang, 'lookup.install')}
-											</a>
-										</div>
-									</div>
-								</article>
-							</li>
-						{/each}
-</ol>
-
-					<!-- Pagination -->
-					{@const pageNum = parseInt(currentPage) || 1}
-					<div class="lk-pagination">
-						<button class="md3-outlined-button" disabled={pageNum === 1} style="opacity:{pageNum === 1 ? '0.4' : '1'}" onclick={() => { const p = { ...getSearchParams(), page: '1' }; setHashParams(p); syncFromHash(); doSearch(); }}>{t(lang, 'lookup.pagination.first')}</button>
-						<button class="md3-outlined-button" disabled={pageNum === 1} style="opacity:{pageNum === 1 ? '0.4' : '1'}" onclick={() => { const p = { ...getSearchParams(), page: String(Math.max(pageNum - 1, 1)) }; setHashParams(p); syncFromHash(); doSearch(); }}>{t(lang, 'lookup.pagination.prev')}</button>
-						<span class="lk-current-page">{pageNum}</span>
-						<button class="md3-outlined-button" disabled={results.length < responsePerPage} style="opacity:{results.length < responsePerPage ? '0.4' : '1'}" onclick={() => { const p = { ...getSearchParams(), page: String(pageNum + 1) }; setHashParams(p); syncFromHash(); doSearch(); }}>{t(lang, 'lookup.pagination.next')}</button>
-					</div>
-				{/if}
-
-				<div class="lk-warning-bar">
-					{t(lang, 'lookup.warning')}
-				</div>
-
-				<div style="margin:16px 0">
-					<Ad type="auto" />
+				<div class="lk-chip-row">
+					{#each sortOptions as opt (opt.value)}
+						<Chip selected={sortBy === opt.value} onclick={() => handleSort(opt.value)}>
+							{t(lang, opt.key)}
+						</Chip>
+					{/each}
 				</div>
 			</div>
+
+			<div class="lk-option-group">
+				<div class="lk-option-label">
+					<Icon name="globe" size={16} />
+					{t(lang, 'lookup.sidebar_lang')}
+				</div>
+				<div class="lk-chip-row">
+					<Chip selected={filterLocale === '0'} onclick={() => handleLangFilter('0')}>
+						{t(lang, 'lookup.lang_all')}
+					</Chip>
+					<Chip selected={filterLocale === '1'} onclick={() => handleLangFilter('1')}>
+						{t(lang, 'lookup.lang_zh')}
+					</Chip>
+				</div>
+			</div>
+
+			<details class="lk-advanced">
+				<summary class="lk-advanced__summary">
+					<span class="lk-advanced__title"
+						><Icon name="filter" size={16} /> {t(lang, 'lookup.sidebar_advanced')}</span
+					>
+					<span class="lk-advanced__chevron"><Icon name="chevron-down" size={18} /></span>
+				</summary>
+
+				<form class="lk-advanced-form" onsubmit={applyFilter}>
+					<div class="lk-field">
+						<label class="lk-label" for="lk-site">{t(lang, 'lookup.filter_site_placeholder')}</label
+						>
+						<input class="lk-input" id="lk-site" name="site" value={advancedParams.site || ''} />
+					</div>
+
+					{#each numericFilters as filter (filter.key)}
+						<div class="lk-field">
+							<label class="lk-label" for="{filter.key}_operator">{t(lang, filter.labelKey)}</label>
+							<div class="lk-field__row">
+								<select
+									class="lk-input lk-select"
+									id="{filter.key}_operator"
+									name="{filter.key}_operator"
+									value={advancedParams[filter.key + '_operator'] || 'gt'}
+								>
+									<option value="gt">{t(lang, 'lookup.operator.gt')}</option>
+									<option value="lt">{t(lang, 'lookup.operator.lt')}</option>
+									<option value="eq">{t(lang, 'lookup.operator.eq')}</option>
+								</select>
+								<input
+									class="lk-input"
+									type={filter.type}
+									name={filter.key}
+									placeholder={t(lang, 'lookup.filter_value_placeholder')}
+									step={filter.step || ''}
+									value={advancedParams[filter.key] || ''}
+								/>
+							</div>
+						</div>
+					{/each}
+
+					{#each dateFilters as filter (filter.key)}
+						<div class="lk-field">
+							<label class="lk-label" for="{filter.key}_operator">{t(lang, filter.labelKey)}</label>
+							<div class="lk-field__row">
+								<select
+									class="lk-input lk-select"
+									id="{filter.key}_operator"
+									name="{filter.key}_operator"
+									value={advancedParams[filter.key + '_operator'] || 'gt'}
+								>
+									<option value="gt">{t(lang, 'lookup.operator.after')}</option>
+									<option value="lt">{t(lang, 'lookup.operator.before')}</option>
+								</select>
+								<input
+									class="lk-input"
+									type="datetime-local"
+									name={filter.key}
+									value={advancedParams[filter.key] || ''}
+								/>
+							</div>
+						</div>
+					{/each}
+
+					<div class="lk-field">
+						<label class="lk-label" for="entry_locales"
+							>{t(lang, 'lookup.filter_script_lang')}</label
+						>
+						<select
+							class="lk-input"
+							name="entry_locales[]"
+							multiple
+							size="5"
+							id="entry_locales"
+							value={advancedParams['entry_locales[]'] || []}
+						>
+							{#each localeOptions as loc (loc.value)}
+								<option value={loc.value}>{loc.label}</option>
+							{/each}
+						</select>
+						<small class="lk-hint">{t(lang, 'lookup.filter_multi_hint')}</small>
+					</div>
+
+					<input type="hidden" name="tz" value={Intl.DateTimeFormat().resolvedOptions().timeZone} />
+
+					<div class="lk-filter-actions">
+						<button type="submit" class="ui-btn ui-btn--filled"
+							>{t(lang, 'lookup.filter_apply')}</button
+						>
+						<button type="button" class="ui-btn ui-btn--outlined" onclick={clearFilters}
+							>{t(lang, 'lookup.filter_clear')}</button
+						>
+					</div>
+				</form>
+			</details>
+
+			<div class="lk-sidebar__ad"><Ad type="sidebar" /></div>
+		</aside>
+
+		<div class="lk-main">
+			<div class="lk-ad"><Ad type="auto" /></div>
+
+			{#if loading}
+				<div class="lk-skeletons" aria-busy="true">
+					{#each Array(4) as _, i (i)}
+						<div class="ui-card lk-skeleton-card">
+							<Skeleton height="18px" width="65%" />
+							<Skeleton height="12px" />
+							<Skeleton height="12px" width="80%" />
+							<Skeleton height="32px" />
+						</div>
+					{/each}
+				</div>
+			{:else if placeholderMode}
+				<div class="ui-card lk-center-box">
+					<span class="ui-badge ui-badge--primary lk-placeholder-badge"
+						>{t(lang, 'lookup.placeholder_badge')}</span
+					>
+					<h2 class="lk-center-box__title">{t(lang, 'lookup.placeholder_title')}</h2>
+					<p class="lk-center-box__text">{t(lang, 'lookup.placeholder_desc')}</p>
+					<p class="lk-placeholder-example">
+						<Icon name="link" size={16} />
+						<code>{t(lang, 'lookup.placeholder_example')}</code>
+					</p>
+				</div>
+			{:else if error}
+				<div class="ui-card lk-center-box">
+					<span class="lk-center-box__icon"><Icon name="alert" size={32} /></span>
+					<h2 class="lk-center-box__title">{t(lang, 'lookup.load_failed')}</h2>
+					<p class="lk-center-box__text">{error}</p>
+					{#if !query}
+						<p class="lk-center-box__text">{t(lang, 'lookup.search_prompt')}</p>
+					{/if}
+					<button class="ui-btn ui-btn--outlined" onclick={doSearch}>
+						<Icon name="refresh" size={18} />
+						{t(lang, 'lookup.filter_apply')}
+					</button>
+				</div>
+			{:else if results.length === 0 && query}
+				<div class="ui-card lk-center-box">
+					<p class="lk-center-box__text">{t(lang, 'lookup.no_results')}</p>
+				</div>
+			{:else if results.length > 0}
+				{@const pageNum = parseInt(currentPage) || 1}
+				<ul class="lk-results">
+					{#each results as script (script.id)}
+						<li><ScriptCard {lang} {script} variant="list" /></li>
+					{/each}
+				</ul>
+
+				<nav class="lk-pagination" aria-label="pagination">
+					<button
+						class="ui-btn ui-btn--outlined"
+						disabled={pageNum === 1}
+						onclick={() => goToPage('1')}
+					>
+						{t(lang, 'lookup.pagination.first')}
+					</button>
+					<button
+						class="ui-btn ui-btn--outlined"
+						disabled={pageNum === 1}
+						onclick={() => goToPage(String(Math.max(pageNum - 1, 1)))}
+					>
+						{t(lang, 'lookup.pagination.prev')}
+					</button>
+					<span class="lk-pagination__page">{pageNum}</span>
+					<button
+						class="ui-btn ui-btn--outlined"
+						disabled={results.length < responsePerPage}
+						onclick={() => goToPage(String(pageNum + 1))}
+					>
+						{t(lang, 'lookup.pagination.next')}
+					</button>
+				</nav>
+			{/if}
+
+			<p class="lk-warning">
+				<Icon name="info" size={16} />
+				{t(lang, 'lookup.warning')}
+			</p>
+
+			<div class="lk-ad"><Ad type="fluid" /></div>
 		</div>
 	</div>
 </section>
 
 <style>
 	.lk-page {
-		background: transparent;
-		min-height: 100vh;
 		color: var(--md-sys-color-on-surface);
-	}
-
-	/* 撑满视口宽度，让侧边栏贴屏幕左边缘 */
-	:global(.m3-layout-body:has(.lk-page)) {
-		max-width: none;
-		padding: 0;
-	}
-
-	.lk-page :global(.width-constraint) {
-		max-width: none;
-		padding: 16px 0;
 	}
 
 	.lk-layout {
 		display: flex;
+		align-items: flex-start;
 		gap: 24px;
-	}
-
-	.lk-main {
-		flex: 1;
-		min-width: 0;
-		max-width: 1160px;
-		margin: 0 auto;
 	}
 
 	/* ─── Sidebar ──────────────────────────────────────── */
 	.lk-sidebar {
-		width: 280px; flex-shrink: 0;
-		background: var(--glass-bg);
-		backdrop-filter: blur(var(--glass-blur));
-		-webkit-backdrop-filter: blur(var(--glass-blur));
-		border: 1px solid var(--glass-border);
-		border-radius: var(--md-sys-shape-corner-medium);
+		flex: 0 0 280px;
+		display: flex;
+		flex-direction: column;
+		gap: 20px;
+		position: sticky;
+		top: 88px;
 		padding: 20px;
-		box-shadow: var(--glass-shadow);
-		position: sticky; top: 96px;
-		max-height: calc(100vh - 112px);
-		overflow-y: auto;
-		contain: layout style;
-		border-radius: 0 var(--md-sys-shape-corner-medium) var(--md-sys-shape-corner-medium) 0;
-		border-left: none;
-		z-index: 40;
+		background: var(--md-sys-color-surface-container-low);
+		border-radius: var(--md-sys-shape-corner-large);
 	}
 
-	.lk-sidebar-title {
-		font-size: var(--md-sys-typescale-title-medium);
-		font-weight: 500;
-		color: var(--md-sys-color-on-surface);
-		margin-bottom: 16px;
-	}
-
-	.lk-sidebar-toggle {
+	.lk-filters-toggle {
 		display: none;
-		position: fixed; top: 12px; left: 12px;
-		width: 40px; height: 40px;
-		background: var(--glass-bg);
-		backdrop-filter: blur(var(--glass-blur)) saturate(180%);
-		-webkit-backdrop-filter: blur(var(--glass-blur)) saturate(180%);
-		color: var(--md-sys-color-primary);
-		border: 1px solid var(--glass-border);
-		border-radius: 50%;
-		font-size: 20px; cursor: pointer;
-		z-index: 100;
-		box-shadow: var(--glass-shadow);
+		align-self: flex-start;
 	}
 
-	.lk-sidebar-search {
-		display: flex; gap: 6px;
-		margin-bottom: 16px;
-	}
-
-	.lk-sidebar-search input {
-		flex: 1; padding: 8px 12px;
-		border: 1px solid var(--md-sys-color-outline-variant);
-		border-radius: var(--md-sys-shape-corner-small);
-		font-size: 14px; font-family: inherit;
-		background: var(--md-sys-color-surface);
-		color: var(--md-sys-color-on-surface);
-		outline: none;
+	.lk-sidebar__search {
+		position: relative;
 	}
 
 	.lk-option-group {
-		margin-bottom: 20px;
+		display: flex;
+		flex-direction: column;
+		gap: 8px;
 	}
-
 	.lk-option-label {
-		font-size: 13px; font-weight: 600;
-		color: var(--md-sys-color-on-surface);
-		margin-bottom: 8px;
+		display: flex;
+		align-items: center;
+		gap: 6px;
+		font-size: var(--md-sys-typescale-title-small-size);
+		font-weight: 600;
+		color: var(--md-sys-color-on-surface-variant);
 	}
-
 	.lk-chip-row {
-		display: flex; flex-wrap: wrap; gap: 6px;
+		display: flex;
+		flex-wrap: wrap;
+		gap: 6px;
 	}
 
-	.lk-advanced-summary {
-		font-size: 13px; font-weight: 600;
+	/* 高级筛选 */
+	.lk-advanced {
+		background: var(--md-sys-color-surface-container);
+		border-radius: var(--md-sys-shape-corner-medium);
+	}
+	.lk-advanced__summary {
+		display: flex;
+		align-items: center;
+		justify-content: space-between;
+		gap: 8px;
+		padding: 12px 14px;
+		cursor: pointer;
+		list-style: none;
+		font-size: var(--md-sys-typescale-body-medium-size);
+		font-weight: 500;
 		color: var(--md-sys-color-on-surface);
-		cursor: pointer; margin-bottom: 12px;
+	}
+	.lk-advanced__summary::-webkit-details-marker {
+		display: none;
+	}
+	.lk-advanced__title {
+		display: flex;
+		align-items: center;
+		gap: 6px;
+	}
+	.lk-advanced__chevron {
+		display: flex;
+		color: var(--md-sys-color-on-surface-variant);
+		transition: transform 160ms ease-out;
+	}
+	.lk-advanced[open] .lk-advanced__chevron {
+		transform: rotate(180deg);
 	}
 
-	.lk-filter-group { margin-bottom: 12px; }
-	.lk-filter-group label { display: block; margin-bottom: 4px; font-size: 13px; font-weight: 500; color: var(--md-sys-color-on-surface-variant); }
-	.lk-filter-group input,
-	.lk-filter-group select {
-		width: 100%; padding: 6px 8px;
+	.lk-advanced-form {
+		display: flex;
+		flex-direction: column;
+		gap: 14px;
+		padding: 0 14px 14px;
+	}
+	.lk-field {
+		display: flex;
+		flex-direction: column;
+		gap: 6px;
+	}
+	.lk-field__row {
+		display: flex;
+		gap: 8px;
+	}
+	.lk-field__row .lk-input {
+		min-width: 0;
+	}
+	.lk-field__row .lk-select {
+		flex: 0 0 96px;
+	}
+	.lk-label {
+		font-size: var(--md-sys-typescale-label-medium-size);
+		color: var(--md-sys-color-on-surface-variant);
+	}
+	.lk-input {
+		width: 100%;
+		height: 40px;
+		padding: 0 12px;
+		font: inherit;
+		font-size: var(--md-sys-typescale-body-small-size);
+		color: var(--md-sys-color-on-surface);
+		background: var(--md-sys-color-surface);
 		border: 1px solid var(--md-sys-color-outline-variant);
 		border-radius: var(--md-sys-shape-corner-small);
-		font-size: 13px; font-family: inherit;
-		background: var(--md-sys-color-surface);
+	}
+	.lk-input:focus-visible {
+		outline: none;
+		border-color: var(--md-sys-color-primary);
+	}
+	select.lk-input[multiple] {
+		height: auto;
+		padding: 8px;
+	}
+	.lk-hint {
+		font-size: var(--md-sys-typescale-label-small-size);
+		color: var(--md-sys-color-on-surface-variant);
+	}
+	.lk-filter-actions {
+		display: flex;
+		flex-wrap: wrap;
+		gap: 8px;
+	}
+	.lk-sidebar__ad {
+		margin-top: auto;
+	}
+
+	/* ─── Main ─────────────────────────────────────────── */
+	.lk-main {
+		flex: 1;
+		min-width: 0;
+		display: flex;
+		flex-direction: column;
+		gap: 16px;
+	}
+	.lk-ad {
+		display: flex;
+		justify-content: center;
+	}
+
+	.lk-skeletons {
+		display: flex;
+		flex-direction: column;
+		gap: 12px;
+	}
+	.lk-skeleton-card {
+		display: flex;
+		flex-direction: column;
+		gap: 10px;
+	}
+
+	.lk-center-box {
+		display: flex;
+		flex-direction: column;
+		align-items: center;
+		gap: 12px;
+		padding: 40px 24px;
+		text-align: center;
+	}
+	.lk-center-box__icon {
+		color: var(--md-sys-color-error);
+	}
+	.lk-center-box__title {
+		margin: 0;
+		font-size: var(--md-sys-typescale-title-medium-size);
+		font-weight: 600;
 		color: var(--md-sys-color-on-surface);
 	}
-
-	.lk-filter-row {
-		display: flex; gap: 4px;
-	}
-	.lk-filter-row select { width: 60px; flex-shrink: 0; }
-	.lk-filter-row input { flex: 1; }
-
-	.lk-filter-hint {
-		display: block; margin-top: 4px;
-		color: var(--md-sys-color-on-surface-variant);
-		font-size: 12px;
-	}
-
-	.lk-filter-actions {
-		display: flex; gap: 8px; margin-top: 12px;
-	}
-
-	.lk-filter-btn {
-		flex: 1; height: 36px; padding: 0 16px; font-size: 13px;
-	}
-
-	/* ─── Center box (loading / error / empty) ────────── */
-	.lk-center-box {
-		display: flex; flex-direction: column;
-		align-items: center; justify-content: center;
-		padding: 60px 20px; min-height: 400px;
-		text-align: center;
-		background: var(--glass-bg);
-		backdrop-filter: blur(var(--glass-blur)) saturate(180%);
-		-webkit-backdrop-filter: blur(var(--glass-blur)) saturate(180%);
-		box-shadow: var(--glass-shadow);
-	}
-
-	.lk-spinner {
-		font-size: 80px;
-		animation: lk-spin 0.5s linear infinite;
-		display: inline-block;
-		color: var(--md-sys-color-primary);
-	}
-
-.lk-loading-tip {
-		text-align: center; line-height: 1.6;
-		max-width: 500px; margin-top: 20px;
+	.lk-center-box__text {
+		margin: 0;
+		max-width: 48ch;
+		font-size: var(--md-sys-typescale-body-medium-size);
+		line-height: 1.7;
 		color: var(--md-sys-color-on-surface-variant);
 	}
-	.lk-loading-tip small { font-size: 0.9em; opacity: 0.7; }
-
-	.lk-placeholder-box { max-width: 560px; margin: 0 auto; }
 	.lk-placeholder-badge {
-		display: inline-block;
-		background: var(--md-sys-color-secondary-container);
-		color: var(--md-sys-color-on-secondary-container);
-		font-size: 12px; font-weight: 600;
-		letter-spacing: 0.5px;
-		padding: 4px 12px;
-		border-radius: var(--md-sys-shape-corner-full);
-		margin-bottom: 12px;
+		margin-bottom: 4px;
 	}
 	.lk-placeholder-example {
-		display: inline-flex; align-items: center; gap: 8px;
-		margin-top: 20px; padding: 10px 16px;
-		background: var(--md-sys-color-surface-container);
-		border: 1px solid var(--md-sys-color-outline-variant);
+		display: inline-flex;
+		align-items: center;
+		gap: 6px;
+		margin: 4px 0 0;
+		padding: 8px 12px;
+		background: var(--md-sys-color-surface-container-high);
 		border-radius: var(--md-sys-shape-corner-small);
 		color: var(--md-sys-color-on-surface-variant);
 	}
-	.lk-placeholder-example code { font-family: var(--md-sys-code-font, monospace); font-size: 13px; }
+	.lk-placeholder-example code {
+		font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+		font-size: var(--md-sys-typescale-body-small-size);
+		word-break: break-all;
+	}
 
-/* ─── Script list ─────────────────────────────────── */
-	.lk-script-list {
-		list-style: none; padding: 0; margin: 0;
-		display: grid;
-		grid-template-columns: repeat(2, 1fr);
+	.lk-results {
+		list-style: none;
+		margin: 0;
+		padding: 0;
+		display: flex;
+		flex-direction: column;
 		gap: 12px;
 	}
 
-	.lk-result-item {
-		background: var(--glass-bg);
-		backdrop-filter: blur(var(--glass-blur)) saturate(180%);
-		-webkit-backdrop-filter: blur(var(--glass-blur)) saturate(180%);
-		border: 1px solid var(--glass-border);
-		border-radius: var(--md-sys-shape-corner-medium);
-		padding: 20px;
-		box-shadow: var(--glass-shadow);
-		opacity: 1;
-		min-width: 0;
-		contain: layout style;
-		transition: box-shadow var(--md-sys-motion-duration-short) var(--md-sys-motion-easing-standard);
-	}
-	.lk-result-item:hover {
-		background: var(--glass-bg-hover);
-		box-shadow: 0 12px 40px rgba(0,0,0,0.09);
-		transform: translateY(-2px);
-	}
-
-	.lk-result-item h2 {
-		margin: 0 0 10px; font-size: 16px;
-		display: flex; align-items: baseline; gap: 6px; flex-wrap: wrap;
-	}
-	.lk-result-item h2 > * { min-width: 0; }
-
-	.lk-script-link {
-		color: var(--md-sys-color-primary);
-		text-decoration: none; font-weight: 600;
-		overflow-wrap: anywhere;
-	}
-	.lk-script-link:hover { text-decoration: underline; }
-
-	.lk-badge-js {
-		background: var(--md-sys-color-primary-container);
-		color: var(--md-sys-color-on-primary-container);
-		padding: 1px 6px; border-radius: 3px;
-		font-size: 11px; font-weight: 600;
-	}
-
-	.lk-sep { color: var(--md-sys-color-outline-variant); }
-	.lk-script-desc { color: var(--md-sys-color-on-surface-variant); font-size: 14px; font-weight: normal; overflow-wrap: anywhere; }
-	.lk-script-meta { margin-top: 8px; }
-
-	.lk-stats {
-		display: flex; flex-wrap: wrap; gap: 4px 16px;
-		font-size: 13px; margin: 0 0 10px; padding: 0;
-	}
-	.lk-stats dt { color: var(--md-sys-color-on-surface-variant); }
-	.lk-stats dd { margin: 0 12px 0 4px; min-width: 0; overflow-wrap: anywhere; }
-	.lk-stats a { color: var(--md-sys-color-primary); text-decoration: none; }
-
-	.lk-ratings-cell .lk-good { color: #4caf50; }
-	.lk-ratings-cell .lk-ok { color: #ff9800; margin: 0 4px; }
-	.lk-ratings-cell .lk-bad { color: var(--md-sys-color-error); }
-
-	.lk-rating-bar {
-		display: inline-flex;
-		width: 80px;
-		height: 6px;
-		border-radius: 3px;
-		overflow: hidden;
-		margin-left: 8px;
-		vertical-align: middle;
-	}
-
-	.lk-rating-bar-good { background: #4caf50; height: 100%; display: inline-block; }
-	.lk-rating-bar-ok   { background: #ff9800; height: 100%; display: inline-block; }
-	.lk-rating-bar-bad  { background: var(--md-sys-color-error); height: 100%; display: inline-block; }
-
-	.lk-install-area { margin-top: 12px; }
-
-	/* ─── Pagination ──────────────────────────────────── */
 	.lk-pagination {
-		display: flex; justify-content: center; align-items: center;
-		gap: 8px; margin-top: 20px; padding: 12px 0;
-		font-size: 13px;
+		display: flex;
+		flex-wrap: wrap;
+		align-items: center;
+		justify-content: center;
+		gap: 8px;
 	}
-	.lk-pagination button:disabled { pointer-events: none; opacity: 0.4; }
-	.lk-current-page {
-		padding: 6px 14px; font-weight: 600;
+	.lk-pagination__page {
+		min-width: 40px;
+		text-align: center;
+		font-size: var(--md-sys-typescale-body-medium-size);
+		font-variant-numeric: tabular-nums;
 		color: var(--md-sys-color-on-surface);
 	}
 
-	.lk-warning-bar {
-		margin-top: 16px; padding: 10px 16px;
-		background: var(--md-sys-color-surface-container-highest);
-		border: 1px solid var(--md-sys-color-outline-variant);
-		border-radius: var(--md-sys-shape-corner-small);
-		font-size: 13px;
+	.lk-warning {
+		display: flex;
+		align-items: center;
+		justify-content: center;
+		gap: 6px;
+		margin: 0;
+		font-size: var(--md-sys-typescale-label-small-size);
 		color: var(--md-sys-color-on-surface-variant);
+		text-align: center;
 	}
 
-/* ─── Mobile ──────────────────────────────────────── */
-	@media (max-width: 768px) {
-		/* 顶栏 sticky z-index:50 会盖住 layout-body(z-index:1) 内的元素；
-		   因此开关按钮移到顶栏下方，避免与品牌区重叠而点不到 */
-		.lk-sidebar-toggle {
-			display: flex; align-items:center; justify-content:center;
-			top: 72px; right: 12px; left: auto;
+	/* ─── Responsive ───────────────────────────────────── */
+	@media (max-width: 839px) {
+		.lk-layout {
+			flex-direction: column;
 		}
-		.lk-layout { flex-direction: column; }
-		.lk-main { margin: 0; width: 100%; min-width: 0; overflow: hidden; }
-		.lk-page :global(.width-constraint) { padding: 16px; }
-		.lk-main :global(ins), .lk-main :global(iframe) { max-width: 100%; }
+		.lk-filters-toggle {
+			display: inline-flex;
+		}
 		.lk-sidebar {
-			display: none; position: fixed;
-			top: 64px; left: 0;
-			width: 280px; height: calc(100dvh - 64px);
-			z-index: 99;
-			border-radius: 0 var(--md-sys-shape-corner-medium) var(--md-sys-shape-corner-medium) 0;
-			box-shadow: var(--md-sys-elevation-4);
+			position: static;
+			width: 100%;
+			flex: none;
+			display: none;
 		}
-		.lk-sidebar.open { display: block; }
-
-		.lk-script-list { grid-template-columns: 1fr; }
+		.lk-sidebar.open {
+			display: flex;
+		}
 	}
 </style>

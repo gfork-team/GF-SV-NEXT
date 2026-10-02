@@ -9,7 +9,7 @@
 
 	const DLC = siteConfig.download;
 
-let stage = $state<string>('init');
+	let stage = $state<string>('init');
 	let progress = $state(0);
 	let progressText = $state('');
 	let scriptPath = $state('');
@@ -73,7 +73,9 @@ let stage = $state<string>('init');
 				return c.domain;
 			}
 			localStorage.removeItem(DLC.cacheKey);
-		} catch {}
+		} catch {
+			// localStorage 可能被禁用（隐私模式 / 配额），读缓存失败就当没缓存
+		}
 		return null;
 	}
 
@@ -81,7 +83,9 @@ let stage = $state<string>('init');
 		if (!userIP) return;
 		try {
 			localStorage.setItem(DLC.cacheKey, JSON.stringify({ ip: userIP, domain, time: Date.now() }));
-		} catch {}
+		} catch {
+			// 同上，写不进去也不影响下载流程
+		}
 	}
 
 	/** Test single domain via gfork.js injection in hidden iframe.
@@ -121,7 +125,9 @@ let stage = $state<string>('init');
 	}
 
 	/** Format domain for display (matches yuan's formatDomain). */
-	function formatDomain(d: string): string { return d.replace('https://', ''); }
+	function formatDomain(d: string): string {
+		return d.replace('https://', '');
+	}
 
 	/** Meta-refresh redirect (matches yuan's redirectWithMeta). */
 	function redirectWithMeta(url: string, delaySec: number) {
@@ -214,9 +220,12 @@ let stage = $state<string>('init');
 </script>
 
 <svelte:head>
-<title>{t(lang, 'download.title')} - ZGF</title>
+	<title>{t(lang, 'download.title')} - ZGF</title>
 	<meta name="description" content={t(lang, 'download.description')} />
-	<meta name="keywords" content="script download, userscript install, script acceleration download, greasyfork download, user script download" />
+	<meta
+		name="keywords"
+		content="script download, userscript install, script acceleration download, greasyfork download, user script download"
+	/>
 	<link rel="stylesheet" href="https://fonts.googleapis.com/icon?family=Material+Icons" />
 </svelte:head>
 
@@ -225,103 +234,131 @@ let stage = $state<string>('init');
 		<!-- 主列：状态卡片 -->
 		<div class="dl-main">
 			<div class="md3-card" id="download-app" style="min-height:400px">
-
-			<!-- no-path -->
-			{#if stage === 'no-path'}
-				<div class="dl-icon"><span class="material-icons">link</span></div>
-				<h1>{t(lang, 'download.title')}</h1>
-				<p class="dl-desc">{t(lang, 'download.no_path_title')}</p>
-				<div class="dl-tip">
-					{t(lang, 'download.no_path_desc')}
-				</div>
-				<div class="dl-url">{DLC.useQueryString ? '?path=example/your-script.user.js' : '#/example/your-script.user.js'}</div>
-				<div class="dl-tip">
-					{t(lang, 'download.no_path_example')}
-					<a href="/{lang}/l#/amidist/example.user.js" class="dl-example-link" rel="nofollow">#/.../example.user.js</a>
-				</div>
-				<div style="margin-top:20px">
-					<a href="/{lang}" class="md3-outlined-button">{t(lang, 'download.back_home')}</a>
-				</div>
-			{/if}
-
-			<!-- fetching-ip -->
-			{#if stage === 'fetching-ip'}
-				<div class="dl-icon"><span class="material-icons dl-spin">sync</span></div>
-				<h1>{t(lang, 'download.title')}</h1>
-				<p class="dl-desc">{progressText}</p>
-				<div class="dl-progress-bar"><div class="dl-progress-fill" style="width:{progress}%"></div></div>
-			{/if}
-
-	<!-- checking-cache / init -->
-			{#if stage === 'checking-cache' || stage === 'init'}
-				<div class="dl-icon"><span class="material-icons dl-spin">{stage === 'checking-cache' ? 'verified' : 'sync'}</span></div>
-				<h1>{stage === 'checking-cache' ? '校验中' : t(lang, 'download.title')}</h1>
-				<p class="dl-desc">{stage === 'checking-cache' ? '正在校验缓存节点...' : progressText}</p>
-				{#if scriptPath}
-					<div class="dl-url">{scriptPath}</div>
-				{/if}
-				{#if stage === 'checking-cache'}
-					<div class="dl-st">
-						<div class="dl-st-t">缓存节点</div>
-						<div class="dl-st-i ok"><span class="material-icons">cloud_done</span>{formatDomain(bestDomain)}</div>
+				<!-- no-path -->
+				{#if stage === 'no-path'}
+					<div class="dl-icon"><span class="material-icons">link</span></div>
+					<h1>{t(lang, 'download.title')}</h1>
+					<p class="dl-desc">{t(lang, 'download.no_path_title')}</p>
+					<div class="dl-tip">
+						{t(lang, 'download.no_path_desc')}
 					</div>
-					<div class="dl-tip">提示: 缓存有效期 {DLC.cacheDays} 天{#if userIP} (IP: {userIP}){/if}</div>
+					<div class="dl-url">
+						{DLC.useQueryString
+							? '?path=example/your-script.user.js'
+							: '#/example/your-script.user.js'}
+					</div>
+					<div class="dl-tip">
+						{t(lang, 'download.no_path_example')}
+						<a href="/{lang}/l#/amidist/example.user.js" class="dl-example-link" rel="nofollow"
+							>#/.../example.user.js</a
+						>
+					</div>
+					<div style="margin-top:20px">
+						<a href="/{lang}" class="md3-outlined-button">{t(lang, 'download.back_home')}</a>
+					</div>
 				{/if}
-			<div class="dl-progress-bar"><div class="dl-progress-fill" style="width:{progress}%"></div></div>
-		{/if}
 
-		<!-- testing -->
-			{#if stage === 'testing'}
-				<div class="dl-icon"><span class="material-icons dl-spin">speed</span></div>
-				<h1>{t(lang, 'download.testing')}</h1>
-				<p class="dl-desc">正在测试节点连接速度, 请稍候...</p>
-				{#if scriptPath}
-					<div class="dl-url">{scriptPath}</div>
+				<!-- fetching-ip -->
+				{#if stage === 'fetching-ip'}
+					<div class="dl-icon"><span class="material-icons dl-spin">sync</span></div>
+					<h1>{t(lang, 'download.title')}</h1>
+					<p class="dl-desc">{progressText}</p>
+					<div class="dl-progress-bar">
+						<div class="dl-progress-fill" style="width:{progress}%"></div>
+					</div>
 				{/if}
-				<div class="dl-st">
-					<div class="dl-st-t">测试节点 ({selectedDomains.length}个)</div>
-					{#each selectedDomains as d}
-						{@const r = testResults.find(t => t.domain === d)}
-						{@const pending = !r}
-						<div class="dl-st-i" class:ok={r !== undefined}>
-							<span class="material-icons">{pending ? 'pending' : 'check_circle'}</span>
-							{formatDomain(d)}
-							<span class="lat">{pending ? '等待中' : `${r.latency.toFixed(0)}ms`}</span>
+
+				<!-- checking-cache / init -->
+				{#if stage === 'checking-cache' || stage === 'init'}
+					<div class="dl-icon">
+						<span class="material-icons dl-spin"
+							>{stage === 'checking-cache' ? 'verified' : 'sync'}</span
+						>
+					</div>
+					<h1>{stage === 'checking-cache' ? '校验中' : t(lang, 'download.title')}</h1>
+					<p class="dl-desc">{stage === 'checking-cache' ? '正在校验缓存节点...' : progressText}</p>
+					{#if scriptPath}
+						<div class="dl-url">{scriptPath}</div>
+					{/if}
+					{#if stage === 'checking-cache'}
+						<div class="dl-st">
+							<div class="dl-st-t">缓存节点</div>
+							<div class="dl-st-i ok">
+								<span class="material-icons">cloud_done</span>{formatDomain(bestDomain)}
+							</div>
 						</div>
-					{/each}
-				</div>
-		<div class="dl-tip">提示: 正在随机测试 {selectedDomains.length} 个节点</div>
-		<div class="dl-progress-bar"><div class="dl-progress-fill" style="width:{progress}%"></div></div>
-	{/if}
-
-			<!-- success -->
-			{#if stage === 'success'}
-				<div class="dl-icon"><span class="material-icons ok">check_circle</span></div>
-				<h1>{t(lang, 'download.success')}</h1>
-				<p class="dl-desc">{cacheHit ? '缓存校验通过, 即将自动跳转' : '已选择最快节点, 即将自动跳转'}</p>
-				{#if !cacheHit}
-					<div class="dl-badge"><span class="material-icons">speed</span>最低延迟 {bestLatency.toFixed(0)}ms</div>
+						<div class="dl-tip">
+							提示: 缓存有效期 {DLC.cacheDays} 天{#if userIP}
+								(IP: {userIP}){/if}
+						</div>
+					{/if}
+					<div class="dl-progress-bar">
+						<div class="dl-progress-fill" style="width:{progress}%"></div>
+					</div>
 				{/if}
-		<div class="dl-url">{finalUrl}</div>
-		<a href={finalUrl} class="dl-btn" target="_blank" rel="noopener noreferrer"><span class="material-icons">open_in_new</span>{t(lang, 'download.manual')}</a>
-		<div class="dl-tip">若无法访问, 请重新整理再试</div>
-			{/if}
+
+				<!-- testing -->
+				{#if stage === 'testing'}
+					<div class="dl-icon"><span class="material-icons dl-spin">speed</span></div>
+					<h1>{t(lang, 'download.testing')}</h1>
+					<p class="dl-desc">正在测试节点连接速度, 请稍候...</p>
+					{#if scriptPath}
+						<div class="dl-url">{scriptPath}</div>
+					{/if}
+					<div class="dl-st">
+						<div class="dl-st-t">测试节点 ({selectedDomains.length}个)</div>
+						{#each selectedDomains as d (d)}
+							{@const r = testResults.find((t) => t.domain === d)}
+							{@const pending = !r}
+							<div class="dl-st-i" class:ok={r !== undefined}>
+								<span class="material-icons">{pending ? 'pending' : 'check_circle'}</span>
+								{formatDomain(d)}
+								<span class="lat">{pending ? '等待中' : `${r.latency.toFixed(0)}ms`}</span>
+							</div>
+						{/each}
+					</div>
+					<div class="dl-tip">提示: 正在随机测试 {selectedDomains.length} 个节点</div>
+					<div class="dl-progress-bar">
+						<div class="dl-progress-fill" style="width:{progress}%"></div>
+					</div>
+				{/if}
+
+				<!-- success -->
+				{#if stage === 'success'}
+					<div class="dl-icon"><span class="material-icons ok">check_circle</span></div>
+					<h1>{t(lang, 'download.success')}</h1>
+					<p class="dl-desc">
+						{cacheHit ? '缓存校验通过, 即将自动跳转' : '已选择最快节点, 即将自动跳转'}
+					</p>
+					{#if !cacheHit}
+						<div class="dl-badge">
+							<span class="material-icons">speed</span>最低延迟 {bestLatency.toFixed(0)}ms
+						</div>
+					{/if}
+					<div class="dl-url">{finalUrl}</div>
+					<a href={finalUrl} class="dl-btn" target="_blank" rel="noopener noreferrer"
+						><span class="material-icons">open_in_new</span>{t(lang, 'download.manual')}</a
+					>
+					<div class="dl-tip">若无法访问, 请重新整理再试</div>
+				{/if}
+			</div>
 		</div>
-	</div>
 
 		<!-- 侧栏：广告框 -->
 		{#if siteConfig.adsense.allowOnDownloadPage}
-		<aside class="dl-side">
-			<div class="dl-ad-box"><Ad type="sidebar" /></div>
-			<div class="dl-ad-box"><Ad type="auto" /></div>
-			<div class="dl-ad-box"><Ad type="fluid" /></div>
-		</aside>
+			<aside class="dl-side">
+				<div class="dl-ad-box"><Ad type="sidebar" /></div>
+				<div class="dl-ad-box"><Ad type="auto" /></div>
+				<div class="dl-ad-box"><Ad type="fluid" /></div>
+			</aside>
 		{/if}
 	</div>
 </section>
 
 <style>
-	.download-page { padding: 32px 0; }
+	.download-page {
+		padding: 32px 0;
+	}
 	.dl-grid {
 		display: grid;
 		grid-template-columns: minmax(0, 1fr) 300px;
@@ -331,10 +368,24 @@ let stage = $state<string>('init');
 		padding: 0 var(--md-sys-layout-side-margin, 16px);
 		align-items: start;
 	}
-	.dl-main { min-width: 0; }
-	.dl-main #download-app { max-width: 720px; margin: 0 auto; }
-	#download-app { padding: 48px 32px; text-align: center; }
-	.dl-side { display: flex; flex-direction: column; gap: 16px; position: sticky; top: 96px; }
+	.dl-main {
+		min-width: 0;
+	}
+	.dl-main #download-app {
+		max-width: 720px;
+		margin: 0 auto;
+	}
+	#download-app {
+		padding: 48px 32px;
+		text-align: center;
+	}
+	.dl-side {
+		display: flex;
+		flex-direction: column;
+		gap: 16px;
+		position: sticky;
+		top: 96px;
+	}
 	.dl-ad-box {
 		background: var(--glass-bg);
 		backdrop-filter: blur(var(--glass-blur));
@@ -345,34 +396,167 @@ let stage = $state<string>('init');
 		box-shadow: var(--glass-shadow);
 		min-height: 250px;
 	}
-	.dl-ad-box > :global(ins.adsbygoogle) { width: 100%; }
-	.dl-icon { margin-bottom: 24px; }
-	.dl-icon .material-icons { font-size: 64px; color: var(--md-sys-color-on-surface-variant); }
-	.dl-icon .material-icons.ok { color: var(--md-sys-color-primary); }
-	.dl-icon .material-icons.dl-spin { color: var(--md-sys-color-primary); animation: dl-spin 0.5s linear infinite; }
-	@keyframes dl-spin { from { transform: rotate(0deg) } to { transform: rotate(360deg) } }
-	#download-app h1 { font-family: var(--md-sys-typescale-headline-medium-font, inherit); font-size: 24px; font-weight: 600; margin: 0 0 12px; color: var(--md-sys-color-on-surface); }
-	.dl-desc { font-size: 15px; color: var(--md-sys-color-on-surface-variant); margin: 0 0 20px; }
-	.dl-url { font-size: 13px; color: var(--md-sys-color-outline); background: var(--md-sys-color-surface-container); padding: 8px 16px; border-radius: var(--md-sys-shape-corner-small); word-break: break-all; display: inline-block; max-width: 100%; margin-bottom: 16px; }
-	.dl-tip { font-size: 13px; color: var(--md-sys-color-outline); background: var(--md-sys-color-surface-container); padding: 12px 16px; border-radius: var(--md-sys-shape-corner-small); margin-top: 12px; word-break: break-all; }
-	.dl-badge { display: inline-flex; align-items: center; gap: 6px; font-size: 14px; color: var(--md-sys-color-primary); background: var(--md-sys-color-primary-container); padding: 6px 16px; border-radius: var(--md-sys-shape-corner-full); margin-bottom: 16px; }
-	.dl-badge .material-icons { font-size: 18px; }
-	.dl-st { text-align: left; max-width: 500px; margin: 16px auto; }
-	.dl-st-t { font-size: 13px; font-weight: 600; color: var(--md-sys-color-on-surface); margin-bottom: 8px; padding: 0 4px; }
-	.dl-st-i { display: flex; align-items: center; gap: 8px; padding: 8px 12px; border-radius: var(--md-sys-shape-corner-small); font-size: 13px; color: var(--md-sys-color-on-surface-variant); background: var(--md-sys-color-surface-container); margin-bottom: 4px; }
-	.dl-st-i .material-icons { font-size: 18px; color: var(--md-sys-color-outline); }
-	.dl-st-i.ok .material-icons { color: var(--md-sys-color-primary); }
-	.dl-st-i .lat { margin-left: auto; font-variant-numeric: tabular-nums; color: var(--md-sys-color-outline); font-size: 12px; }
-	.dl-st-i.ok .lat { color: var(--md-sys-color-primary); }
-	.dl-btn { display: inline-flex; align-items: center; gap: 6px; margin-top: 24px; padding: 10px 24px; background: var(--md-sys-color-primary); color: var(--md-sys-color-on-primary); border-radius: var(--md-sys-shape-corner-full); text-decoration: none; font-size: 14px; font-weight: 500; }
-	.dl-btn:hover { filter: brightness(1.1); }
-	.dl-btn .material-icons { font-size: 18px; }
-	.dl-example-link { color: var(--md-sys-color-primary); font-family: var(--md-sys-code-font, monospace); font-size: 13px; word-break: break-all; }
-	.dl-progress-bar { width: 100%; max-width: 400px; height: 4px; background: var(--md-sys-color-surface-container-highest); border-radius: 2px; margin: 16px auto 0; overflow: hidden; }
-	.dl-progress-fill { height: 100%; background: var(--md-sys-color-primary); border-radius: 2px; transition: width 0.3s ease; }
-	@media (max-width: 899px) {
-		.dl-grid { grid-template-columns: 1fr; }
-		.dl-side { position: static; }
+	.dl-ad-box > :global(ins.adsbygoogle) {
+		width: 100%;
 	}
-	@media (max-width: 600px) { #download-app { padding: 32px 16px; } }
+	.dl-icon {
+		margin-bottom: 24px;
+	}
+	.dl-icon .material-icons {
+		font-size: 64px;
+		color: var(--md-sys-color-on-surface-variant);
+	}
+	.dl-icon .material-icons.ok {
+		color: var(--md-sys-color-primary);
+	}
+	.dl-icon .material-icons.dl-spin {
+		color: var(--md-sys-color-primary);
+		animation: dl-spin 0.5s linear infinite;
+	}
+	@keyframes dl-spin {
+		from {
+			transform: rotate(0deg);
+		}
+		to {
+			transform: rotate(360deg);
+		}
+	}
+	#download-app h1 {
+		font-family: var(--md-sys-typescale-headline-medium-font, inherit);
+		font-size: 24px;
+		font-weight: 600;
+		margin: 0 0 12px;
+		color: var(--md-sys-color-on-surface);
+	}
+	.dl-desc {
+		font-size: 15px;
+		color: var(--md-sys-color-on-surface-variant);
+		margin: 0 0 20px;
+	}
+	.dl-url {
+		font-size: 13px;
+		color: var(--md-sys-color-outline);
+		background: var(--md-sys-color-surface-container);
+		padding: 8px 16px;
+		border-radius: var(--md-sys-shape-corner-small);
+		word-break: break-all;
+		display: inline-block;
+		max-width: 100%;
+		margin-bottom: 16px;
+	}
+	.dl-tip {
+		font-size: 13px;
+		color: var(--md-sys-color-outline);
+		background: var(--md-sys-color-surface-container);
+		padding: 12px 16px;
+		border-radius: var(--md-sys-shape-corner-small);
+		margin-top: 12px;
+		word-break: break-all;
+	}
+	.dl-badge {
+		display: inline-flex;
+		align-items: center;
+		gap: 6px;
+		font-size: 14px;
+		color: var(--md-sys-color-primary);
+		background: var(--md-sys-color-primary-container);
+		padding: 6px 16px;
+		border-radius: var(--md-sys-shape-corner-full);
+		margin-bottom: 16px;
+	}
+	.dl-badge .material-icons {
+		font-size: 18px;
+	}
+	.dl-st {
+		text-align: left;
+		max-width: 500px;
+		margin: 16px auto;
+	}
+	.dl-st-t {
+		font-size: 13px;
+		font-weight: 600;
+		color: var(--md-sys-color-on-surface);
+		margin-bottom: 8px;
+		padding: 0 4px;
+	}
+	.dl-st-i {
+		display: flex;
+		align-items: center;
+		gap: 8px;
+		padding: 8px 12px;
+		border-radius: var(--md-sys-shape-corner-small);
+		font-size: 13px;
+		color: var(--md-sys-color-on-surface-variant);
+		background: var(--md-sys-color-surface-container);
+		margin-bottom: 4px;
+	}
+	.dl-st-i .material-icons {
+		font-size: 18px;
+		color: var(--md-sys-color-outline);
+	}
+	.dl-st-i.ok .material-icons {
+		color: var(--md-sys-color-primary);
+	}
+	.dl-st-i .lat {
+		margin-left: auto;
+		font-variant-numeric: tabular-nums;
+		color: var(--md-sys-color-outline);
+		font-size: 12px;
+	}
+	.dl-st-i.ok .lat {
+		color: var(--md-sys-color-primary);
+	}
+	.dl-btn {
+		display: inline-flex;
+		align-items: center;
+		gap: 6px;
+		margin-top: 24px;
+		padding: 10px 24px;
+		background: var(--md-sys-color-primary);
+		color: var(--md-sys-color-on-primary);
+		border-radius: var(--md-sys-shape-corner-full);
+		text-decoration: none;
+		font-size: 14px;
+		font-weight: 500;
+	}
+	.dl-btn:hover {
+		filter: brightness(1.1);
+	}
+	.dl-btn .material-icons {
+		font-size: 18px;
+	}
+	.dl-example-link {
+		color: var(--md-sys-color-primary);
+		font-family: var(--md-sys-code-font, monospace);
+		font-size: 13px;
+		word-break: break-all;
+	}
+	.dl-progress-bar {
+		width: 100%;
+		max-width: 400px;
+		height: 4px;
+		background: var(--md-sys-color-surface-container-highest);
+		border-radius: 2px;
+		margin: 16px auto 0;
+		overflow: hidden;
+	}
+	.dl-progress-fill {
+		height: 100%;
+		background: var(--md-sys-color-primary);
+		border-radius: 2px;
+		transition: width 0.3s ease;
+	}
+	@media (max-width: 899px) {
+		.dl-grid {
+			grid-template-columns: 1fr;
+		}
+		.dl-side {
+			position: static;
+		}
+	}
+	@media (max-width: 600px) {
+		#download-app {
+			padding: 32px 16px;
+		}
+	}
 </style>

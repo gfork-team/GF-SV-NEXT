@@ -12,13 +12,13 @@
  */
 
 import {
-  SCHEMES,
-  getActiveSchemeId,
-  getDefaultSchemeId,
-  hasCustomScheme as hasCustom,
-  applyColorScheme,
-  saveSchemePreference,
-  clearSchemePreference,
+	SCHEMES,
+	getActiveSchemeId,
+	getDefaultSchemeId,
+	hasCustomScheme as hasCustom,
+	applyColorScheme,
+	saveSchemePreference,
+	clearSchemePreference
 } from './colors.ts';
 
 export type Theme = 'system' | 'light' | 'dark';
@@ -32,77 +32,85 @@ let _schemeId = $state<string>(SCHEMES[0].id);
 let _customScheme = $state<boolean>(false);
 
 /* ── Accessors ─────────────────────────────────── */
-export function getTheme(): Theme { return _theme; }
-export function getSchemeId(): string { return _schemeId; }
-export function getDefaultSchemeId_(): string { return getDefaultSchemeId(); }
-export function hasCustomScheme(): boolean { return _customScheme; }
+export function getTheme(): Theme {
+	return _theme;
+}
+export function getSchemeId(): string {
+	return _schemeId;
+}
+export function getDefaultSchemeId_(): string {
+	return getDefaultSchemeId();
+}
+export function hasCustomScheme(): boolean {
+	return _customScheme;
+}
 
 /* ── Internal apply helpers ─────────────────────── */
 
 function isDark(): boolean {
-  if (_theme === 'dark') return true;
-  if (_theme === 'light') return false;
-  return window.matchMedia('(prefers-color-scheme: dark)').matches;
+	if (_theme === 'dark') return true;
+	if (_theme === 'light') return false;
+	return window.matchMedia('(prefers-color-scheme: dark)').matches;
 }
 
 function applyTheme() {
-  const root = document.documentElement;
-  if (_theme === 'system') {
-    root.removeAttribute('data-theme');
-    localStorage.removeItem('gf-theme');
-  } else {
-    root.setAttribute('data-theme', _theme);
-    localStorage.setItem('gf-theme', _theme);
-  }
+	const root = document.documentElement;
+	if (_theme === 'system') {
+		root.removeAttribute('data-theme');
+		localStorage.removeItem('gf-theme');
+	} else {
+		root.setAttribute('data-theme', _theme);
+		localStorage.setItem('gf-theme', _theme);
+	}
 }
 
 function applyScheme() {
-  applyColorScheme(_schemeId, isDark());
+	applyColorScheme(_schemeId, isDark());
 }
 
 /* ── Public API ────────────────────────────────── */
 
 /** Call once in +layout.svelte onMount. */
 export function initTheme() {
-  const savedTheme = localStorage.getItem('gf-theme') as Theme | null;
-  if (savedTheme === 'light' || savedTheme === 'dark') {
-    _theme = savedTheme;
-  } else {
-    _theme = 'system';
-  }
+	const savedTheme = localStorage.getItem('gf-theme') as Theme | null;
+	if (savedTheme === 'light' || savedTheme === 'dark') {
+		_theme = savedTheme;
+	} else {
+		_theme = 'system';
+	}
 
-  _customScheme = hasCustom();
-  _schemeId = getActiveSchemeId();
+	_customScheme = hasCustom();
+	_schemeId = getActiveSchemeId();
 
-  applyTheme();
-  applyScheme();
+	applyTheme();
+	applyScheme();
 }
 
 /** Switch theme (light / dark / system). */
 export function setTheme(t: Theme) {
-  _theme = t;
-  applyTheme();
-  applyScheme();
+	_theme = t;
+	applyTheme();
+	applyScheme();
 }
 
 /** Switch to a custom color scheme (saves preference). */
 export function setScheme(id: string) {
-  _schemeId = id;
-  _customScheme = true;
-  saveSchemePreference(id);
-  applyScheme();
+	_schemeId = id;
+	_customScheme = true;
+	saveSchemePreference(id);
+	applyScheme();
 }
 
 /** Revert to site default color scheme (removes preference). */
 export function resetScheme() {
-  _schemeId = getDefaultSchemeId();
-  _customScheme = false;
-  clearSchemePreference();
-  applyScheme();
+	_schemeId = getDefaultSchemeId();
+	_customScheme = false;
+	clearSchemePreference();
+	applyScheme();
 }
 
 /** Call when system prefers-color-scheme changes (system mode only). */
 export function handleSystemChange() {
-  if (_theme !== 'system') return;
-  applyScheme();
+	if (_theme !== 'system') return;
+	applyScheme();
 }

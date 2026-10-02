@@ -48,10 +48,14 @@ for (const file of files) {
 	});
 	writeFileSync(file, minified, 'utf-8');
 	const pct = (((original.length - minified.length) / original.length) * 100).toFixed(1);
-	console.log(`${file}: ${(original.length / 1024).toFixed(1)}KB → ${(minified.length / 1024).toFixed(1)}KB (${pct}%)`);
+	console.log(
+		`${file}: ${(original.length / 1024).toFixed(1)}KB → ${(minified.length / 1024).toFixed(1)}KB (${pct}%)`
+	);
 	totalOriginal += original.length;
 	totalMinified += minified.length;
 }
 
 const totalPct = (((totalOriginal - totalMinified) / totalOriginal) * 100).toFixed(1);
-console.log(`\nTotal: ${(totalOriginal / 1024).toFixed(1)}KB → ${(totalMinified / 1024).toFixed(1)}KB (${totalPct}%)`);
+console.log(
+	`\nTotal: ${(totalOriginal / 1024).toFixed(1)}KB → ${(totalMinified / 1024).toFixed(1)}KB (${totalPct}%)`
+);

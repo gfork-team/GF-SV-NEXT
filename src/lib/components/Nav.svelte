@@ -1,135 +1,162 @@
 <script lang="ts">
 	import { page } from '$app/state';
 	import { goto } from '$app/navigation';
-	import { i18nConfig, type Lang } from '$i18n';
-	import { t } from '$i18n';
 	import { onMount } from 'svelte';
+	import { i18nConfig, t, type Lang } from '$i18n';
+	import { getTheme, setTheme } from '$lib/theme.svelte';
+	import SearchBar from '$components/SearchBar.svelte';
+	import Icon from '$components/Icon.svelte';
+	import type { IconName } from '$lib/icons';
 
 	let { lang }: { lang: Lang } = $props();
-	let mobileOpen = $state(false);
 
-	import { getTheme, setTheme, getSchemeId, getDefaultSchemeId_, hasCustomScheme, setScheme, resetScheme, SCHEMES } from '$lib/theme.svelte.ts';
-	import { getScheme } from '$lib/colors';
-
-	// Focus trap
-	let drawerRef = $state<HTMLElement>();
+	let menuOpen = $state(false);
+	let searchOpen = $state(false);
+	let themeOpen = $state(false);
+	let langOpen = $state(false);
+	let menuRef = $state<HTMLElement | null>(null);
+	let menuBtn = $state<HTMLButtonElement | null>(null);
 	let theme = $derived(getTheme());
-	let schemeId = $derived(getSchemeId());
-	let defaultScheme = $derived(getScheme(getDefaultSchemeId_()));
-	let showColorPicker = $state(false);
-	let showThemeDropdown = $state(false);
-	let brandName = 'GFork Proxy';
-	onMount(() => {
-		const handleKey = (e: KeyboardEvent) => {
-			if (!mobileOpen) return;
-			if (e.key === 'Escape') { mobileOpen = false; return; }
-			if (e.key === 'Tab' && drawerRef) {
-				const focusable = drawerRef.querySelectorAll<HTMLElement>(
-					'a[href], button:not([disabled]), input, select, textarea, [tabindex]:not([tabindex="-1"])'
-				);
-				if (focusable.length === 0) return;
-				const first = focusable[0], last = focusable[focusable.length - 1];
-				if (e.shiftKey) { if (document.activeElement === first) { e.preventDefault(); last.focus(); } }
-				else { if (document.activeElement === last) { e.preventDefault(); first.focus(); } }
-			}
-		};
-		const handleClickOutside = (e: MouseEvent) => {
-			const target = e.target as HTMLElement;
-			if (showColorPicker && !target.closest('.m3-color-selector')) showColorPicker = false;
-			if (showThemeDropdown && !target.closest('.m3-theme-selector')) showThemeDropdown = false;
-		};
-		document.addEventListener('keydown', handleKey);
-		document.addEventListener('click', handleClickOutside);
-		return () => {
-			document.removeEventListener('keydown', handleKey);
-			document.removeEventListener('click', handleClickOutside);
-		};
-	});
 
 	const navItems = $derived([
 		{ href: `/${lang}`, label: t(lang, 'nav.home') },
-		{ href: `/${lang}/search`, label: t(lang, 'nav.search') },
+		{ href: `/${lang}/lookup`, label: t(lang, 'nav.lookup') },
 		{ href: `/${lang}/help`, label: t(lang, 'nav.help') },
 		{ href: `/${lang}/about`, label: t(lang, 'nav.about') }
 	]);
 
 	const langItems = i18nConfig.supportedLangs.map((l) => ({
 		lang: l,
-		label: i18nConfig.langDisplayNames[l],
-		href: page.url.pathname.replace(/^\/[^/]+/, `/${l}`)
+		label: i18nConfig.langDisplayNames[l]
 	}));
 
+	const themeOptions: { value: 'light' | 'dark' | 'system'; icon: IconName }[] = [
+		{ value: 'light', icon: 'sun' },
+		{ value: 'dark', icon: 'moon' },
+		{ value: 'system', icon: 'globe' }
+	];
+
+	const themeIcon = $derived(themeOptions.find((o) => o.value === theme)?.icon ?? 'globe');
+
+	function isActive(href: string) {
+		const path = page.url.pathname;
+		return path === href || (href !== `/${lang}` && path.startsWith(href));
+	}
+
 	function switchLang(newLang: Lang) {
+		langOpen = false;
+		menuOpen = false;
 		goto(page.url.pathname.replace(/^\/[^/]+/, `/${newLang}`));
 	}
-	const isActive = (href: string) => page.url.pathname === href;
+
+	function closeAll() {
+		menuOpen = false;
+		themeOpen = false;
+		langOpen = false;
+	}
+
+	onMount(() => {
+		const onKey = (e: KeyboardEvent) => {
+			if (e.key !== 'Escape') return;
+			closeAll();
+			if (searchOpen) searchOpen = false;
+		};
+		const onPointer = (e: PointerEvent) => {
+			const target = e.target as HTMLElement;
+			if (menuOpen && menuRef && !menuRef.contains(target) && !menuBtn?.contains(target))
+				menuOpen = false;
+			if (themeOpen && !(target.closest('.appbar__theme') ?? false)) themeOpen = false;
+			if (langOpen && !(target.closest('.appbar__lang') ?? false)) langOpen = false;
+		};
+		document.addEventListener('keydown', onKey);
+		document.addEventListener('pointerdown', onPointer);
+		return () => {
+			document.removeEventListener('keydown', onKey);
+			document.removeEventListener('pointerdown', onPointer);
+		};
+	});
+
+	$effect(() => {
+		// 路由变化后收起所有浮层
+		void page.url.pathname;
+		closeAll();
+	});
 </script>
 
-<header class="m3-nav-header glass-nav">
-	<nav class="m3-nav-inner">
-		<a href="/{lang}" class="m3-nav-brand" data-sveltekit-preload-data="hover" aria-label="GFork Proxy">
-			<span class="m3-nav-brand-text">{brandName}</span>
+<a class="skip-link" href="#main">{t(lang, 'nav.skip_to_content')}</a>
+
+<header class="appbar">
+	<div class="appbar__row ui-container">
+		<a
+			class="appbar__brand"
+			href="/{lang}"
+			aria-label="GFork Proxy"
+			data-sveltekit-preload-data="hover"
+		>
+			GFork<span class="appbar__brand-accent">Proxy</span>
 		</a>
 
-		<!-- Desktop links -->
-		<div class="m3-nav-links">
-			{#each navItems as item}
-				<a href={item.href} class="m3-nav-link" class:m3-nav-link--active={isActive(item.href)} data-sveltekit-preload-data="hover">
+		<nav class="appbar__links" aria-label={t(lang, 'nav.menu')}>
+			{#each navItems as item (item.href)}
+				<a
+					href={item.href}
+					class="appbar__link"
+					class:appbar__link--active={isActive(item.href)}
+					aria-current={isActive(item.href) ? 'page' : undefined}
+					data-sveltekit-preload-data="hover"
+				>
 					{item.label}
 				</a>
 			{/each}
+		</nav>
 
-			<!-- Language selector -->
-			<div class="m3-lang-selector">
-				<button class="m3-lang-btn">
-					{i18nConfig.langDisplayNames[lang]}
-					<svg class="m3-lang-chevron" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-						<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
-					</svg>
-				</button>
-				<div class="m3-lang-dropdown">
-					{#each langItems as item}
-						<button onclick={() => switchLang(item.lang)} class="m3-lang-option">{item.label}</button>
-					{/each}
-				</div>
-			</div>
+		<div class="appbar__search">
+			<SearchBar id="appbar" {lang} />
+		</div>
 
-			<!-- Color scheme picker -->
-			<div class="m3-color-selector">
-				<button class="m3-color-btn" onclick={() => showColorPicker = !showColorPicker} aria-label="Choose color theme">
-					<svg class="m3-color-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-						<circle cx="12" cy="12" r="10" />
-						<circle cx="12" cy="12" r="4" fill="var(--md-sys-color-primary)" stroke="none" />
-					</svg>
+		<div class="appbar__actions">
+			<button
+				type="button"
+				class="ui-icon-btn appbar__search-toggle"
+				aria-expanded={searchOpen}
+				aria-controls="appbar-search-row"
+				aria-label={t(lang, 'nav.search_open')}
+				onclick={() => (searchOpen = !searchOpen)}
+			>
+				<Icon name={searchOpen ? 'close' : 'search'} size={22} />
+			</button>
+
+			<div class="appbar__theme">
+				<button
+					type="button"
+					class="ui-icon-btn"
+					aria-haspopup="menu"
+					aria-expanded={themeOpen}
+					aria-label={t(lang, 'theme.theme')}
+					onclick={() => {
+						themeOpen = !themeOpen;
+						langOpen = false;
+					}}
+				>
+					<Icon name={themeIcon} size={22} />
 				</button>
-				{#if showColorPicker}
-					<div class="m3-color-dropdown">
-						<p class="m3-color-group-label">{t(lang, 'theme.default_scheme')}</p>
-						<button
-							class="m3-color-swatch m3-color-swatch--default"
-							class:m3-color-swatch--active={!hasCustomScheme()}
-							style:background={defaultScheme.swatch}
-							onclick={() => { resetScheme(); showColorPicker = false; }}
-							title={defaultScheme.label}
-						>
-							<span class="m3-swatch-default-label">A</span>
-							{#if !hasCustomScheme()}
-								<svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="3"><path d="M5 13l4 4L19 7" stroke-linecap="round" stroke-linejoin="round"/></svg>
-							{/if}
-						</button>
-						<div class="m3-color-divider"></div>
-						<p class="m3-color-group-label">{t(lang, 'theme.custom_scheme')}</p>
-						{#each SCHEMES as scheme (scheme.id)}
+				{#if themeOpen}
+					<div class="menu" role="menu" aria-label={t(lang, 'theme.theme')}>
+						{#each themeOptions as opt (opt.value)}
 							<button
-								class="m3-color-swatch"
-								class:m3-color-swatch--active={hasCustomScheme() && schemeId === scheme.id}
-								style:background={scheme.swatch}
-								onclick={() => { setScheme(scheme.id); showColorPicker = false; }}
-								aria-label={scheme.label}
-								title={scheme.label}
+								type="button"
+								class="menu__item"
+								role="menuitemradio"
+								aria-checked={theme === opt.value}
+								onclick={() => {
+									setTheme(opt.value);
+									themeOpen = false;
+								}}
 							>
-								{#if hasCustomScheme() && schemeId === scheme.id}
-									<svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="3"><path d="M5 13l4 4L19 7" stroke-linecap="round" stroke-linejoin="round"/></svg>
+								<Icon name={opt.icon} size={18} />
+								<span>{t(lang, `theme.${opt.value}`)}</span>
+								{#if theme === opt.value}
+									<Icon name="check" size={18} class="menu__check" />
 								{/if}
 							</button>
 						{/each}
@@ -137,576 +164,324 @@
 				{/if}
 			</div>
 
-			<!-- Theme selector -->
-			<div class="m3-theme-selector">
-				<button class="m3-theme-btn" onclick={() => showThemeDropdown = !showThemeDropdown}>
-					{#if theme === 'light'}
-						<svg class="m3-theme-icon" fill="currentColor" viewBox="0 0 24 24">
-							<path d="M12 3V1m0 22v-2M4.22 4.22l1.42 1.42m12.72 12.72l1.42 1.42M1 12h2m18 0h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42M12 7a5 5 0 110 10 5 5 0 010-10z"/>
-						</svg>
-					{:else if theme === 'dark'}
-						<svg class="m3-theme-icon" fill="currentColor" viewBox="0 0 24 24">
-							<path d="M12 3a9 9 0 109 9c0-4.97-4.03-9-9-9z"/>
-						</svg>
-					{:else}
-						<svg class="m3-theme-icon" fill="currentColor" viewBox="0 0 24 24">
-							<path d="M12 2a10 10 0 1010 10A10 10 0 0012 2zm0 18a8 8 0 110-16 8 8 0 018 8 8 8 0 01-8 8z"/>
-						</svg>
-					{/if}
-					<span class="m3-theme-label">{t(lang, 'theme.' + theme)}</span>
-					<svg class="m3-theme-chevron" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-						<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
-					</svg>
+			<div class="appbar__lang">
+				<button
+					type="button"
+					class="appbar__lang-btn"
+					aria-haspopup="menu"
+					aria-expanded={langOpen}
+					aria-label={t(lang, 'nav.language')}
+					onclick={() => {
+						langOpen = !langOpen;
+						themeOpen = false;
+					}}
+				>
+					<Icon name="globe" size={20} />
+					<span class="appbar__lang-code"
+						>{lang === 'zh-hans'
+							? '简'
+							: lang === 'zh-hant'
+								? '繁'
+								: lang === 'en'
+									? 'EN'
+									: 'JA'}</span
+					>
+					<Icon name="chevron-down" size={16} />
 				</button>
-				{#if showThemeDropdown}
-					<div class="m3-theme-dropdown">
-						<button class="m3-theme-option" class:m3-theme-option--active={theme === 'light'} onclick={() => { setTheme('light'); showThemeDropdown = false; }}>
-							<svg width="18" height="18" fill="currentColor" viewBox="0 0 24 24"><path d="M12 3V1m0 22v-2M4.22 4.22l1.42 1.42m12.72 12.72l1.42 1.42M1 12h2m18 0h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42M12 7a5 5 0 110 10 5 5 0 010-10z"/></svg>
-							<span>{t(lang, 'theme.light')}</span>
-							{#if theme === 'light'}<svg class="m3-theme-check" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><path d="M5 13l4 4L19 7" stroke-linecap="round" stroke-linejoin="round"/></svg>{/if}
-						</button>
-						<button class="m3-theme-option" class:m3-theme-option--active={theme === 'dark'} onclick={() => { setTheme('dark'); showThemeDropdown = false; }}>
-							<svg width="18" height="18" fill="currentColor" viewBox="0 0 24 24"><path d="M12 3a9 9 0 109 9c0-4.97-4.03-9-9-9z"/></svg>
-							<span>{t(lang, 'theme.dark')}</span>
-							{#if theme === 'dark'}<svg class="m3-theme-check" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><path d="M5 13l4 4L19 7" stroke-linecap="round" stroke-linejoin="round"/></svg>{/if}
-						</button>
-						<button class="m3-theme-option" class:m3-theme-option--active={theme === 'system'} onclick={() => { setTheme('system'); showThemeDropdown = false; }}>
-							<svg width="18" height="18" fill="currentColor" viewBox="0 0 24 24"><path d="M12 2a10 10 0 1010 10A10 10 0 0012 2zm0 18a8 8 0 110-16 8 8 0 018 8 8 8 0 01-8 8z"/></svg>
-							<span>{t(lang, 'theme.system')}</span>
-							{#if theme === 'system'}<svg class="m3-theme-check" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><path d="M5 13l4 4L19 7" stroke-linecap="round" stroke-linejoin="round"/></svg>{/if}
-						</button>
+				{#if langOpen}
+					<div class="menu" role="menu" aria-label={t(lang, 'nav.language')}>
+						{#each langItems as item (item.lang)}
+							<button
+								type="button"
+								class="menu__item"
+								role="menuitemradio"
+								aria-checked={item.lang === lang}
+								onclick={() => switchLang(item.lang)}
+							>
+								<span>{item.label}</span>
+								{#if item.lang === lang}
+									<Icon name="check" size={18} class="menu__check" />
+								{/if}
+							</button>
+						{/each}
 					</div>
 				{/if}
 			</div>
+
+			<button
+				type="button"
+				class="ui-icon-btn appbar__menu-btn"
+				aria-haspopup="menu"
+				aria-expanded={menuOpen}
+				aria-label={t(lang, 'nav.menu')}
+				bind:this={menuBtn}
+				onclick={() => (menuOpen = !menuOpen)}
+			>
+				<Icon name={menuOpen ? 'close' : 'list'} size={22} />
+			</button>
 		</div>
+	</div>
 
-		<!-- Mobile hamburger -->
-		<button class="m3-hamburger" onclick={() => mobileOpen = !mobileOpen} aria-label="Toggle menu">
-			<svg class="m3-hamburger-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-				{#if mobileOpen}
-					<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
-				{:else}
-					<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16" />
-				{/if}
-			</svg>
-		</button>
-	</nav>
-</header>
+	{#if searchOpen}
+		<div class="appbar__search-row ui-container" id="appbar-search-row">
+			<SearchBar id="appbar-mobile" {lang} />
+		</div>
+	{/if}
 
-<!-- Mobile drawer -->
-{#if mobileOpen}
-	<button class="m3-drawer-overlay" onclick={() => mobileOpen = false} aria-label="Close menu"></button>
-	<nav class="m3-drawer" class:open={mobileOpen} bind:this={drawerRef}>
-			<div class="m3-drawer-header">
-				<span class="m3-drawer-title">
-					<span class="material-symbols-outlined m3-drawer-title-icon" aria-hidden="true">bolt</span>
-					{brandName}
-				</span>
-				<button class="m3-drawer-close" onclick={() => mobileOpen = false} aria-label="Close menu">
-					<svg class="m3-drawer-close-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-						<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
-					</svg>
-				</button>
-			</div>
-
-			{#each navItems as item}
-				<a href={item.href} class="m3-drawer-item" class:m3-drawer-item--active={isActive(item.href)} onclick={() => mobileOpen = false} data-sveltekit-preload-data="hover">
-					{item.label}
-				</a>
-			{/each}
-
-			<div class="m3-drawer-divider"></div>
-
-			<p class="m3-drawer-lang-label">{t(lang, 'lang.' + lang)}</p>
-			{#each langItems as item}
-				<button class="m3-drawer-item" onclick={() => { switchLang(item.lang); mobileOpen = false; }}>
-					{item.label}
-				</button>
-			{/each}
-
-			<!-- Theme toggle (mobile) -->
-			<div class="m3-drawer-theme">
-				<p class="m3-drawer-theme-label">{t(lang, 'theme.theme')}</p>
-				<button class="m3-drawer-theme-btn" onclick={() => {
-					if (theme === 'light') setTheme('dark');
-					else if (theme === 'dark') setTheme('system');
-					else setTheme('light');
-				}}>
-						{#if theme === 'light'}
-							<svg width="20" height="20" fill="currentColor" viewBox="0 0 24 24" style="margin-right:8px;flex-shrink:0"><path d="M12 3a9 9 0 109 9c0-4.97-4.03-9-9-9z"/></svg>{t(lang, 'theme.dark')}
-						{/if}
-						{#if theme === 'dark'}
-							<svg width="20" height="20" fill="currentColor" viewBox="0 0 24 24" style="margin-right:8px;flex-shrink:0"><path d="M12 3V1m0 22v-2M4.22 4.22l1.42 1.42m12.72 12.72l1.42 1.42M1 12h2m18 0h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42M12 7a5 5 0 110 10 5 5 0 010-10z"/></svg>{t(lang, 'theme.light')}
-						{/if}
-						{#if theme === 'system'}
-							<svg width="20" height="20" fill="currentColor" viewBox="0 0 24 24" style="margin-right:8px;flex-shrink:0"><path d="M12 2a10 10 0 1010 10A10 10 0 0012 2zm0 18a8 8 0 110-16 8 8 0 018 8 8 8 0 01-8 8z"/></svg>{t(lang, 'theme.system')}
-						{/if}
-				</button>
-			</div>
-
-			<!-- Color scheme picker (mobile) -->
-			<div class="m3-drawer-colors">
-				<p class="m3-drawer-colors-label">{t(lang, 'theme.picker_title')}</p>
-				<p class="m3-drawer-colors-sublabel">{t(lang, 'theme.default_scheme')}</p>
-				<div class="m3-drawer-swatch-row">
-					<button
-						class="m3-drawer-swatch m3-drawer-swatch--default"
-						class:m3-drawer-swatch--active={!hasCustomScheme()}
-						style:background={defaultScheme.swatch}
-						onclick={() => resetScheme()}
-						title={defaultScheme.label}
-					>
-						<span class="m3-swatch-default-label">A</span>
-						{#if !hasCustomScheme()}
-							<svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="3"><path d="M5 13l4 4L19 7" stroke-linecap="round" stroke-linejoin="round"/></svg>
-						{/if}
-					</button>
-				</div>
-				<p class="m3-drawer-colors-sublabel" style="margin-top:8px">{t(lang, 'theme.custom_scheme')}</p>
-				<div class="m3-drawer-swatch-row">
-					{#each SCHEMES as scheme (scheme.id)}
-						<button
-							class="m3-drawer-swatch"
-							class:m3-drawer-swatch--active={hasCustomScheme() && schemeId === scheme.id}
-							style:background={scheme.swatch}
-							onclick={() => setScheme(scheme.id)}
-							aria-label={scheme.label}
-							title={scheme.label}
+	{#if menuOpen}
+		<nav class="sheet" bind:this={menuRef} aria-label={t(lang, 'nav.menu')}>
+			<ul class="sheet__list">
+				{#each navItems as item (item.href)}
+					<li>
+						<a
+							href={item.href}
+							class="sheet__item"
+							class:sheet__item--active={isActive(item.href)}
+							onclick={() => (menuOpen = false)}
 						>
-							{#if hasCustomScheme() && schemeId === scheme.id}
-								<svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="3"><path d="M5 13l4 4L19 7" stroke-linecap="round" stroke-linejoin="round"/></svg>
-							{/if}
+							{item.label}
+							{#if isActive(item.href)}<Icon name="check" size={18} />{/if}
+						</a>
+					</li>
+				{/each}
+			</ul>
+			<div class="sheet__divider ui-divider"></div>
+			<div class="sheet__group">
+				<span class="sheet__label">{t(lang, 'nav.language')}</span>
+				<div class="sheet__langs">
+					{#each langItems as item (item.lang)}
+						<button
+							type="button"
+							class="ui-chip"
+							class:ui-chip--selected={item.lang === lang}
+							onclick={() => switchLang(item.lang)}
+						>
+							{item.label}
+						</button>
+					{/each}
+				</div>
+			</div>
+			<div class="sheet__group">
+				<span class="sheet__label">{t(lang, 'theme.theme')}</span>
+				<div class="sheet__themes">
+					{#each themeOptions as opt (opt.value)}
+						<button
+							type="button"
+							class="ui-btn ui-btn--outlined ui-btn--sm"
+							aria-pressed={theme === opt.value}
+							onclick={() => setTheme(opt.value)}
+						>
+							<Icon name={opt.icon} size={16} />
+							{t(lang, `theme.${opt.value}`)}
 						</button>
 					{/each}
 				</div>
 			</div>
 		</nav>
 	{/if}
+</header>
 
 <style>
-	/* ─── 鏀垮姟绠€绾﹂厤鑹插彉閲忥細浠呭湪榛樿涓婚涓嬪惎鐢紙data-zh-china="1"锛?── */
-	:global(:root) {
-		--zh-ink: #1f1f1f;
-		--zh-ink-deep: #111111;
-		--zh-ink-soft: #5f5f5f;
-		--zh-azure: #1d5fa8;
-		--zh-azure-soft: #6b93c2;
-		--zh-seal: #ddaacc;
-		--zh-seal-deep: #c86b8a;
-		--zh-seal-bright: #eed3e5;
-		--zh-seal-soft: #f8edf4;
-		--zh-seal-ink: #a34a6b;
-		--zh-gold: #b98a1e;
-		--zh-gold-deep: #9a731a;
-		--zh-ivory: #f5f5f5;
-		--zh-ivory-bright: #ffffff;
-		--zh-paper: #fafafa;
-		--zh-line: #e5e5e5;
-		--zh-serif: "Noto Serif SC", "Source Han Serif SC", "Songti SC", "STSong", "SimSun", Georgia, "Times New Roman", serif;
+	.appbar {
+		position: sticky;
+		top: 0;
+		z-index: 60;
+		background: var(--md-sys-color-surface);
+		border-bottom: 1px solid var(--md-sys-color-outline-variant);
 	}
-
-	/* ─── Top bar ─────────────────────── */
-	.m3-nav-header {
-		position: sticky; top: 0; z-index: 50;
-		height: 64px; display: flex; align-items: center;
-		padding: 0 var(--md-sys-layout-side-margin);
-	}
-	/* 榛樿涓婚锛堟棤鑷畾涔夐厤鑹诧級锛氭斂鍔＄畝绾?脳 鐧界幓鐠冿紙gov.cn 寮忥級 */
-	:global(:root[data-zh-china="1"]) .m3-nav-header {
-		height: 72px;
-		background: rgba(255,255,255,.68);
-		backdrop-filter: blur(20px) saturate(160%);
-		-webkit-backdrop-filter: blur(20px) saturate(160%);
-		box-shadow: none;
-		border-bottom: none;
-	}
-	/* 默认主题暗色模式：深色玻璃顶栏 */
-	:global(:root[data-zh-china="1"][data-theme="dark"]) .m3-nav-header {
-		background: rgba(18,20,24,.7);
-		box-shadow: none;
-		border-bottom: none;
-	}
-	@media (prefers-color-scheme: dark) {
-		:global(:root[data-zh-china="1"]:not([data-theme])) .m3-nav-header {
-			background: rgba(18,20,24,.7);
-			box-shadow: none;
-			border-bottom: none;
-		}
-	}
-	.m3-nav-inner {
-		display: flex; align-items: center; justify-content: space-between;
-		width: 100%; max-width: var(--md-sys-layout-max-width); margin: 0 auto;
-	}
-	.m3-nav-brand {
-		display: inline-flex; align-items: center; gap: 10px;
-		color: var(--md-sys-color-on-surface); text-decoration: none;
-		flex-shrink: 0;
-		transition: opacity var(--md-sys-motion-duration-short) var(--md-sys-motion-easing-standard);
-	}
-	.m3-nav-brand:hover { opacity: .85; }
-	:global(:root[data-zh-china="1"]) .m3-nav-brand { color: var(--zh-ink-deep); }
-	.m3-nav-brand-text {
-		font-size: var(--md-sys-typescale-title-large); font-weight: 600;
-		white-space: nowrap;
-	}
-	:global(:root[data-zh-china="1"]) .m3-nav-brand-text {
-		font-size: 21px; font-weight: 700; letter-spacing: -0.01em;
-	}
-
-	/* ─── Desktop links ───────────────── */
-	.m3-nav-links {
-		display: none; align-items: center; gap: 2px;
-	}
-	.m3-nav-link {
-		display: inline-flex; align-items: center; padding: 12px 16px; height: 40px;
-		font-size: var(--md-sys-typescale-label-large); font-weight: 500;
-		color: var(--md-sys-color-on-surface-variant); text-decoration: none;
-		border-bottom: 3px solid transparent; position: relative; overflow: hidden;
-		border-radius: var(--md-sys-shape-corner-full) var(--md-sys-shape-corner-full) 0 0;
-		transition: color var(--md-sys-motion-duration-short) var(--md-sys-motion-easing-standard),
-		            background var(--md-sys-motion-duration-short) var(--md-sys-motion-easing-standard);
-	}
-	.m3-nav-link:hover { color: var(--md-sys-color-on-surface); background: var(--md-sys-color-surface-variant); }
-	.m3-nav-link--active { color: var(--md-sys-color-primary) !important; }
-	.m3-nav-link--active:after, .m3-nav-link:hover:after {
-		content: ''; position: absolute; bottom: 0; left: 50%; width: 100%; height: 3px;
-		background: var(--md-sys-color-primary);
-		transform: translate(-50%) scaleX(0);
-		transition: transform var(--md-sys-motion-duration-medium) var(--md-sys-motion-easing-emphasized);
-		transform-origin: center;
-	}
-	.m3-nav-link--active:after { transform: translate(-50%) scaleX(1); }
-	/* 鏀垮姟椋庡鑸摼鎺ワ紙hover 鍙樼孩锛屾縺娲荤孩瀛椾笅鍒掔嚎锛?*/
-	:global(:root[data-zh-china="1"]) .m3-nav-link {
-		padding: 8px 14px;
-		border-radius: 6px;
-		color: var(--zh-ink);
-		letter-spacing: 0;
-		border-bottom: none;
-		transition:
-			color 160ms ease-out,
-			background 160ms ease-out;
-	}
-	:global(:root[data-zh-china="1"]) .m3-nav-link:hover { color: var(--zh-seal-ink); background: rgba(221,170,204,.14); }
-	:global(:root[data-zh-china="1"]) .m3-nav-link:active { transform: scale(.96); transition: none; }
-	:global(:root[data-zh-china="1"]) .m3-nav-link--active { color: var(--zh-seal-ink) !important; font-weight: 600; }
-	:global(:root[data-zh-china="1"]) .m3-nav-link--active:after,
-	:global(:root[data-zh-china="1"]) .m3-nav-link:hover:after {
-		content: ''; position: absolute; left: 50%; bottom: 2px;
-		width: 24px; height: 2px;
-		background: var(--zh-seal);
-		border-radius: 1px;
-		transform: translate(-50%);
-	}
-
-	/* ─── Language selector ─────────────── */
-	.m3-lang-selector { position: relative; margin-left: 8px; }
-	.m3-lang-btn {
-		display: inline-flex; align-items: center; gap: 6px;
-		padding: 10px 20px; height: 40px;
-		background: var(--md-sys-color-secondary-container);
-		color: var(--md-sys-color-on-secondary-container);
-		border: none; border-radius: var(--md-sys-shape-corner-full);
-		font-family: inherit; font-size: var(--md-sys-typescale-label-large); font-weight: 500;
-		cursor: pointer;
-		transition: all var(--md-sys-motion-duration-short) var(--md-sys-motion-easing-standard);
-		white-space: nowrap;
-	}
-	.m3-lang-btn:hover { filter: brightness(.95); box-shadow: var(--md-sys-elevation-1); }
-	:global(:root[data-zh-china="1"]) .m3-lang-btn {
-		background: var(--zh-ivory-bright);
-		color: var(--zh-ink);
-		border: 1px solid var(--zh-line);
-		border-radius: 6px;
-		box-shadow: none;
-		transition: all 160ms ease-out;
-	}
-	:global(:root[data-zh-china="1"]) .m3-lang-btn:hover { background: var(--zh-paper); border-color: var(--zh-azure-soft); filter: none; }
-	:global(:root[data-zh-china="1"]) .m3-lang-btn:active { transform: scale(.95); transition: none; }
-	.m3-lang-chevron { width: 16px; height: 16px; flex-shrink: 0; }
-	.m3-lang-dropdown {
-		position: absolute; right: 0; top: calc(100% + 4px); min-width: 140px;
-		background: var(--md-sys-color-surface-container);
-		border-radius: var(--md-sys-shape-corner-extra-small);
-		box-shadow: var(--md-sys-elevation-2);
-		border: 1px solid var(--md-sys-color-outline-variant);
-		overflow: hidden;
-		opacity: 0; visibility: hidden; transform: translateY(-4px);
-		transition: all var(--md-sys-motion-duration-short) var(--md-sys-motion-easing-standard);
-		z-index: 100;
-	}
-	.m3-lang-selector:hover .m3-lang-dropdown { opacity: 1; visibility: visible; transform: translateY(0); }
-	.m3-lang-option {
-		display: block; width: 100%; padding: 12px 16px; text-align: left;
-		font-family: inherit; font-size: var(--md-sys-typescale-body-medium);
-		color: var(--md-sys-color-on-surface); background: none;
-		border: none; cursor: pointer;
-		transition: background var(--md-sys-motion-duration-short) var(--md-sys-motion-easing-standard);
-	}
-	.m3-lang-option:hover { background: var(--md-sys-color-surface-variant); }
-
-	/* ─── Color picker (desktop) ──────── */
-	.m3-color-selector { position: relative; margin-left: 4px; }
-	.m3-color-btn {
-		display: inline-flex; align-items: center; justify-content: center;
-		width: 40px; height: 40px; border-radius: var(--md-sys-shape-corner-full);
-		border: none; background: transparent; color: var(--md-sys-color-on-surface-variant);
-		cursor: pointer;
-		transition: all var(--md-sys-motion-duration-short) var(--md-sys-motion-easing-standard);
-		flex-shrink: 0;
-	}
-	.m3-color-btn:hover { background: var(--md-sys-color-surface-variant); color: var(--md-sys-color-primary); }
-	:global(:root[data-zh-china="1"]) .m3-color-btn {
-		border-radius: 999px; color: var(--zh-ink);
-	}
-	:global(:root[data-zh-china="1"]) .m3-color-btn:hover { background: var(--zh-paper); color: var(--zh-seal-ink); }
-	.m3-color-icon { width: 20px; height: 20px; }
-	.m3-color-dropdown {
-		position: absolute; right: 0; top: calc(100% + 8px);
-		display: flex; gap: 8px; padding: 12px;
-		background: var(--md-sys-color-surface-container);
-		border-radius: var(--md-sys-shape-corner-medium);
-		box-shadow: var(--md-sys-elevation-3);
-		border: 1px solid var(--md-sys-color-outline-variant);
-		z-index: 100;
-	}
-	.m3-color-swatch {
-		width: 32px; height: 32px; border-radius: var(--md-sys-shape-corner-full);
-		border: 3px solid transparent; cursor: pointer;
-		transition: transform var(--md-sys-motion-duration-short) var(--md-sys-motion-easing-standard),
-		            border-color var(--md-sys-motion-duration-short) var(--md-sys-motion-easing-standard);
-		display: inline-flex; align-items: center; justify-content: center;
-		padding: 0;
-	}
-	.m3-color-swatch:hover { transform: scale(1.15); }
-	.m3-color-swatch--active { border-color: var(--md-sys-color-on-surface); }
-	.m3-color-swatch--default {
-		position: relative;
-		border: 2px dashed var(--md-sys-color-outline-variant);
-	}
-	.m3-color-swatch--default.m3-color-swatch--active {
-		border: 3px solid var(--md-sys-color-on-surface);
-	}
-	.m3-swatch-default-label {
-		position: absolute;
-		font-size: 12px; font-weight: 700; line-height: 1;
-		color: #fff; text-shadow: 0 1px 2px rgba(0,0,0,0.5);
-		pointer-events: none;
-	}
-	.m3-color-group-label {
-		font-size: 11px;
-		color: var(--md-sys-color-on-surface-variant);
-		margin: 0 0 4px 0;
-		text-transform: uppercase;
-		letter-spacing: .5px;
-	}
-	.m3-color-divider {
-		width: 100%; height: 1px;
-		background: var(--md-sys-color-outline-variant);
-		margin: 4px 0;
-	}
-	.m3-color-swatch svg { width: 16px; height: 16px; }
-
-	/* ─── Theme selector (desktop) ──────── */
-	.m3-theme-selector { position: relative; margin-left: 4px; }
-	.m3-theme-btn {
-		display: inline-flex; align-items: center; gap: 6px;
-		padding: 10px 14px; height: 40px;
-		background: var(--md-sys-color-surface-variant);
-		color: var(--md-sys-color-on-surface-variant);
-		border: none; border-radius: var(--md-sys-shape-corner-full);
-		font-family: inherit; font-size: var(--md-sys-typescale-label-large); font-weight: 500;
-		cursor: pointer; white-space: nowrap;
-		transition: all var(--md-sys-motion-duration-short) var(--md-sys-motion-easing-standard);
-	}
-	.m3-theme-btn:hover { background: var(--md-sys-color-surface-container-highest); color: var(--md-sys-color-on-surface); }
-	:global(:root[data-zh-china="1"]) .m3-theme-btn {
-		background: var(--zh-ivory-bright);
-		color: var(--zh-ink);
-		border: 1px solid var(--zh-line);
-		border-radius: 6px;
-		box-shadow: none;
-		transition: all 160ms ease-out;
-	}
-	:global(:root[data-zh-china="1"]) .m3-theme-btn:hover { background: var(--zh-paper); border-color: var(--zh-azure-soft); }
-	:global(:root[data-zh-china="1"]) .m3-theme-btn:active { transform: scale(.95); transition: none; }
-	.m3-theme-icon { width: 18px; height: 18px; flex-shrink: 0; }
-	.m3-theme-label { font-size: var(--md-sys-typescale-label-large); }
-	.m3-theme-chevron { width: 14px; height: 14px; flex-shrink: 0; }
-	.m3-theme-dropdown {
-		position: absolute; right: 0; top: calc(100% + 4px); min-width: 160px;
-		background: var(--md-sys-color-surface-container);
-		border-radius: var(--md-sys-shape-corner-extra-small);
-		box-shadow: var(--md-sys-elevation-2);
-		border: 1px solid var(--md-sys-color-outline-variant);
-		overflow: hidden; z-index: 100;
-	}
-	.m3-theme-option {
-		display: flex; align-items: center; gap: 10px;
-		width: 100%; padding: 12px 16px; text-align: left;
-		font-family: inherit; font-size: var(--md-sys-typescale-body-medium);
-		color: var(--md-sys-color-on-surface); background: none;
-		border: none; cursor: pointer;
-		transition: background var(--md-sys-motion-duration-short) var(--md-sys-motion-easing-standard);
-	}
-	.m3-theme-option:hover { background: var(--md-sys-color-surface-variant); }
-	.m3-theme-option--active { color: var(--md-sys-color-primary); background: var(--md-sys-color-primary-container); }
-	.m3-theme-check { width: 16px; height: 16px; margin-left: auto; flex-shrink: 0; }
-
-	/* ─── Hamburger ──────────────────── */
-	.m3-hamburger {
-		display: flex; align-items: center; justify-content: center;
-		width: 48px; height: 48px; background: none; border: none;
-		border-radius: var(--md-sys-shape-corner-full);
-		color: var(--md-sys-color-on-surface); cursor: pointer;
-		transition: background var(--md-sys-motion-duration-short) var(--md-sys-motion-easing-standard);
-		flex-shrink: 0;
-	}
-	.m3-hamburger:hover { background: var(--md-sys-color-surface-variant); }
-	:global(:root[data-zh-china="1"]) .m3-hamburger {
-		border-radius: 6px; color: var(--zh-ink);
-	}
-	:global(:root[data-zh-china="1"]) .m3-hamburger:hover { background: var(--zh-paper); }
-	:global(:root[data-zh-china="1"]) .m3-hamburger:active { transform: scale(.92); transition: none; }
-	.m3-hamburger-icon { width: 24px; height: 24px; }
-
-	/* ─── Drawer ─────────────────────── */
-	.m3-drawer-overlay {
-		position: fixed; top: 0; right: 0; bottom: 0; left: 0;
-		background: #0000004d; z-index: 80; border: none; cursor: pointer;
-	}
-	.m3-drawer {
-		position: fixed; top: 0; right: 0; bottom: 0;
-		width: 320px; max-width: 85vw;
-		background: var(--md-sys-color-surface-container-low);
-		z-index: 90; padding: 24px 16px;
-		display: flex; flex-direction: column; gap: 2px;
-		box-shadow: var(--md-sys-elevation-3); overflow-y: auto;
-		transform: translate(100%);
-		transition: transform var(--md-sys-motion-duration-medium) var(--md-sys-motion-easing-emphasized);
-	}
-	.m3-drawer.open { transform: translate(0); }
-	.m3-drawer-header {
-		display: flex; align-items: center; justify-content: space-between;
+	.appbar__row {
+		display: flex;
+		align-items: center;
 		gap: 8px;
-		padding: 10px 12px 14px; border-bottom: 1px solid var(--md-sys-color-outline-variant);
-		margin-bottom: 8px;
+		height: 60px;
 	}
-	:global(:root[data-zh-china="1"]) .m3-drawer-header {
-		border-bottom: 1px solid var(--zh-line);
-		background: var(--zh-paper);
-		border-radius: 6px 6px 0 0;
-		margin: -8px 0 8px;
-	}
-	.m3-drawer-title {
-		display: inline-flex; align-items: center; gap: 8px;
-		font-size: var(--md-sys-typescale-title-medium); font-weight: 600;
+	.appbar__brand {
+		flex: none;
+		font-size: var(--md-sys-typescale-title-medium-size);
+		font-weight: 700;
 		color: var(--md-sys-color-on-surface);
+		letter-spacing: 0.2px;
 	}
-	:global(:root[data-zh-china="1"]) .m3-drawer-title {
-		color: var(--zh-ink-deep);
-	}
-	.m3-drawer-title-icon {
-		font-size: 22px; line-height: 1;
+	.appbar__brand-accent {
 		color: var(--md-sys-color-primary);
 	}
-	:global(:root[data-zh-china="1"]) .m3-drawer-title-icon { color: var(--zh-seal); }
-	.m3-drawer-close {
-		display: flex; align-items: center; justify-content: center;
-		width: 40px; height: 40px; background: none; border: none;
-		border-radius: var(--md-sys-shape-corner-full); color: var(--md-sys-color-on-surface);
-		cursor: pointer;
-		transition: background var(--md-sys-motion-duration-short) var(--md-sys-motion-easing-standard);
+	.appbar__links {
+		display: none;
+		flex: none;
+		gap: 2px;
 	}
-	.m3-drawer-close:hover { background: var(--md-sys-color-surface-variant); }
-	:global(:root[data-zh-china="1"]) .m3-drawer-close { border-radius: 999px; color: var(--zh-ink); }
-	:global(:root[data-zh-china="1"]) .m3-drawer-close:hover { background: var(--zh-paper); }
-	.m3-drawer-close-icon { width: 20px; height: 20px; }
-	.m3-drawer-item {
-		display: flex; align-items: center; gap: 12px; padding: 14px 16px;
+	.appbar__link {
+		display: inline-flex;
+		align-items: center;
+		height: 40px;
+		padding: 0 12px;
 		border-radius: var(--md-sys-shape-corner-full);
-		font-size: var(--md-sys-typescale-body-large); font-weight: 500;
-		color: var(--md-sys-color-on-surface-variant); text-decoration: none;
-		transition: all var(--md-sys-motion-duration-short) var(--md-sys-motion-easing-standard);
-		font-family: inherit; background: none; border: none; cursor: pointer;
-		width: 100%; text-align: left; position: relative; overflow: hidden;
+		color: var(--md-sys-color-on-surface-variant);
+		font-size: var(--md-sys-typescale-label-large-size);
 	}
-	.m3-drawer-item:hover { background: var(--md-sys-color-surface-variant); color: var(--md-sys-color-on-surface); }
-	.m3-drawer-item--active { color: var(--md-sys-color-primary) !important; background: var(--md-sys-color-primary-container) !important; }
-	:global(:root[data-zh-china="1"]) .m3-drawer-item { border-radius: 6px; }
-	:global(:root[data-zh-china="1"]) .m3-drawer-item--active { color: var(--zh-seal-ink) !important; background: rgba(221,170,204,.14) !important; font-weight: 600; }
-	.m3-drawer-divider { height: 1px; background: var(--md-sys-color-outline-variant); margin: 8px; }
-	.m3-drawer-lang-label { padding: 8px 16px; font-size: var(--md-sys-typescale-label-medium); color: var(--md-sys-color-on-surface-variant); }
-
-	/* ─── Drawer: theme + color ──────── */
-	.m3-drawer-theme { padding: 16px 8px 0; margin-top: auto; border-top: 1px solid var(--md-sys-color-outline-variant); }
-	.m3-drawer-theme-btn {
-		display: flex; align-items: center; gap: 8px; width: 100%; padding: 12px 16px;
-		border-radius: var(--md-sys-shape-corner-full); border: none; background: none;
-		font-family: inherit; font-size: var(--md-sys-typescale-body-large);
-		color: var(--md-sys-color-on-surface-variant); cursor: pointer;
-		transition: background var(--md-sys-motion-duration-short) var(--md-sys-motion-easing-standard);
+	.appbar__link:hover {
+		background: var(--md-sys-color-surface-container-high);
+		color: var(--md-sys-color-on-surface);
 	}
-	.m3-drawer-theme { padding: 8px 8px 0; }
-	.m3-drawer-theme-label { padding: 0 16px 4px; font-size: var(--md-sys-typescale-label-medium); color: var(--md-sys-color-on-surface-variant); }
-	.m3-drawer-theme-btn:hover { background: var(--md-sys-color-surface-variant); }
-	.m3-drawer-colors { padding: 16px 8px 0; }
-	.m3-drawer-colors-label { padding: 0 16px 4px; font-size: var(--md-sys-typescale-label-medium); color: var(--md-sys-color-on-surface-variant); }
-	.m3-drawer-colors-sublabel { padding: 0 16px 4px; font-size: 11px; color: var(--md-sys-color-on-surface-variant); text-transform: uppercase; letter-spacing: .5px; }
-	.m3-drawer-swatch-row { display: flex; gap: 10px; padding: 0 16px; flex-wrap: wrap; }
-	.m3-drawer-swatch {
-		width: 36px; height: 36px; border-radius: var(--md-sys-shape-corner-full);
-		border: 3px solid transparent; cursor: pointer;
-		transition: transform var(--md-sys-motion-duration-short) var(--md-sys-motion-easing-standard),
-		            border-color var(--md-sys-motion-duration-short) var(--md-sys-motion-easing-standard);
-		display: inline-flex; align-items: center; justify-content: center; padding: 0;
+	.appbar__link--active {
+		background: var(--md-sys-color-secondary-container);
+		color: var(--md-sys-color-on-secondary-container);
+		font-weight: 500;
 	}
-	.m3-drawer-swatch:hover { transform: scale(1.1); }
-	.m3-drawer-swatch--active { border-color: var(--md-sys-color-on-surface); }
-	.m3-drawer-swatch--default {
+	.appbar__search {
+		display: none;
+		flex: 1;
+		min-width: 0;
+		max-width: 420px;
+		margin-left: auto;
+	}
+	.appbar__actions {
+		display: flex;
+		align-items: center;
+		gap: 2px;
+		margin-left: auto;
+	}
+	.appbar__theme,
+	.appbar__lang {
 		position: relative;
-		border: 2px dashed var(--md-sys-color-outline-variant);
 	}
-	.m3-drawer-swatch--default.m3-drawer-swatch--active {
-		border: 3px solid var(--md-sys-color-on-surface);
+	.appbar__lang-btn {
+		display: inline-flex;
+		align-items: center;
+		gap: 4px;
+		height: 40px;
+		padding: 0 8px;
+		background: transparent;
+		color: var(--md-sys-color-on-surface-variant);
+		border: none;
+		border-radius: var(--md-sys-shape-corner-full);
+		font-size: var(--md-sys-typescale-label-large-size);
+		cursor: pointer;
 	}
-	.m3-drawer-swatch svg { width: 18px; height: 18px; }
+	.appbar__lang-btn:hover {
+		background: var(--md-sys-color-surface-container-high);
+		color: var(--md-sys-color-on-surface);
+	}
+	.appbar__lang-code {
+		font-weight: 600;
+	}
 
-	/* ─── 鏃犻殰纰嶇劍鐐圭幆 ─────────────────── */
-	:global(:root[data-zh-china="1"]) .m3-nav-link:focus-visible,
-	:global(:root[data-zh-china="1"]) .m3-lang-btn:focus-visible,
-	:global(:root[data-zh-china="1"]) .m3-theme-btn:focus-visible,
-	:global(:root[data-zh-china="1"]) .m3-hamburger:focus-visible,
-	:global(:root[data-zh-china="1"]) .m3-drawer-close:focus-visible {
-		outline: 2px solid var(--zh-seal);
-		outline-offset: 2px;
+	.menu {
+		position: absolute;
+		top: calc(100% + 6px);
+		right: 0;
+		z-index: 40;
+		min-width: 176px;
+		padding: 8px;
+		background: var(--md-sys-color-surface-container-high);
+		border: 1px solid var(--md-sys-color-outline-variant);
+		border-radius: var(--md-sys-shape-corner-small);
+	}
+	.menu__item {
+		display: flex;
+		align-items: center;
+		gap: 10px;
+		width: 100%;
+		min-height: 40px;
+		padding: 0 12px;
+		background: transparent;
+		color: var(--md-sys-color-on-surface);
+		border: none;
+		border-radius: var(--md-sys-shape-corner-extra-small);
+		font-size: var(--md-sys-typescale-body-medium-size);
+		text-align: left;
+		cursor: pointer;
+	}
+	.menu__item:hover {
+		background: var(--md-sys-color-surface-container-highest);
+	}
+	:global(.menu__check) {
+		margin-left: auto;
+		color: var(--md-sys-color-primary);
 	}
 
-	/* ─── 鍑忓皯鍔ㄦ€侊紙鏃犻殰纰嶏級─────────────── */
-	@media (prefers-reduced-motion: reduce) {
-		:global(:root[data-zh-china="1"]) .m3-nav-header,
-		:global(:root[data-zh-china="1"]) .m3-nav-link,
-		:global(:root[data-zh-china="1"]) .m3-lang-btn,
-		:global(:root[data-zh-china="1"]) .m3-theme-btn,
-		:global(:root[data-zh-china="1"]) .m3-hamburger,
-		:global(:root[data-zh-china="1"]) .m3-nav-link:active,
-		:global(:root[data-zh-china="1"]) .m3-lang-btn:active,
-		:global(:root[data-zh-china="1"]) .m3-theme-btn:active,
-		:global(:root[data-zh-china="1"]) .m3-hamburger:active {
-			transition: none !important;
-			transform: none !important;
+	.appbar__search-row {
+		display: flex;
+		padding-top: 4px;
+		padding-bottom: 12px;
+	}
+
+	.sheet {
+		position: absolute;
+		left: 0;
+		right: 0;
+		top: 100%;
+		z-index: 50;
+		padding: 12px var(--md-sys-layout-side-margin) 20px;
+		background: var(--md-sys-color-surface-container-low);
+		border-bottom: 1px solid var(--md-sys-color-outline-variant);
+	}
+	.sheet__list {
+		list-style: none;
+		padding: 0;
+	}
+	.sheet__item {
+		display: flex;
+		align-items: center;
+		justify-content: space-between;
+		min-height: 48px;
+		padding: 0 12px;
+		border-radius: var(--md-sys-shape-corner-full);
+		color: var(--md-sys-color-on-surface-variant);
+		font-size: var(--md-sys-typescale-body-large-size);
+	}
+	.sheet__item:hover {
+		background: var(--md-sys-color-surface-container-high);
+		color: var(--md-sys-color-on-surface);
+	}
+	.sheet__item--active {
+		background: var(--md-sys-color-secondary-container);
+		color: var(--md-sys-color-on-secondary-container);
+		font-weight: 500;
+	}
+	.sheet__divider {
+		margin: 12px 0;
+	}
+	.sheet__group {
+		padding: 8px 12px;
+	}
+	.sheet__label {
+		display: block;
+		margin-bottom: 8px;
+		color: var(--md-sys-color-on-surface-variant);
+		font-size: var(--md-sys-typescale-label-medium-size);
+	}
+	.sheet__langs,
+	.sheet__themes {
+		display: flex;
+		flex-wrap: wrap;
+		gap: 8px;
+	}
+
+	@media (min-width: 600px) {
+		.appbar__row {
+			height: 64px;
 		}
 	}
-
-	/* ─── Responsive ─────────────────── */
-	@media (min-width: 768px) {
-		.m3-nav-links { display: flex; }
-		.m3-hamburger { display: none; }
-	}
-	@media (max-width: 767px) {
-		.m3-nav-links { display: none; }
-		.m3-hamburger { display: flex; }
-		:global(:root[data-zh-china="1"]) .m3-nav-header { height: 64px; }
-		:global(:root[data-zh-china="1"]) .m3-nav-brand-text { font-size: 17px; letter-spacing: 0; }
+	@media (min-width: 840px) {
+		.appbar__links {
+			display: flex;
+		}
+		.appbar__search {
+			display: block;
+		}
+		.appbar__actions {
+			margin-left: 12px;
+		}
+		.appbar__search-toggle,
+		.appbar__menu-btn {
+			display: none;
+		}
+		.appbar__search-row {
+			display: none;
+		}
+		.sheet {
+			display: none;
+		}
 	}
 </style>

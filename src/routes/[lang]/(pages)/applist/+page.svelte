@@ -5,13 +5,15 @@
 
 	let { data }: { data: PageData } = $props();
 	let lang: Lang = $derived(data.lang);
-
 </script>
 
 <svelte:head>
-<title>{t(lang, 'meta.applist_title')}</title>
+	<title>{t(lang, 'meta.applist_title')}</title>
 	<meta name="description" content={t(lang, 'meta.applist_desc')} />
-	<meta name="keywords" content="userscript managers, tampermonkey, greasemonkey, scriptcat, violentmonkey, browser extensions, user script managers" />
+	<meta
+		name="keywords"
+		content="userscript managers, tampermonkey, greasemonkey, scriptcat, violentmonkey, browser extensions, user script managers"
+	/>
 </svelte:head>
 
 <div class="width-constraint" style="padding-top:32px;padding-bottom:32px">
@@ -26,51 +28,125 @@
 			<li>
 				<strong>Google Chrome</strong>：
 				<ul>
-					<li><a href="https://docs.scriptcat.org/" target="_blank" rel="noopener">ScriptCat</a></li>
-					<li><a href="https://www.tampermonkey.net/index.php?browser=chrome" target="_blank" rel="noopener">Tampermonkey</a></li>
-					<li><a href="https://chromewebstore.google.com/detail/violentmonkey/jinjaccalgkegednnccohejagnlnfdag" target="_blank" rel="noopener">Violentmonkey</a></li>
+					<li>
+						<a href="https://docs.scriptcat.org/" target="_blank" rel="noopener">ScriptCat</a>
+					</li>
+					<li>
+						<a
+							href="https://www.tampermonkey.net/index.php?browser=chrome"
+							target="_blank"
+							rel="noopener">Tampermonkey</a
+						>
+					</li>
+					<li>
+						<a
+							href="https://chromewebstore.google.com/detail/violentmonkey/jinjaccalgkegednnccohejagnlnfdag"
+							target="_blank"
+							rel="noopener">Violentmonkey</a
+						>
+					</li>
 				</ul>
 			</li>
 
 			<li>
 				<strong>Microsoft Edge</strong>：
 				<ul>
-					<li><a href="https://docs.scriptcat.org/" target="_blank" rel="noopener">ScriptCat</a></li>
-					<li><a href="https://microsoftedge.microsoft.com/addons/detail/tampermonkey/iikmkjmpaadaobahmlepeloendndfphd" target="_blank" rel="noopener">Tampermonkey</a></li>
-					<li><a href="https://microsoftedge.microsoft.com/addons/detail/violentmonkey/eeagobfjdenkkddmbclomhiblgggliao" target="_blank" rel="noopener">Violentmonkey</a></li>
+					<li>
+						<a href="https://docs.scriptcat.org/" target="_blank" rel="noopener">ScriptCat</a>
+					</li>
+					<li>
+						<a
+							href="https://microsoftedge.microsoft.com/addons/detail/tampermonkey/iikmkjmpaadaobahmlepeloendndfphd"
+							target="_blank"
+							rel="noopener">Tampermonkey</a
+						>
+					</li>
+					<li>
+						<a
+							href="https://microsoftedge.microsoft.com/addons/detail/violentmonkey/eeagobfjdenkkddmbclomhiblgggliao"
+							target="_blank"
+							rel="noopener">Violentmonkey</a
+						>
+					</li>
 				</ul>
 			</li>
 
 			<li>
 				<strong>Mozilla Firefox</strong>：
 				<ul>
-					<li><a href="https://docs.scriptcat.org/" target="_blank" rel="noopener">ScriptCat</a></li>
-					<li><a href="https://addons.mozilla.org/firefox/addon/greasemonkey/" target="_blank" rel="noopener">Greasemonkey</a></li>
-					<li><a href="https://addons.mozilla.org/firefox/addon/tampermonkey/" target="_blank" rel="noopener">Tampermonkey</a></li>
-					<li><a href="https://addons.mozilla.org/firefox/addon/violentmonkey/" target="_blank" rel="noopener">Violentmonkey</a></li>
+					<li>
+						<a href="https://docs.scriptcat.org/" target="_blank" rel="noopener">ScriptCat</a>
+					</li>
+					<li>
+						<a
+							href="https://addons.mozilla.org/firefox/addon/greasemonkey/"
+							target="_blank"
+							rel="noopener">Greasemonkey</a
+						>
+					</li>
+					<li>
+						<a
+							href="https://addons.mozilla.org/firefox/addon/tampermonkey/"
+							target="_blank"
+							rel="noopener">Tampermonkey</a
+						>
+					</li>
+					<li>
+						<a
+							href="https://addons.mozilla.org/firefox/addon/violentmonkey/"
+							target="_blank"
+							rel="noopener">Violentmonkey</a
+						>
+					</li>
 				</ul>
 			</li>
 
 			<li>
 				<strong>Safari</strong>：
 				<ul>
-					<li><a href="https://www.tampermonkey.net/?browser=safari" target="_blank" rel="noopener">Tampermonkey</a></li>
-					<li><a href="https://apps.apple.com/app/userscripts/id1463298887" target="_blank" rel="noopener">Userscripts</a></li>
+					<li>
+						<a href="https://www.tampermonkey.net/?browser=safari" target="_blank" rel="noopener"
+							>Tampermonkey</a
+						>
+					</li>
+					<li>
+						<a
+							href="https://apps.apple.com/app/userscripts/id1463298887"
+							target="_blank"
+							rel="noopener">Userscripts</a
+						>
+					</li>
 				</ul>
 			</li>
 
 			<li>
 				<strong>Opera</strong>：
 				<ul>
-					<li><a href="https://addons.opera.com/extensions/details/tampermonkey-beta/" target="_blank" rel="noopener">Tampermonkey</a></li>
-					<li><a href="https://violentmonkey.github.io/get-it/" target="_blank" rel="noopener">Violentmonkey</a></li>
+					<li>
+						<a
+							href="https://addons.opera.com/extensions/details/tampermonkey-beta/"
+							target="_blank"
+							rel="noopener">Tampermonkey</a
+						>
+					</li>
+					<li>
+						<a href="https://violentmonkey.github.io/get-it/" target="_blank" rel="noopener"
+							>Violentmonkey</a
+						>
+					</li>
 				</ul>
 			</li>
 
 			<li>
 				<strong>Maxthon</strong>：
 				<ul>
-					<li><a href="http://extension.maxthon.com/detail/index.php?view_id=1680" target="_blank" rel="noopener">Violentmonkey</a></li>
+					<li>
+						<a
+							href="http://extension.maxthon.com/detail/index.php?view_id=1680"
+							target="_blank"
+							rel="noopener">Violentmonkey</a
+						>
+					</li>
 				</ul>
 			</li>
 
@@ -90,34 +166,82 @@
 			<li>
 				<strong>Firefox for Android</strong>：
 				<ul>
-					<li><a href="https://addons.mozilla.org/firefox/addon/greasemonkey/" target="_blank" rel="noopener">Greasemonkey</a></li>
-					<li><a href="https://addons.mozilla.org/firefox/addon/tampermonkey/" target="_blank" rel="noopener">Tampermonkey</a></li>
-					<li><a href="https://addons.mozilla.org/firefox/addon/violentmonkey/" target="_blank" rel="noopener">Violentmonkey</a></li>
+					<li>
+						<a
+							href="https://addons.mozilla.org/firefox/addon/greasemonkey/"
+							target="_blank"
+							rel="noopener">Greasemonkey</a
+						>
+					</li>
+					<li>
+						<a
+							href="https://addons.mozilla.org/firefox/addon/tampermonkey/"
+							target="_blank"
+							rel="noopener">Tampermonkey</a
+						>
+					</li>
+					<li>
+						<a
+							href="https://addons.mozilla.org/firefox/addon/violentmonkey/"
+							target="_blank"
+							rel="noopener">Violentmonkey</a
+						>
+					</li>
 				</ul>
 			</li>
 			<li>
 				<strong>Microsoft Edge for Android</strong>：
 				<ul>
-					<li><a href="https://microsoftedge.microsoft.com/addons/detail/tampermonkey/iikmkjmpaadaobahmlepeloendndfphd" target="_blank" rel="noopener">Tampermonkey</a></li>
+					<li>
+						<a
+							href="https://microsoftedge.microsoft.com/addons/detail/tampermonkey/iikmkjmpaadaobahmlepeloendndfphd"
+							target="_blank"
+							rel="noopener">Tampermonkey</a
+						>
+					</li>
 				</ul>
 			</li>
 			<li>
 				<strong>Dolphin</strong>：
 				<ul>
-					<li><a href="https://play.google.com/store/apps/details?id=net.tampermonkey.dolphin" target="_blank" rel="noopener">Tampermonkey</a></li>
+					<li>
+						<a
+							href="https://play.google.com/store/apps/details?id=net.tampermonkey.dolphin"
+							target="_blank"
+							rel="noopener">Tampermonkey</a
+						>
+					</li>
 				</ul>
 			</li>
 			<li>
 				<strong>UC Browser</strong>：
 				<ul>
-					<li><a href="https://www.tampermonkey.net/?browser=ucweb&amp;ext=dhdg" target="_blank" rel="noopener">Tampermonkey</a></li>
+					<li>
+						<a
+							href="https://www.tampermonkey.net/?browser=ucweb&amp;ext=dhdg"
+							target="_blank"
+							rel="noopener">Tampermonkey</a
+						>
+					</li>
 				</ul>
 			</li>
 			<li>
 				<strong>Kiwi Browser</strong>：
 				<ul>
-					<li><a href="https://chromewebstore.google.com/detail/tampermonkey-legacy/lcmhijbkigalmkeommnijlpobloojgfn" target="_blank" rel="noopener">Tampermonkey Legacy</a></li>
-					<li><a href="https://chromewebstore.google.com/detail/violentmonkey/jinjaccalgkegednnccohejagnlnfdag" target="_blank" rel="noopener">Violentmonkey</a></li>
+					<li>
+						<a
+							href="https://chromewebstore.google.com/detail/tampermonkey-legacy/lcmhijbkigalmkeommnijlpobloojgfn"
+							target="_blank"
+							rel="noopener">Tampermonkey Legacy</a
+						>
+					</li>
+					<li>
+						<a
+							href="https://chromewebstore.google.com/detail/violentmonkey/jinjaccalgkegednnccohejagnlnfdag"
+							target="_blank"
+							rel="noopener">Violentmonkey</a
+						>
+					</li>
 				</ul>
 			</li>
 			<li><a href="https://www.xbext.com" target="_blank" rel="noopener">X Browser</a></li>
@@ -125,7 +249,13 @@
 			<li>
 				<strong>Lemur Browser</strong>：
 				<ul>
-					<li><a href="https://microsoftedge.microsoft.com/addons/detail/tampermonkey/iikmkjmpaadaobahmlepeloendndfphd" target="_blank" rel="noopener">Tampermonkey</a></li>
+					<li>
+						<a
+							href="https://microsoftedge.microsoft.com/addons/detail/tampermonkey/iikmkjmpaadaobahmlepeloendndfphd"
+							target="_blank"
+							rel="noopener">Tampermonkey</a
+						>
+					</li>
 				</ul>
 			</li>
 		</ul>
@@ -138,8 +268,18 @@
 			<li>
 				<strong>Safari</strong>：
 				<ul>
-					<li><a href="https://www.tampermonkey.net/?browser=safari" target="_blank" rel="noopener">Tampermonkey</a></li>
-					<li><a href="https://apps.apple.com/app/userscripts/id1463298887" target="_blank" rel="noopener">Userscripts</a></li>
+					<li>
+						<a href="https://www.tampermonkey.net/?browser=safari" target="_blank" rel="noopener"
+							>Tampermonkey</a
+						>
+					</li>
+					<li>
+						<a
+							href="https://apps.apple.com/app/userscripts/id1463298887"
+							target="_blank"
+							rel="noopener">Userscripts</a
+						>
+					</li>
 				</ul>
 			</li>
 			<li><a href="https://gear4.app/" target="_blank" rel="noopener">Gear Browser</a></li>
@@ -153,8 +293,21 @@
 </div>
 
 <style>
-	.text-content ul { list-style: disc; padding-left: 2em; line-height: 1.8; }
-	.text-content ul ul { list-style: circle; padding-left: 1.5em; }
-	.text-content li { margin-bottom: 4px; }
-	.text-content hr { border: none; border-top: 1px solid var(--md-sys-color-outline-variant); margin: 24px 0; }
+	.text-content ul {
+		list-style: disc;
+		padding-left: 2em;
+		line-height: 1.8;
+	}
+	.text-content ul ul {
+		list-style: circle;
+		padding-left: 1.5em;
+	}
+	.text-content li {
+		margin-bottom: 4px;
+	}
+	.text-content hr {
+		border: none;
+		border-top: 1px solid var(--md-sys-color-outline-variant);
+		margin: 24px 0;
+	}
 </style>

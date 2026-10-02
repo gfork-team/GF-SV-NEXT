@@ -11,7 +11,8 @@ const env =
 export const cdnEnabled = env.VITE_CDN_ENABLED === 'true';
 
 /** CDN 静态资源源站（图片、字体、_app 构建产物）。 */
-export const cdnStatic = env.VITE_CDN_STATIC || 'https://web-static-origin.dahi.edu.cn.dahi.e.yu.ac.cn';
+export const cdnStatic =
+	env.VITE_CDN_STATIC || 'https://web-static-origin.dahi.edu.cn.dahi.e.yu.ac.cn';
 
 /** 构建输出基础路径。若将 build/_app 镜像至 CDN 的 /gfork/_app/，则设为 '/gfork'。 */
 export const buildBasePath = env.VITE_BUILD_BASE_PATH || '/gfork';

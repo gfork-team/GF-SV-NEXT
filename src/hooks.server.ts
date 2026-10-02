@@ -11,7 +11,7 @@ const STATIC_ASSET_REGEX = /\.(css|js|svg|png|jpg|jpeg|webp|woff2|woff|ttf|ico)$
 const IMMUTABLE_ASSET_REGEX = /\.(css|js|svg|png|jpg|jpeg|webp|woff2)$/i;
 
 function isSpecialRoute(pathname: string): boolean {
-	return SPECIAL_ROUTES.some(r => pathname === r || pathname.startsWith(r + '/'));
+	return SPECIAL_ROUTES.some((r) => pathname === r || pathname.startsWith(r + '/'));
 }
 
 export const handle: Handle = async ({ event, resolve }) => {
@@ -29,7 +29,8 @@ export const handle: Handle = async ({ event, resolve }) => {
 		return new Response('Not Found', { status: 404 });
 	}
 
-	event.locals.lang = (lang as typeof i18nConfig.supportedLangs[number]) || i18nConfig.defaultLang;
+	event.locals.lang =
+		(lang as (typeof i18nConfig.supportedLangs)[number]) || i18nConfig.defaultLang;
 
 	const response = await resolve(event, {
 		transformPageChunk: ({ html }) => {
@@ -55,7 +56,10 @@ export const handle: Handle = async ({ event, resolve }) => {
 		response.headers.set('Cache-Control', 'public, max-age=31536000, immutable');
 	} else if (STATIC_ASSET_REGEX.test(pathname)) {
 		response.headers.set('Cache-Control', 'public, max-age=31536000, immutable');
-	} else if (pathname.endsWith('.html') || (!pathname.includes('.') && !pathname.startsWith('/api/'))) {
+	} else if (
+		pathname.endsWith('.html') ||
+		(!pathname.includes('.') && !pathname.startsWith('/api/'))
+	) {
 		// HTML pages → 1 hour cache
 		response.headers.set('Cache-Control', 'public, max-age=3600');
 	}

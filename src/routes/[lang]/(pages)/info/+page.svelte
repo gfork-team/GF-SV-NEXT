@@ -2,7 +2,12 @@
 	import { onMount, tick } from 'svelte';
 	import { t, type Lang, i18nConfig } from '$i18n';
 	import { siteConfig, siteProxyUrl } from '$lib/config';
+	import { showSnackbar } from '$lib/ui-state.svelte';
 	import Ad from '$components/Ad.svelte';
+	import Icon from '$components/Icon.svelte';
+	import InstallButton from '$components/InstallButton.svelte';
+	import ScriptCard from '$components/ScriptCard.svelte';
+	import StatBar from '$components/StatBar.svelte';
 	import type { PageData } from './$types';
 
 	let { data }: { data: PageData } = $props();
@@ -19,12 +24,17 @@
 	}
 
 	let lastValidHash = $state('');
-	let hashInvalidWarningShown = $state(false);
 	let initialParamChecked = $state(false);
 	let abortController: AbortController | null = $state(null);
 
 	function isHashValid(hash: string): boolean {
-		return !!hash && hash !== '#' && hash !== '#google_vignette' && hash.startsWith('#') && hash.length > 1;
+		return (
+			!!hash &&
+			hash !== '#' &&
+			hash !== '#google_vignette' &&
+			hash.startsWith('#') &&
+			hash.length > 1
+		);
 	}
 
 	function parseHash(hashStr: string): RouteInfo | null {
@@ -35,9 +45,18 @@
 		if (!path) return null;
 
 		const patterns: { regex: RegExp; pageType: RouteInfo['pageType'] }[] = [
-			{ regex: /^([a-z]{2}(?:-[A-Za-z]{2,})?)\/scripts\/(\d+)(?:-[^/]+)?\/detail$/, pageType: 'detail' },
-			{ regex: /^([a-z]{2}(?:-[A-Za-z]{2,})?)\/scripts\/(\d+)(?:-[^/]+)?\/feedback$/, pageType: 'feedback' },
-			{ regex: /^([a-z]{2}(?:-[A-Za-z]{2,})?)\/scripts\/(\d+)(?:-[^/]+)?\/(code|versions|stats)$/, pageType: 'redirect' },
+			{
+				regex: /^([a-z]{2}(?:-[A-Za-z]{2,})?)\/scripts\/(\d+)(?:-[^/]+)?\/detail$/,
+				pageType: 'detail'
+			},
+			{
+				regex: /^([a-z]{2}(?:-[A-Za-z]{2,})?)\/scripts\/(\d+)(?:-[^/]+)?\/feedback$/,
+				pageType: 'feedback'
+			},
+			{
+				regex: /^([a-z]{2}(?:-[A-Za-z]{2,})?)\/scripts\/(\d+)(?:-[^/]+)?\/(code|versions|stats)$/,
+				pageType: 'redirect'
+			},
 			{ regex: /^([a-z]{2}(?:-[A-Za-z]{2,})?)\/scripts\/(\d+)(?:-[^/]+)?$/, pageType: 'redirect' },
 			{ regex: /^([a-z]{2}(?:-[A-Za-z]{2,})?)\/users\/(.+)$/, pageType: 'users' }
 		];
@@ -47,8 +66,11 @@
 			if (m) {
 				const locale = (m[1] || '').toLowerCase();
 				const normLocale =
-					locale === 'zh-cn' || locale === 'zh-hans' ? 'zh-CN' :
-					locale === 'zh-tw' || locale === 'zh-hant' ? 'zh-TW' : m[1];
+					locale === 'zh-cn' || locale === 'zh-hans'
+						? 'zh-CN'
+						: locale === 'zh-tw' || locale === 'zh-hant'
+							? 'zh-TW'
+							: m[1];
 				const rest = path.slice(m[1].length);
 				return {
 					locale: normLocale,
@@ -66,13 +88,18 @@
 		const hash = window.location.hash;
 		if (isHashValid(hash)) {
 			const route = parseHash(hash);
-			if (route) { lastValidHash = hash; return route; }
+			if (route) {
+				lastValidHash = hash;
+				return route;
+			}
 		}
 		const fallback = lastValidHash;
 		return isHashValid(fallback) ? parseHash(fallback) : null;
 	}
 
 	function setHashRoute(route: RouteInfo): void {
+		// 仅用于拼 hash 后交给 history.replaceState，函数结束即丢弃
+		// eslint-disable-next-line svelte/prefer-svelte-reactivity
 		const url = new URL(window.location.href);
 		if (route.pageType === 'users') {
 			url.hash = `#/${gfLocale}/users/${route.userId}`;
@@ -86,19 +113,7 @@
 	}
 
 	function showHashInvalidWarning(): void {
-		if (hashInvalidWarningShown) return;
-		hashInvalidWarningShown = true;
-		const toast = document.createElement('div');
-		toast.style.cssText = 'position:fixed;top:20px;right:20px;background:var(--md-sys-color-error-container);color:var(--md-sys-color-on-error-container);padding:16px 24px;border-radius:var(--md-sys-shape-corner-medium);box-shadow:var(--md-sys-elevation-3);z-index:10000;display:flex;align-items:center;gap:12px;font-size:14px;animation:if-toast-in 0.3s ease';
-		toast.innerHTML = `<span class="material-icons" style="font-size:20px">warning</span><span>${t(lang, 'info.history_invalid_toast')}</span>`;
-		const style = document.createElement('style');
-		style.textContent = '@keyframes if-toast-in{from{transform:translateX(400px);opacity:0}to{transform:translateX(0);opacity:1}}';
-		document.head.appendChild(style);
-		document.body.appendChild(toast);
-		setTimeout(() => {
-			toast.style.animation = 'if-toast-in 0.3s ease reverse';
-			setTimeout(() => toast.remove(), 300);
-		}, 5000);
+		showSnackbar(t(lang, 'info.history_invalid_toast'), undefined, 5000);
 	}
 
 	// ─── Base64 decode ───────────────────────────────────────────────────
@@ -109,7 +124,9 @@
 			const bytes = new Uint8Array(raw.length);
 			for (let i = 0; i < raw.length; i++) bytes[i] = raw.charCodeAt(i);
 			return new TextDecoder('utf-8').decode(bytes);
-		} catch { return str; }
+		} catch {
+			return str;
+		}
 	}
 
 	// ─── API config ──────────────────────────────────────────────────────
@@ -130,8 +147,13 @@
 		const msg = err?.message || '';
 		const name = err?.name || '';
 		if (name === 'AbortError') return false;
-		const isTimeout = name === 'TimeoutError' || msg.includes('timeout') || msg.includes('timed out');
-		const isNetworkFail = name === 'TypeError' || msg.includes('Failed to fetch') || msg.includes('NetworkError') || msg.includes('fetch failed');
+		const isTimeout =
+			name === 'TimeoutError' || msg.includes('timeout') || msg.includes('timed out');
+		const isNetworkFail =
+			name === 'TypeError' ||
+			msg.includes('Failed to fetch') ||
+			msg.includes('NetworkError') ||
+			msg.includes('fetch failed');
 		const isServerError = /HTTP 5\d\d/.test(msg);
 		return isTimeout || isNetworkFail || isServerError;
 	}
@@ -164,20 +186,85 @@
 	let scriptMetaHtml = $state('');
 	let additionalInfoHtml = $state('');
 	let installLink = $state('');
-	let installPath = $derived(installLink ? installLink.replace('https://update.greasyfork.org/scripts/', '') : '');
+	let installPath = $derived(
+		installLink ? installLink.replace('https://update.greasyfork.org/scripts/', '') : ''
+	);
 
 	// feedback
 	let feedbackTitle = $state('');
 	let feedbackListHtml = $state('');
-		let feedbackPage = $state(1);
-		let feedbackTotalPages = $state(1);
-		let feedbackLoading = $state(false);
+	let feedbackPage = $state(1);
+	let feedbackTotalPages = $state(1);
+	let feedbackLoading = $state(false);
 
 	// users
-	interface GithubIdentity { name: string; url?: string }
-	interface UserScript { id: number; name?: string; description?: string; daily_installs?: number; total_installs?: number; good_ratings?: number; ok_ratings?: number; bad_ratings?: number; fan_score?: number; created_at?: string; code_updated_at?: string; code_url?: string; deleted?: boolean }
-	interface UserInfo { id: number; name?: string; created_at?: string; bio?: string; github_identities?: GithubIdentity[]; scripts?: UserScript[] }
+	interface GithubIdentity {
+		name: string;
+		url?: string;
+	}
+	interface UserScript {
+		id: number;
+		name?: string;
+		description?: string;
+		daily_installs?: number;
+		total_installs?: number;
+		good_ratings?: number;
+		ok_ratings?: number;
+		bad_ratings?: number;
+		fan_score?: number;
+		created_at?: string;
+		code_updated_at?: string;
+		code_url?: string;
+		deleted?: boolean;
+	}
+	interface UserInfo {
+		id: number;
+		name?: string;
+		created_at?: string;
+		bio?: string;
+		github_identities?: GithubIdentity[];
+		scripts?: UserScript[];
+	}
 	let userData = $state<UserInfo | null>(null);
+	/** 作者脚本列表：过滤已删除，补齐 ScriptCard 需要的必填字段（缺字段留空串 / null，不编造数值） */
+	let userScripts = $derived(
+		(userData?.scripts || [])
+			.filter((s) => !s.deleted)
+			.map((s) => ({
+				id: s.id,
+				name: s.name || '',
+				description: s.description || '',
+				daily_installs: s.daily_installs ?? null,
+				total_installs: s.total_installs ?? null,
+				good_ratings: s.good_ratings ?? null,
+				ok_ratings: s.ok_ratings ?? null,
+				bad_ratings: s.bad_ratings ?? null,
+				fan_score: s.fan_score ?? null,
+				created_at: s.created_at || '',
+				code_updated_at: s.code_updated_at || '',
+				code_url: s.code_url || ''
+			}))
+	);
+
+	/**
+	 * 作者维度汇总：只在「所有脚本都缺该字段」时返回 null。
+	 * 缺字段的脚本不参与累加，但只要有一个脚本报了数，就说明这批数据是有值的。
+	 */
+	function sumKnown(
+		scripts: UserScript[] | undefined,
+		key: 'total_installs' | 'good_ratings' | 'ok_ratings' | 'bad_ratings'
+	): number | null {
+		let sum = 0;
+		let seen = false;
+		for (const s of scripts || []) {
+			if (s.deleted) continue;
+			const v = s[key];
+			if (v == null) continue;
+			sum += v;
+			seen = true;
+		}
+		return seen ? sum : null;
+	}
 
 	// ─── Link processing ─────────────────────────────────────────────────
 	function processAllLinks(container: HTMLElement | null, locale: string): void {
@@ -187,9 +274,15 @@
 			const href = a.getAttribute('href');
 			if (!href) return;
 			// Skip already absolute/external URLs and internal anchors
-			if (href.startsWith('http://') || href.startsWith('https://') ||
-				href.startsWith('javascript:') || href.startsWith('mailto:') ||
-				href.startsWith('tel:') || href.startsWith('#')) return;
+			if (
+				href.startsWith('http://') ||
+				href.startsWith('https://') ||
+				href.startsWith('javascript:') ||
+				href.startsWith('mailto:') ||
+				href.startsWith('tel:') ||
+				href.startsWith('#')
+			)
+				return;
 
 			// User profile links → internal info page
 			const userMatch = href.match(/\/users\/([^/?]+)/);
@@ -225,8 +318,7 @@
 			if (a.hasAttribute('data-processed')) return;
 			const href = a.getAttribute('href');
 			if (!href) return;
-			if (href.startsWith('http://') || href.startsWith('https://') ||
-				href.startsWith('?')) return;
+			if (href.startsWith('http://') || href.startsWith('https://') || href.startsWith('?')) return;
 
 			// User profile links → internal info page
 			const userMatch = href.match(/\/users\/([^/?]+)/);
@@ -254,24 +346,6 @@
 		return { destroy() {} };
 	}
 
-	// ─── Formatting ──────────────────────────────────────────────────────
-	function formatDateTime(raw: string): string {
-		if (!raw) return '—';
-		try {
-			const localeTag = i18nConfig.langNames[lang] || 'zh-CN';
-			return new Date(raw).toLocaleString(localeTag, {
-				year: 'numeric', month: '2-digit', day: '2-digit',
-				hour: '2-digit', minute: '2-digit', hour12: false
-			});
-		} catch { return raw; }
-	}
-
-	function escapeHtml(text: string): string {
-		const div = document.createElement('div');
-		div.textContent = text;
-		return div.innerHTML;
-	}
-
 	// ─── Data loading ────────────────────────────────────────────────────
 	async function loadContent(r: RouteInfo): Promise<void> {
 		abortController?.abort();
@@ -286,6 +360,8 @@
 			} else if (r.pageType === 'feedback') {
 				await withRetry(() => loadFeedbackPage(r, signal), signal);
 			} else if (r.pageType === 'redirect') {
+				// 同上：局部 URL，改完立刻 replaceState
+				// eslint-disable-next-line svelte/prefer-svelte-reactivity
 				const url = new URL(window.location.href);
 				url.hash = `#/${gfLocale}/scripts/${r.scriptId}/detail`;
 				url.search = '';
@@ -299,13 +375,29 @@
 		} catch (e) {
 			if ((e as Error).name !== 'AbortError') {
 				const msg = (e as Error).message || '';
-				error = isTransientError(e) ? t(lang, 'info.error_502') : `${t(lang, 'info.generic_error')}: ${msg}`;
+				error = isTransientError(e)
+					? t(lang, 'info.error_502')
+					: `${t(lang, 'info.generic_error')}: ${msg}`;
 			}
 		} finally {
 			loading = false;
 		}
 	}
 
+	/* ------------------------------------------------------------------
+	 * XSS 说明（c1/c2/c3 为何可以直接 {@html}）
+	 *
+	 * c1/c2/c3 是 Greasy Fork 静态站下发的 HTML 原文（base64），本项目把它当作
+	 * 镜像透传展示，这是「用户脚本详情页」的产品前提 —— 脚本作者写的说明本身就是
+	 * 富文本，转义成纯文本会让页面失去意义。
+	 *
+	 * 已知风险：当前没有任何 HTML 消毒（无 DOMPurify 等依赖），若上游 API 被入侵或
+	 * 传输链路被劫持，注入的 <script> / onerror 会在本站执行。
+	 * use:processLinks 只是重写站内链接与 target，不会消毒。
+	 *
+	 * 正确修法是在 {@html} 之前接一层白名单消毒器（DOMPurify / isomorphic-dompurify）。
+	 * 该方案需要新增依赖，未纳入本次改动 —— 不要在此处改用正则剥标签，正则消毒比不消毒更危险。
+	 * ------------------------------------------------------------------ */
 	async function loadDetailPage(r: RouteInfo, signal: AbortSignal): Promise<void> {
 		activeTab = 'info';
 		const url = `${INFO_API}/${gfLocale}/scripts/${r.scriptId}/detail.json`;
@@ -320,23 +412,25 @@
 		document.title = scriptTitle ? `${scriptTitle} - ZGF` : `Script Info - ZGF`;
 	}
 
-		async function loadFeedbackPage(r: RouteInfo, signal: AbortSignal, page = 1): Promise<void> {
+	async function loadFeedbackPage(r: RouteInfo, signal: AbortSignal, page = 1): Promise<void> {
 		activeTab = 'feedback';
-			const url = `${INFO_API}/${gfLocale}/scripts/${r.scriptId}/feedback.json?page=${page}`;
+		const url = `${INFO_API}/${gfLocale}/scripts/${r.scriptId}/feedback.json?page=${page}`;
 		const res = await fetchJson(url, signal);
 		if (!res.ok) throw new Error(`HTTP ${res.status}`);
 		const json = await res.json();
 		feedbackTitle = json.title || '';
-			feedbackPage = json.page || 1;
-			feedbackTotalPages = json.totalPages || 1;
-			feedbackListHtml = decodeBase64(json.c1) || `<p style="text-align:center;color:var(--md-sys-color-on-surface-variant);padding:40px">${t(lang, 'info.no_feedback')}</p>`;
+		feedbackPage = json.page || 1;
+		feedbackTotalPages = json.totalPages || 1;
+		feedbackListHtml =
+			decodeBase64(json.c1) ||
+			`<p style="text-align:center;color:var(--md-sys-color-on-surface-variant);padding:40px">${t(lang, 'info.no_feedback')}</p>`;
 		document.title = feedbackTitle ? `${feedbackTitle} - ZGF` : `Feedback - ZGF`;
 	}
 
-		async function goToFeedbackPage(page: number): Promise<void> {
-			const target = route;
-			if (!target || page < 1 || page > feedbackTotalPages || feedbackLoading) return;
-			feedbackLoading = true;
+	async function goToFeedbackPage(page: number): Promise<void> {
+		const target = route;
+		if (!target || page < 1 || page > feedbackTotalPages || feedbackLoading) return;
+		feedbackLoading = true;
 		try {
 			abortController?.abort();
 			abortController = new AbortController();
@@ -346,12 +440,14 @@
 		} catch (e) {
 			if ((e as Error).name !== 'AbortError') {
 				const msg = (e as Error).message || '';
-				error = isTransientError(e) ? t(lang, 'info.error_502') : `${t(lang, 'info.generic_error')}: ${msg}`;
+				error = isTransientError(e)
+					? t(lang, 'info.error_502')
+					: `${t(lang, 'info.generic_error')}: ${msg}`;
 			}
 		} finally {
 			feedbackLoading = false;
 		}
-		}
+	}
 
 	async function loadUserPage(r: RouteInfo, signal: AbortSignal): Promise<void> {
 		const url = `${INFO_API}/${gfLocale}/users/${r.userId}.json`;
@@ -403,7 +499,11 @@
 						}
 					});
 				}
-				if (m.type === 'attributes' && m.attributeName === 'href' && m.target.nodeType === Node.ELEMENT_NODE) {
+				if (
+					m.type === 'attributes' &&
+					m.attributeName === 'href' &&
+					m.target.nodeType === Node.ELEMENT_NODE
+				) {
 					const el = m.target as HTMLElement;
 					if (el.tagName === 'A') {
 						el.removeAttribute('data-processed');
@@ -412,7 +512,12 @@
 				}
 			}
 		});
-		observer.observe(document.body, { childList: true, subtree: true, attributes: true, attributeFilter: ['href'] });
+		observer.observe(document.body, {
+			childList: true,
+			subtree: true,
+			attributes: true,
+			attributeFilter: ['href']
+		});
 
 		initPage();
 
@@ -451,7 +556,10 @@
 
 	function switchTab(tab: 'info' | 'feedback'): void {
 		if (!route) return;
-		const newRoute = { ...route, pageType: tab === 'info' ? 'detail' as const : 'feedback' as const };
+		const newRoute = {
+			...route,
+			pageType: tab === 'info' ? ('detail' as const) : ('feedback' as const)
+		};
 		setHashRoute(newRoute);
 		loadContent(newRoute);
 	}
@@ -459,869 +567,671 @@
 
 <svelte:head>
 	<title>Script Info - ZGF</title>
-	<meta name="description" content="Detailed information about user scripts on Greasy Fork, including descriptions, ratings, install links and user feedback." />
-	<meta name="keywords" content="script info, userscript details, greasyfork script, script page, user script, script feedback" />
-	<link rel="stylesheet" href="https://fonts.googleapis.com/icon?family=Material+Icons" />
+	<meta
+		name="description"
+		content="Detailed information about user scripts on Greasy Fork, including descriptions, ratings, install links and user feedback."
+	/>
+	<meta
+		name="keywords"
+		content="script info, userscript details, greasyfork script, script page, user script, script feedback"
+	/>
 </svelte:head>
 
 <section class="info-page-root">
-	<div class="width-constraint">
+	<div class="info-container">
 		{#if loading}
-			<div class="md3-card if-loading-box">
-				<span class="material-icons if-spinner">autorenew</span>
-				<div class="if-loading-tip">
-					{t(lang, 'info.loading')}
-				</div>
+			<div class="ui-card if-center-box" aria-busy="true">
+				<span class="if-spinner"><Icon name="refresh" size={40} /></span>
+				<p class="if-center-text">{t(lang, 'info.loading')}</p>
 			</div>
 		{:else if placeholderMode}
-			<!-- No-hash placeholder: default example content -->
-			<section class="md3-card if-placeholder-box">
-				<div class="if-ph-badge">{t(lang, 'info.placeholder_badge')}</div>
-				<h1 class="headline-large if-ph-title">{t(lang, 'info.placeholder_title')}</h1>
+			<div class="ui-card if-placeholder-box">
+				<span class="ui-badge ui-badge--primary">{t(lang, 'info.placeholder_badge')}</span>
+				<h1 class="if-ph-title">{t(lang, 'info.placeholder_title')}</h1>
 				<p class="if-ph-desc">{t(lang, 'info.placeholder_desc')}</p>
+
 				<div class="if-ph-example">
-					<div class="if-ph-ex-head">
-						<h2>{t(lang, 'info.placeholder_example_head')}</h2>
-					</div>
-					<ol class="if-script-list if-ph-demo-list">
-						<li class="if-result-item">
-							<ul class="if-ph-usage">
-							<li><code>{placeholderExample}</code></li>
-						</ul>
-						<article>
-								<h2>
-									<span class="if-script-link is-demo">{t(lang, 'info.placeholder_title')}</span>
-									<span class="if-badge-js">JS</span>
-									<span class="if-sep">-</span>
-									<span class="if-script-desc">{t(lang, 'info.placeholder_desc')}</span>
-								</h2>
-								<div class="if-script-meta">
-									<dl class="if-stats">
-										<dt>{t(lang, 'lookup.author')}</dt>
-										<dd>{t(lang, 'info.placeholder_badge')}</dd>
-										<dt>{t(lang, 'lookup.daily_installs')}</dt>
-										<dd>1,024</dd>
-										<dt>{t(lang, 'lookup.total_installs')}</dt>
-										<dd>5,832</dd>
-										<dt>{t(lang, 'lookup.ratings')}</dt>
-										<dd><span class="if-good">98</span> / <span class="if-ok">1</span> / <span class="if-bad">0</span></dd>
-									</dl>
-								</div>
-							</article>
-						</li>
-					</ol>
+					<h2 class="if-ph-ex-head">{t(lang, 'info.placeholder_example_head')}</h2>
+					<code class="if-ph-code">{placeholderExample}</code>
+					<p class="if-ph-hint">
+						<Icon name="info" size={16} />
+						<span>{t(lang, 'info.placeholder_desc')}</span>
+					</p>
 				</div>
-				<div class="if-ph-hint">
-					<span class="material-icons" style="font-size:20px">info</span>
-					<span>{t(lang, 'info.placeholder_desc')}</span>
-				</div>
-			</section>
+			</div>
 		{:else if error}
-			<div class="md3-card if-error-box">
-				<span class="material-icons" style="font-size:48px;color:var(--md-sys-color-error)">error_outline</span>
-				<h3 class="title-large" style="margin:12px 0">{t(lang, 'info.error')}</h3>
-				<p style="color:var(--md-sys-color-on-surface-variant);margin-bottom:20px">{error}</p>
-				<button onclick={() => { error = ''; if (route) loadContent(route); else initPage(); }} class="md3-button">{t(lang, 'info.retry')}</button>
+			<div class="ui-card if-center-box">
+				<span class="if-error-icon"><Icon name="alert" size={40} /></span>
+				<h2 class="if-center-title">{t(lang, 'info.error')}</h2>
+				<p class="if-center-text">{error}</p>
+				<button
+					class="ui-btn ui-btn--filled"
+					onclick={() => {
+						error = '';
+						if (route) loadContent(route);
+						else initPage();
+					}}
+				>
+					<Icon name="refresh" size={18} />
+					{t(lang, 'info.retry')}
+				</button>
 			</div>
 		{:else if route?.pageType === 'users' && userData}
-			<!-- User page -->
-			<section class="md3-card if-user-card">
+			<article class="ui-card if-user-card">
 				<header class="if-user-header">
-					<h1 class="headline-large">{escapeHtml(userData.name || t(lang, 'info.unknown_user'))}</h1>
-					<dl class="if-user-stats">
-						<dt>{t(lang, 'info.script_count')}</dt>
-						<dd>{userData.scripts?.filter(s => !s.deleted).length || 0}</dd>
-						<dt>{t(lang, 'info.total_installs')}</dt>
-						<dd>{((userData.scripts?.reduce((sum, s) => sum + (s.total_installs || 0), 0) || 0)).toLocaleString()}</dd>
-						<dt>{t(lang, 'info.good_ratings')}</dt>
-						<dd class="if-good">{userData.scripts?.reduce((sum, s) => sum + (s.good_ratings || 0), 0) || 0}</dd>
-						<dt>{t(lang, 'info.ok_ratings')}</dt>
-						<dd class="if-ok">{userData.scripts?.reduce((sum, s) => sum + (s.ok_ratings || 0), 0) || 0}</dd>
-						<dt>{t(lang, 'info.bad_ratings')}</dt>
-						<dd class="if-bad">{userData.scripts?.reduce((sum, s) => sum + (s.bad_ratings || 0), 0) || 0}</dd>
-						<dt>{t(lang, 'info.registered')}</dt>
-						<dd>{formatDateTime(userData.created_at || '')}</dd>
-					</dl>
+					<h1 class="if-user-name">{userData.name || t(lang, 'info.unknown_user')}</h1>
+					<StatBar
+						{lang}
+						totalInstalls={sumKnown(userData.scripts, 'total_installs')}
+						goodRatings={sumKnown(userData.scripts, 'good_ratings')}
+						okRatings={sumKnown(userData.scripts, 'ok_ratings')}
+						badRatings={sumKnown(userData.scripts, 'bad_ratings')}
+					/>
 				</header>
 
 				{#if userData.bio}
-					<div class="if-user-bio" style="color:var(--md-sys-color-on-surface-variant);font-size:14px;line-height:1.6;margin-bottom:16px;padding:12px 16px;background:var(--md-sys-color-surface-container-low);border-radius:var(--md-sys-shape-corner-small)">
-						{escapeHtml(userData.bio)}
-					</div>
+					<p class="if-user-bio">{userData.bio}</p>
 				{/if}
 
-				{#if userData.github_identities && userData.github_identities.length > 0}
-					<div class="if-user-github" style="margin-bottom:16px;font-size:13px">
-						<span style="color:var(--md-sys-color-on-surface-variant)">GitHub: </span>
-						{#each userData.github_identities as gh, i}
+				{#if userData.github_identities?.length}
+					<p class="if-user-github">
+						<span class="if-user-github__label">GitHub:</span>
+						{#each userData.github_identities as gh, i (gh.name + i)}
 							{#if gh.url}
-								<a href={gh.url} target="_blank" rel="noopener noreferrer" style="color:var(--md-sys-color-primary);text-decoration:none">{gh.name}</a>
+								<a href={gh.url} target="_blank" rel="noopener noreferrer">{gh.name}</a>
 							{:else}
-								<span style="color:var(--md-sys-color-on-surface-variant)">{gh.name}</span>
+								<span>{gh.name}</span>
 							{/if}
-							{#if i < userData.github_identities.length - 1}, {/if}
+							{#if i < userData.github_identities.length - 1}<span>, </span>{/if}
 						{/each}
-					</div>
+					</p>
 				{/if}
 
-				<div>
-					<h3 class="title-large" style="margin-bottom:16px">{t(lang, 'info.scripts')}</h3>
-					{#if userData.scripts && userData.scripts.filter(s => !s.deleted).length > 0}
-						<ol class="if-script-list">
-							{#each userData.scripts.filter(s => !s.deleted) as script, i (script.id)}
-								<li class="if-result-item" style="animation-delay: {Math.min(0.05 * i, 0.5)}s;">
-									<article>
-										<h2>
-											<a class="if-script-link" href={`#/${route?.locale || i18nConfig.langNames[lang]}/scripts/${script.id}/detail`}>
-												{script.name || t(lang, 'info.unnamed')}
-											</a>
-											<span class="if-badge-js">JS</span>
-											<span class="if-sep">-</span>
-											<span class="if-script-desc">{escapeHtml(script.description || t(lang, 'info.no_description'))}</span>
-										</h2>
-										<div class="if-script-meta">
-											<dl class="if-stats">
-												<dt>{t(lang, 'lookup.author')}</dt>
-												<dd>{escapeHtml(userData.name || t(lang, 'info.unknown_author'))}</dd>
-												<dt>{t(lang, 'lookup.daily_installs')}</dt>
-												<dd>{script.daily_installs || 0}</dd>
-												<dt>{t(lang, 'lookup.total_installs')}</dt>
-												<dd>{script.total_installs || 0}</dd>
-												<dt>{t(lang, 'lookup.ratings')}</dt>
-												<dd>
-													<span class="if-good">{script.good_ratings || 0}</span>
-													<span class="if-ok">{script.ok_ratings || 0}</span>
-													<span class="if-bad">{script.bad_ratings || 0}</span>
-												</dd>
-												<dt>{t(lang, 'lookup.created')}</dt>
-												<dd>{formatDateTime(script.created_at || '')}</dd>
-												<dt>{t(lang, 'lookup.updated')}</dt>
-												<dd>{formatDateTime(script.code_updated_at || '')}</dd>
-											</dl>
-											<div style="margin-top:12px">
-												{#if script.code_url}
-													{@const dl = `/${lang}/l#/` + script.code_url.replace('https://update.greasyfork.org/scripts/', '')}
-													<a href={dl} class="md3-button" target="_blank" rel="noopener noreferrer">{t(lang, 'info.install')}</a>
-												{:else}
-													<a href="/{lang}/installing" class="md3-button">{t(lang, 'info.install')}</a>
-												{/if}
-											</div>
-										</div>
-									</article>
-								</li>
-							{/each}
-						</ol>
-					{:else}
-						<p class="if-no-content">{t(lang, 'info.no_scripts')}</p>
-					{/if}
-				</div>
-			</section>
+				<h2 class="if-section-title">{t(lang, 'info.scripts')}</h2>
+
+				{#if userScripts.length > 0}
+					<ul class="if-script-list">
+						{#each userScripts as script (script.id)}
+							{@const dl = script.code_url
+								? `/${lang}/l#/${script.code_url.replace('https://update.greasyfork.org/scripts/', '')}`
+								: null}
+							<li>
+								<ScriptCard {lang} {script} variant="list" showInstall={!!dl} sites={[]} />
+							</li>
+						{/each}
+					</ul>
+				{:else}
+					<p class="if-no-content">{t(lang, 'info.no_scripts')}</p>
+				{/if}
+			</article>
 		{:else if route}
-			<!-- Script page -->
-			<section>
-				<!-- Notice bar -->
-				<div class="if-notice-bar">
-					{t(lang, 'info.notice')}
-					<a id="source-link" href="https://greasyfork.org{route.fullPath.replace(/\/detail$/, '')}" target="_blank" rel="noopener noreferrer" class="if-source-link">
-						{t(lang, 'info.source_link')}
-					</a>
-				</div>
+			<div class="if-notice-bar">
+				<span>{t(lang, 'info.notice')}</span>
+				<a
+					id="source-link"
+					class="if-source-link"
+					href="https://greasyfork.org{route.fullPath.replace(/\/detail$/, '')}"
+					target="_blank"
+					rel="noopener noreferrer"
+				>
+					{t(lang, 'info.source_link')}
+					<Icon name="external" size={14} />
+				</a>
+			</div>
 
-				<!-- Tabs -->
-				<div class="md3-tabs">
-					<button class="md3-tab" class:active={activeTab === 'info'} onclick={e => { e.preventDefault(); switchTab('info'); }}>
-						{t(lang, 'info.info_tab')}
-					</button>
-					<button class="md3-tab" class:active={activeTab === 'feedback'} onclick={e => { e.preventDefault(); switchTab('feedback'); }}>
-						{t(lang, 'info.feedback_tab')}
-					</button>
-					<a class="md3-tab" href="{siteProxyUrl()}{route.fullPath.replace(/\/detail$/, '')}" target="_blank" rel="noopener noreferrer">
-						{t(lang, 'info.proxy_tab')}
-					</a>
-				</div>
+			<div class="if-tabs" role="tablist">
+				<button
+					class="if-tab"
+					class:is-active={activeTab === 'info'}
+					role="tab"
+					aria-selected={activeTab === 'info'}
+					onclick={() => switchTab('info')}
+				>
+					{t(lang, 'info.info_tab')}
+				</button>
+				<button
+					class="if-tab"
+					class:is-active={activeTab === 'feedback'}
+					role="tab"
+					aria-selected={activeTab === 'feedback'}
+					onclick={() => switchTab('feedback')}
+				>
+					{t(lang, 'info.feedback_tab')}
+				</button>
+				<a
+					class="if-tab"
+					href="{siteProxyUrl()}{route.fullPath.replace(/\/detail$/, '')}"
+					target="_blank"
+					rel="noopener noreferrer"
+				>
+					{t(lang, 'info.proxy_tab')}
+					<Icon name="external" size={14} />
+				</a>
+			</div>
 
-				<!-- Info Tab — ads fill empty content spots -->
-				{#if activeTab === 'info'}
+			{#if activeTab === 'info'}
+				<article class="ui-card if-script-card">
+					<!-- eslint-disable svelte/no-at-html-tags -- 远程 Greasy Fork API 原文，未经消毒，XSS 风险见文末说明 -->
 					{#if scriptHeaderHtml}
-						<div class="if-content-area if-gf-header" id="script-header" use:processLinks={gfLocale}>{@html scriptHeaderHtml}</div>
+						<div
+							class="if-content-area if-gf-header"
+							id="script-header"
+							use:processLinks={gfLocale}
+						>
+							{@html scriptHeaderHtml}
+						</div>
 					{:else if scriptTitle}
-						<h2 class="if-script-page-title">{scriptTitle}</h2>
+						<h1 class="if-script-page-title">{scriptTitle}</h1>
 					{/if}
 
-					<!-- Install row (moved after script description) -->
-					<div class="if-install-row">
-						<a href="/{lang}/l#/{installPath}" class="md3-button" target="_blank" rel="noopener noreferrer">
-							{t(lang, 'info.install')}
-						</a>
-						<a href="/{lang}/installing" class="if-help-link" title={t(lang, 'info.install_help')} rel="nofollow">?</a>
-						{#if installLink}
-							<details class="if-install-details">
-								<summary>{t(lang, 'info.install_details')}</summary>
-								<code>{installLink}</code>
-							</details>
-						{/if}
-					</div>
-
-					{#if scriptMetaHtml}
-						<div class="if-content-area if-gf-meta" id="script-meta" use:processLinks={gfLocale}>{@html scriptMetaHtml}</div>
-					{/if}
-
-					{#if additionalInfoHtml}
-						<div class="if-content-area if-gf-content" id="additional-info" use:processLinks={gfLocale}>{@html additionalInfoHtml}</div>
-					{/if}
-
-					<div style="text-align:center;padding:16px 0"><Ad type="fluid" /></div>
-
-					{#if !scriptHeaderHtml && !scriptMetaHtml && !additionalInfoHtml}
-						<div class="md3-card if-no-content">
-							<p>{t(lang, 'info.no_description')}</p>
+					{#if installPath}
+						<div class="if-install-row">
+							<InstallButton
+								{lang}
+								installHref={`/${lang}/l#/${installPath}`}
+								sourceUrl={`https://greasyfork.org${route.fullPath.replace(/\/detail$/, '')}`}
+								scriptName={scriptTitle}
+							/>
+							<a
+								class="if-help-link"
+								href="/{lang}/installing"
+								title={t(lang, 'info.install_help')}
+								rel="nofollow"
+							>
+								<Icon name="help-circle" size={18} />
+								{t(lang, 'info.install_help')}
+							</a>
+							{#if installLink}
+								<details class="if-install-details">
+									<summary>{t(lang, 'info.install_details')}</summary>
+									<code>{installLink}</code>
+								</details>
+							{/if}
 						</div>
 					{/if}
 
-					<div style="margin-top:16px"><Ad type="auto" /></div>
-				{:else}
-					<!-- Feedback Tab — ad fills empty spot -->
+					{#if scriptMetaHtml}
+						<div class="if-content-area if-gf-meta" id="script-meta" use:processLinks={gfLocale}>
+							{@html scriptMetaHtml}
+						</div>
+					{/if}
+
+					{#if additionalInfoHtml}
+						<div
+							class="if-content-area if-gf-content"
+							id="additional-info"
+							use:processLinks={gfLocale}
+						>
+							{@html additionalInfoHtml}
+						</div>
+					{/if}
+
+					{#if !scriptHeaderHtml && !scriptMetaHtml && !additionalInfoHtml}
+						<p class="if-no-content">{t(lang, 'info.no_description')}</p>
+					{/if}
+				</article>
+			{:else}
+				<div class="ui-card if-script-card">
 					{#if feedbackListHtml}
-						<div class="if-content-area if-gf-feedback" id="feedback-list" use:processLinks={gfLocale}>{@html feedbackListHtml}</div>
-					{#if feedbackTotalPages > 1}
-						<nav class="if-pagination">
-							<button class="md3-outlined-button if-page-btn" disabled={feedbackPage === 1} style="opacity:{feedbackPage === 1 ? '0.4' : '1'}" onclick={() => goToFeedbackPage(1)}>
-								{t(lang, 'lookup.pagination.first')}
-							</button>
-							<button class="md3-outlined-button if-page-btn" disabled={feedbackPage === 1} style="opacity:{feedbackPage === 1 ? '0.4' : '1'}" onclick={() => goToFeedbackPage(feedbackPage - 1)}>
-								{t(lang, 'lookup.pagination.prev')}
-							</button>
-							<span class="if-page-indicator">{feedbackPage} / {feedbackTotalPages}</span>
-							<button class="md3-outlined-button if-page-btn" disabled={feedbackPage === feedbackTotalPages} style="opacity:{feedbackPage === feedbackTotalPages ? '0.4' : '1'}" onclick={() => goToFeedbackPage(feedbackPage + 1)}>
-								{t(lang, 'lookup.pagination.next')}
-							</button>
-							{#if feedbackLoading}
-								<span class="material-icons if-spinner-sm">autorenew</span>
-							{/if}
-						</nav>
+						<div
+							class="if-content-area if-gf-feedback"
+							id="feedback-list"
+							use:processLinks={gfLocale}
+						>
+							{@html feedbackListHtml}
+						</div>
+						{#if feedbackTotalPages > 1}
+							<nav class="if-pagination">
+								<button
+									class="ui-btn ui-btn--outlined"
+									disabled={feedbackPage === 1 || feedbackLoading}
+									onclick={() => goToFeedbackPage(1)}
+								>
+									{t(lang, 'lookup.pagination.first')}
+								</button>
+								<button
+									class="ui-btn ui-btn--outlined"
+									disabled={feedbackPage === 1 || feedbackLoading}
+									onclick={() => goToFeedbackPage(feedbackPage - 1)}
+								>
+									{t(lang, 'lookup.pagination.prev')}
+								</button>
+								<span class="if-page-indicator">{feedbackPage} / {feedbackTotalPages}</span>
+								<button
+									class="ui-btn ui-btn--outlined"
+									disabled={feedbackPage === feedbackTotalPages || feedbackLoading}
+									onclick={() => goToFeedbackPage(feedbackPage + 1)}
+								>
+									{t(lang, 'lookup.pagination.next')}
+								</button>
+								{#if feedbackLoading}
+									<span class="if-spinner-sm"><Icon name="refresh" size={18} /></span>
+								{/if}
+							</nav>
+						{/if}
 					{/if}
-					{/if}
+				</div>
+			{/if}
+			<!-- eslint-enable svelte/no-at-html-tags -->
 
-					<div style="text-align:center;padding:16px 0"><Ad type="fluid" /></div>
-
-					<div style="margin-top:16px"><Ad type="autorelaxed" /></div>
-				{/if}
-			</section>
+			<div class="if-ad"><Ad type="fluid" /></div>
 		{/if}
 
-		<div class="if-perm-notice">
-			<svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="flex-shrink:0;margin-top:1px"><path d="M11 17h2v-6h-2v6zm1-15C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 18c-4.41 0-8-3.59-8-8s3.59-8 8-8 8 3.59 8 8-3.59 8-8 8zM11 9h2V7h-2v2z"/></svg>
+		{#if route?.pageType !== 'users' && !placeholderMode}
+			<div class="if-ad"><Ad type="auto" /></div>
+		{/if}
+
+		<p class="if-perm-notice">
+			<Icon name="info" size={16} />
 			<span>{t(lang, 'info.loading_notice')}</span>
-		</div>
+		</p>
 	</div>
+
+	<!-- 移动端吸底安装条 -->
+	{#if installPath && route?.pageType !== 'users'}
+		<div class="if-install-bar">
+			<InstallButton
+				{lang}
+				installHref={`/${lang}/l#/${installPath}`}
+				sourceUrl={`https://greasyfork.org${route?.fullPath.replace(/\/detail$/, '') ?? ''}`}
+				scriptName={scriptTitle}
+				size="lg"
+			/>
+		</div>
+	{/if}
 </section>
 
 <style>
 	.info-page-root {
-		background: transparent;
-		min-height: 100vh;
 		color: var(--md-sys-color-on-surface);
-		padding: 24px 0;
+	}
+	.info-container {
+		display: flex;
+		flex-direction: column;
+		gap: 16px;
+		max-width: 960px;
+		margin: 0 auto;
+		padding-bottom: 32px;
 	}
 
-	/* ─── Loading / Error ─────────────────────────────── */
-	.if-loading-box {
-		display: flex; flex-direction: column; align-items: center; justify-content: center;
-		padding: 60px 20px; min-height: 400px; text-align: center;
+	/* ─── Loading / Error / Placeholder ─────────────────────────────── */
+	.if-center-box {
+		display: flex;
+		flex-direction: column;
+		align-items: center;
+		gap: 12px;
+		padding: 56px 24px;
+		text-align: center;
 	}
-	.if-spinner {
-		font-size: 80px; animation: if-spin 0.5s linear infinite; display: inline-block;
+	.if-center-title {
+		margin: 0;
+		font-size: var(--md-sys-typescale-title-medium-size);
+		font-weight: 600;
+	}
+	.if-center-text {
+		margin: 0;
+		max-width: 52ch;
+		font-size: var(--md-sys-typescale-body-medium-size);
+		line-height: 1.7;
+		color: var(--md-sys-color-on-surface-variant);
+	}
+	.if-spinner,
+	.if-spinner-sm {
+		display: inline-flex;
 		color: var(--md-sys-color-primary);
+		animation: if-spin 1.1s linear infinite;
 	}
-	.if-loading-tip {
-		text-align: center; line-height: 1.6; margin-top: 20px;
-		color: var(--md-sys-color-on-surface-variant); max-width: 500px;
+	@keyframes if-spin {
+		to {
+			transform: rotate(360deg);
+		}
+	}
+	@media (prefers-reduced-motion: reduce) {
+		.if-spinner,
+		.if-spinner-sm {
+			animation: none;
+		}
+	}
+	.if-error-icon {
+		color: var(--md-sys-color-error);
 	}
 
-	.if-error-box {
-		text-align: center; padding: 40px;
-		display: flex; flex-direction: column; align-items: center;
+	.if-placeholder-box {
+		display: flex;
+		flex-direction: column;
+		align-items: flex-start;
+		gap: 12px;
+		padding: 28px;
+	}
+	.if-ph-title {
+		margin: 0;
+		font-size: var(--md-sys-typescale-headline-small-size);
+		font-weight: 600;
+	}
+	.if-ph-desc {
+		margin: 0;
+		font-size: var(--md-sys-typescale-body-medium-size);
+		line-height: 1.7;
+		color: var(--md-sys-color-on-surface-variant);
+	}
+	.if-ph-example {
+		display: flex;
+		flex-direction: column;
+		gap: 10px;
+		width: 100%;
+		margin-top: 8px;
+		padding: 16px;
+		background: var(--md-sys-color-surface-container-low);
+		border-radius: var(--md-sys-shape-corner-medium);
+	}
+	.if-ph-ex-head {
+		margin: 0;
+		font-size: var(--md-sys-typescale-title-small-size);
+		font-weight: 600;
+		color: var(--md-sys-color-on-surface);
+	}
+	.if-ph-code {
+		font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+		font-size: var(--md-sys-typescale-body-small-size);
+		word-break: break-all;
+		color: var(--md-sys-color-on-surface);
+	}
+	.if-ph-hint {
+		display: flex;
+		align-items: flex-start;
+		gap: 6px;
+		margin: 0;
+		font-size: var(--md-sys-typescale-body-small-size);
+		line-height: 1.6;
+		color: var(--md-sys-color-on-surface-variant);
+	}
+	.if-ph-hint :global(svg) {
+		margin-top: 2px;
 	}
 
 	.if-no-content {
-		text-align: center; color: var(--md-sys-color-on-surface-variant);
-		padding: 40px;
+		margin: 0;
+		padding: 24px 0;
+		text-align: center;
+		color: var(--md-sys-color-on-surface-variant);
 	}
 
-	/* ─── User page ───────────────────────────────────── */
-	.if-user-card { margin-bottom: 16px; padding: 24px; background: var(--glass-bg); backdrop-filter: blur(var(--glass-blur)) saturate(180%); -webkit-backdrop-filter: blur(var(--glass-blur)) saturate(180%); box-shadow: var(--glass-shadow); }
-	.if-user-header { margin-bottom: 24px; }
-	.if-user-header h1 { margin-bottom: 16px; }
-
-	.if-user-stats {
-		display: flex; flex-wrap: wrap; gap: 4px 16px;
-		font-size: 14px; margin: 0;
-	}
-	.if-user-stats dt { color: var(--md-sys-color-on-surface-variant); }
-	.if-user-stats dd { margin: 0 12px 0 4px; }
-
-	.if-good { color: #4caf50; }
-	.if-ok { color: #ff9800; margin: 0 4px; }
-	.if-bad { color: var(--md-sys-color-error); }
-
-	.if-script-list { list-style: none; padding: 0; margin: 0; }
-	.if-result-item {
-		border: 1px solid var(--glass-border);
-		border-radius: var(--md-sys-shape-corner-medium);
-		padding: 16px;
-		margin-bottom: 12px;
-		opacity: 0;
-		animation: if-fadeIn 0.3s ease-out forwards;
-		background: var(--glass-bg);
-		backdrop-filter: blur(var(--glass-blur)) saturate(180%);
-		-webkit-backdrop-filter: blur(var(--glass-blur)) saturate(180%);
-		box-shadow: var(--glass-shadow);
-		transition: box-shadow var(--md-sys-motion-duration-short) var(--md-sys-motion-easing-standard);
-	}
-	.if-result-item:hover { box-shadow: var(--md-sys-elevation-1); }
-	.if-result-item h2 {
-		margin: 0 0 10px; font-size: 16px;
-		display: flex; align-items: baseline; gap: 6px; flex-wrap: wrap;
-	}
-	.if-script-link { color: var(--md-sys-color-primary); text-decoration: none; font-weight: 600; }
-	.if-script-link:hover { text-decoration: underline; }
-	.if-badge-js { background: var(--md-sys-color-primary-container); color: var(--md-sys-color-on-primary-container); padding: 1px 6px; border-radius: 3px; font-size: 11px; font-weight: 600; }
-	.if-sep { color: var(--md-sys-color-outline-variant); }
-	.if-script-desc { color: var(--md-sys-color-on-surface-variant); font-size: 14px; font-weight: normal; }
-	.if-script-meta { margin-top: 8px; }
-	.if-stats {
-		display: flex; flex-wrap: wrap; gap: 4px 16px;
-		font-size: 13px; margin: 0 0 10px; padding: 0;
-	}
-	.if-stats dt { color: var(--md-sys-color-on-surface-variant); }
-	.if-stats dd { margin: 0 12px 0 4px; }
-
-	/* ─── Script page chrome ──────────────────────────── */
+	/* ─── Notice / Tabs ─────────────────────────────────────────────── */
 	.if-notice-bar {
-		padding: 10px 16px;
-		background: var(--md-sys-color-surface-container-highest);
-		border: 1px solid var(--md-sys-color-outline-variant);
-		border-radius: var(--md-sys-shape-corner-small);
-		font-size: 13px;
-		color: var(--md-sys-color-on-surface-variant);
-		margin-bottom: 16px;
-	}
-	.if-source-link { color: var(--md-sys-color-primary); margin-left: 4px; }
-
-	.if-install-row {
-		display: flex; align-items: center; gap: 8px; margin: 12px 0 20px;
+		display: flex;
 		flex-wrap: wrap;
-	}
-	.if-help-link {
-		color: var(--md-sys-color-on-surface-variant);
-		text-decoration: none; font-size: 18px; padding: 8px;
-	}
-	.if-install-details {
-		font-size: 13px;
-		color: var(--md-sys-color-on-surface-variant);
-		margin-left: auto;
-	}
-	.if-install-details summary { cursor: pointer; }
-	.if-install-details code {
-		display: block; margin-top: 8px; padding: 8px;
-		background: var(--md-sys-color-surface-container-highest);
-		border-radius: var(--md-sys-shape-corner-small);
-		word-break: break-all; font-size: 12px;
-		color: var(--md-sys-color-on-surface);
-		max-width: 600px;
-	}
-
-	.if-script-page-title {
-		font-size: var(--md-sys-typescale-headline-medium);
-		font-weight: 500;
-		margin: 0 0 16px;
-		color: var(--md-sys-color-on-surface);
-	}
-
-	/* ─── GF content containers ───────────────────────── */
-	.if-content-area {
-		background: var(--glass-bg);
-		backdrop-filter: blur(var(--glass-blur)) saturate(180%);
-		-webkit-backdrop-filter: blur(var(--glass-blur)) saturate(180%);
-		border: 1px solid var(--glass-border);
-		border-radius: var(--md-sys-shape-corner-medium);
-		padding: 24px;
-		margin-bottom: 16px;
-		box-shadow: var(--glass-shadow);
-		overflow-x: auto;
-	}
-
-	/* ===================================================
-	   Greasy Fork HTML fragment styles
-	   These match the original GF look within our MD3 theme
-	   =================================================== */
-
-	/* ── Header block (c1) ─────────────────────────────── */
-	.if-gf-header {
-		font-size: 14px;
-		line-height: 1.6;
-	}
-
-	.if-gf-header :global(h2) {
-		font-size: var(--md-sys-typescale-headline-medium);
-		font-weight: 500;
-		margin: 0 0 8px;
-		color: var(--md-sys-color-on-surface);
-	}
-
-	.if-gf-header :global(p.script-description) {
-		color: var(--md-sys-color-on-surface-variant);
-		margin: 0;
-	}
-
-	/* ── Meta block (c2) ─────────────────────────────── */
-	.if-gf-meta :global(.script-meta-block) {
-		font-size: 14px;
-	}
-
-	.if-gf-meta :global(.inline-script-stats) {
-		display: grid;
-		grid-template-columns: auto 1fr;
+		align-items: center;
+		justify-content: space-between;
 		gap: 8px 16px;
-		align-items: baseline;
-		margin: 0;
-	}
-
-	.if-gf-meta :global(.inline-script-stats dt) {
-		color: var(--md-sys-color-on-surface-variant);
-		font-weight: 500;
-		font-size: 13px;
-		white-space: nowrap;
-	}
-
-	.if-gf-meta :global(.inline-script-stats dd) {
-		margin: 0;
-		color: var(--md-sys-color-on-surface);
-	}
-
-	.if-gf-meta :global(.inline-script-stats a) {
-		color: var(--md-sys-color-primary);
-		text-decoration: none;
-	}
-	.if-gf-meta :global(.inline-script-stats a:hover) {
-		text-decoration: underline;
-	}
-
-	/* Rating counts */
-	.if-gf-meta :global(.good-rating-count) {
-		color: #4caf50;
-		font-weight: 600;
-	}
-	.if-gf-meta :global(.ok-rating-count) {
-		color: #ff9800;
-		margin: 0 6px;
-		font-weight: 600;
-	}
-	.if-gf-meta :global(.bad-rating-count) {
-		color: var(--md-sys-color-error);
-		font-weight: 600;
-	}
-
-	/* Antifeatures */
-	.if-gf-meta :global(.script-antifeatures) {
-		color: var(--md-sys-color-error);
-	}
-
-	/* Applies-to site list */
-	.if-gf-meta :global(.block-list) {
-		list-style: none;
-		padding: 0;
-		margin: 4px 0 0;
-		display: flex;
-		flex-wrap: wrap;
-		gap: 4px 8px;
-	}
-
-	.if-gf-meta :global(.block-list li) {
-		display: inline;
-	}
-
-	.if-gf-meta :global(.block-list a) {
-		color: var(--md-sys-color-primary);
-		text-decoration: none;
-		font-size: 13px;
-	}
-	.if-gf-meta :global(.block-list a:hover) {
-		text-decoration: underline;
-	}
-
-	.if-gf-meta :global(.expandable) {
-		max-height: none;
-	}
-
-	/* ── User content / additional info (c3) ─────────── */
-	.if-gf-content {
-		font-size: 14px;
-		line-height: 1.7;
-		color: var(--md-sys-color-on-surface);
-	}
-
-	.if-gf-content :global(h3) {
-		font-size: var(--md-sys-typescale-title-medium);
-		font-weight: 500;
-		margin: 24px 0 12px;
-		color: var(--md-sys-color-on-surface);
-		border-bottom: 1px solid var(--md-sys-color-outline-variant);
-		padding-bottom: 8px;
-	}
-
-	.if-gf-content :global(h3:first-child) {
-		margin-top: 0;
-	}
-
-	.if-gf-content :global(p) {
-		margin: 0 0 12px;
-	}
-
-	.if-gf-content :global(strong) {
-		font-weight: 600;
-	}
-
-	.if-gf-content :global(a) {
-		color: var(--md-sys-color-primary);
-		text-decoration: none;
-		word-break: break-all;
-	}
-	.if-gf-content :global(a:hover) {
-		text-decoration: underline;
-	}
-
-	.if-gf-content :global(img) {
-		max-width: 100%;
-		height: auto;
-		border-radius: var(--md-sys-shape-corner-small);
-		margin: 12px 0;
-		border: 1px solid var(--md-sys-color-outline-variant);
-	}
-
-	.if-gf-content :global(table) {
-		width: 100%;
-		border-collapse: collapse;
-		margin: 12px 0;
-		font-size: 13px;
-	}
-
-	.if-gf-content :global(th) {
-		background: var(--md-sys-color-surface-container-highest);
-		color: var(--md-sys-color-on-surface);
-		font-weight: 600;
-		padding: 10px 14px;
-		text-align: left;
-		border-bottom: 2px solid var(--md-sys-color-outline-variant);
-	}
-
-	.if-gf-content :global(td) {
-		padding: 10px 14px;
-		border-bottom: 1px solid var(--md-sys-color-outline-variant);
-		vertical-align: top;
-	}
-
-	.if-gf-content :global(tr:hover td) {
-		background: var(--md-sys-color-surface-container-low);
-	}
-
-	.if-gf-content :global(code) {
-		background: var(--md-sys-color-surface-container-highest);
-		padding: 2px 6px;
-		border-radius: 4px;
-		font-size: 0.9em;
-		font-family: 'Consolas', 'Monaco', monospace;
-	}
-
-	.if-gf-content :global(pre) {
-		background: var(--md-sys-color-surface-container-highest);
-		padding: 16px;
-		border-radius: var(--md-sys-shape-corner-small);
-		overflow-x: auto;
-		font-size: 13px;
-		line-height: 1.5;
-		margin: 12px 0;
-	}
-
-	.if-gf-content :global(blockquote) {
-		border-left: 3px solid var(--md-sys-color-primary);
-		padding: 8px 16px;
-		margin: 12px 0;
-		color: var(--md-sys-color-on-surface-variant);
-		background: var(--md-sys-color-surface-container-low);
-		border-radius: 0 var(--md-sys-shape-corner-small) var(--md-sys-shape-corner-small) 0;
-	}
-
-	.if-gf-content :global(ul), .if-gf-content :global(ol) {
-		margin: 8px 0;
-		padding-left: 24px;
-	}
-
-	.if-gf-content :global(li) {
-		margin-bottom: 4px;
-	}
-
-	/* Hide non-functional GF elements */
-	.if-gf-content :global(.install-link),
-	.if-gf-content :global(.install-help-link),
-	.if-gf-content :global(dialog),
-	.if-gf-meta :global(dialog),
-	.if-gf-header :global(dialog) {
-		display: none !important;
-	}
-
-	/* ── Feedback list (c1 from feedback endpoint) ───── */
-	.if-gf-feedback {
-		font-size: 14px;
+		padding: 12px 16px;
+		background: var(--md-sys-color-secondary-container);
+		color: var(--md-sys-color-on-secondary-container);
+		border-radius: var(--md-sys-shape-corner-medium);
+		font-size: var(--md-sys-typescale-body-small-size);
 		line-height: 1.6;
 	}
-
-	.if-gf-feedback :global(.script-discussion-list) {
-		display: flex;
-		flex-direction: column;
-		gap: 0;
-	}
-
-	.if-gf-feedback :global(.discussion-list-container) {
-		border-bottom: 1px solid var(--md-sys-color-outline-variant);
-	}
-
-	.if-gf-feedback :global(.discussion-list-item) {
-		padding: 16px 4px;
-		transition: background var(--md-sys-motion-duration-short) var(--md-sys-motion-easing-standard);
-	}
-
-	.if-gf-feedback :global(.discussion-list-item:hover) {
-		background: var(--md-sys-color-surface-container-low);
-	}
-
-	.if-gf-feedback :global(.discussion-meta) {
-		display: flex;
-		flex-wrap: wrap;
-		align-items: baseline;
-		gap: 4px 16px;
-		margin-bottom: 6px;
-		font-size: 13px;
-	}
-
-	.if-gf-feedback :global(.discussion-meta-item) {
-		color: var(--md-sys-color-on-surface-variant);
+	.if-source-link {
 		display: inline-flex;
 		align-items: center;
 		gap: 4px;
-	}
-
-	.if-gf-feedback :global(.discussion-title) {
-		display: flex;
-		align-items: flex-start;
-		gap: 8px;
-		color: var(--md-sys-color-on-surface);
+		font-weight: 600;
+		color: inherit;
 		text-decoration: none;
-		font-size: 14px;
-		line-height: 1.5;
-		word-break: break-word;
+	}
+	.if-source-link:hover {
+		text-decoration: underline;
 	}
 
-	.if-gf-feedback :global(.discussion-title:hover) {
-		color: var(--md-sys-color-primary);
+	.if-tabs {
+		display: flex;
+		gap: 4px;
+		border-bottom: 1px solid var(--md-sys-color-outline-variant);
+		overflow-x: auto;
 	}
-
-	.if-gf-feedback :global(.rating-icon) {
-		flex-shrink: 0;
-		width: 24px;
-		height: 24px;
-		border-radius: var(--md-sys-shape-corner-full);
+	.if-tab {
 		display: inline-flex;
 		align-items: center;
-		justify-content: center;
-		font-size: 12px;
-		font-weight: 600;
-		color: #fff;
-		margin-top: 2px;
-		text-indent: -9999px;
-		overflow: hidden;
-	}
-
-	.if-gf-feedback :global(.rating-icon-good) { background: #4caf50; }
-	.if-gf-feedback :global(.rating-icon-ok)   { background: #ff9800; }
-	.if-gf-feedback :global(.rating-icon-bad)  { background: var(--md-sys-color-error); }
-
-	.if-gf-feedback :global(.discussion-snippet) {
-		color: var(--md-sys-color-on-surface-variant);
-		overflow: hidden;
-		display: -webkit-box;
-		-webkit-box-orient: vertical;
-		-webkit-line-clamp: 3;
-		line-clamp: 3;
-	}
-
-	.if-gf-feedback :global(.user-link) {
-		color: var(--md-sys-color-primary);
-		text-decoration: none;
+		gap: 6px;
+		min-height: 44px;
+		padding: 0 16px;
+		border: none;
+		background: transparent;
+		font: inherit;
+		font-size: var(--md-sys-typescale-title-small-size);
 		font-weight: 500;
-	}
-
-	.if-gf-feedback :global(.user-link:hover) {
-		text-decoration: underline;
-	}
-
-	.if-gf-feedback :global(.badge-author) {
-		background: var(--md-sys-color-primary-container);
-		color: var(--md-sys-color-on-primary-container);
-		padding: 1px 8px;
-		border-radius: var(--md-sys-shape-corner-full);
-		font-size: 11px;
-		font-weight: 600;
-	}
-
-	.if-gf-feedback :global(.discussion) {
-		padding: 16px;
-		border: 1px solid var(--glass-border);
-		border-radius: var(--md-sys-shape-corner-small);
-		background: var(--glass-bg);
-		backdrop-filter: blur(var(--glass-blur)) saturate(180%);
-		-webkit-backdrop-filter: blur(var(--glass-blur)) saturate(180%);
-	}
-
-	.if-gf-feedback :global(.discussion-header) {
-		display: flex;
-		align-items: center;
-		gap: 8px;
-		margin-bottom: 8px;
-		font-size: 13px;
 		color: var(--md-sys-color-on-surface-variant);
-	}
-
-	.if-gf-feedback :global(.discussion-rating) {
-		font-weight: 600;
-	}
-
-	.if-gf-feedback :global(.good-rating-count) {
-		color: #4caf50;
-	}
-	.if-gf-feedback :global(.ok-rating-count) {
-		color: #ff9800;
-		margin: 0 4px;
-	}
-	.if-gf-feedback :global(.bad-rating-count) {
-		color: var(--md-sys-color-error);
-	}
-
-	.if-gf-feedback :global(a) {
-		color: var(--md-sys-color-primary);
 		text-decoration: none;
+		white-space: nowrap;
+		cursor: pointer;
+		border-bottom: 2px solid transparent;
 	}
-	.if-gf-feedback :global(a:hover) {
-		text-decoration: underline;
-	}
-
-	.if-gf-feedback :global(p) {
-		margin: 0 0 8px;
-	}
-
-	.if-gf-feedback :global(code) {
-		background: var(--md-sys-color-surface-container-highest);
-		padding: 2px 6px;
-		border-radius: 4px;
-		font-size: 0.9em;
-	}
-
-	.if-gf-feedback :global(pre) {
-		background: var(--md-sys-color-surface-container-highest);
-		padding: 12px;
-		border-radius: var(--md-sys-shape-corner-small);
-		overflow-x: auto;
-		font-size: 13px;
-		margin: 8px 0;
-	}
-
-	/* ── Responsive ───────────────────────────────────── */
-	@media (max-width: 600px) {
-		.if-gf-meta :global(.inline-script-stats) {
-			grid-template-columns: 1fr;
-			gap: 2px 0;
-		}
-		.if-gf-meta :global(.inline-script-stats dt) {
-			margin-top: 8px;
-		}
-
-		.if-install-details {
-			margin-left: 0;
-			width: 100%;
-		}
-		.if-install-details code {
-			max-width: 100%;
-		}
-	}
-
-	@keyframes if-spin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
-	@keyframes if-fadeIn { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: translateY(0); } }
-
-	.if-perm-notice {
-		display: flex; align-items: flex-start; gap: 8px;
-		margin-top: 24px; padding: 12px 16px;
-		background: var(--md-sys-color-surface-container-low);
-		border: 1px solid var(--md-sys-color-outline-variant);
-		border-radius: var(--md-sys-shape-corner-small);
-		font-size: 13px; line-height: 1.5;
-		color: var(--md-sys-color-on-surface-variant);
-	}
-
-	/* ── Pagination ─────────────────────────────────── */
-	.if-pagination {
-		display: flex; align-items: center; justify-content: center; gap: 12px;
-		margin-top: 16px; padding: 8px 0;
-	}
-	.if-page-btn {
-		min-width: auto; padding: 6px 14px; font-size: 13px;
-	}
-	.if-page-indicator {
-		font-size: 14px; font-weight: 500;
+	.if-tab:hover {
 		color: var(--md-sys-color-on-surface);
 	}
-	.if-spinner-sm {
-		font-size: 28px; animation: if-spin 0.5s linear infinite;
+	.if-tab.is-active {
 		color: var(--md-sys-color-primary);
+		border-bottom-color: var(--md-sys-color-primary);
+	}
+	.if-tab:focus-visible {
+		outline: 2px solid var(--md-sys-color-primary);
+		outline-offset: -2px;
+		border-radius: var(--md-sys-shape-corner-small);
 	}
 
-	/* ── No-hash placeholder ─────────────────────────── */
-	.if-placeholder-box {
-		padding: 32px;
-		max-width: 760px;
-		margin: 0 auto;
-		animation: if-fadeIn 0.3s ease;
+	/* ─── Script detail ─────────────────────────────────────────────── */
+	.if-script-card {
+		padding: 24px;
+		background: var(--md-sys-color-surface);
 	}
-	.if-ph-badge {
-		display: inline-block;
-		background: var(--md-sys-color-secondary-container);
-		color: var(--md-sys-color-on-secondary-container);
-		font-size: 12px; font-weight: 600;
-		letter-spacing: 0.5px;
-		padding: 4px 12px;
-		border-radius: var(--md-sys-shape-corner-full);
-		margin-bottom: 12px;
+	.if-script-page-title {
+		margin: 0 0 12px;
+		font-size: var(--md-sys-typescale-headline-small-size);
+		font-weight: 600;
+		line-height: 1.35;
 	}
-	.if-ph-title { margin: 0 0 8px; }
-	.if-ph-desc { color: var(--md-sys-color-on-surface-variant); font-size: 15px; line-height: 1.6; margin: 0 0 20px; }
-	.if-ph-example { border-top: 1px solid var(--md-sys-color-outline-variant); padding-top: 20px; }
-	.if-ph-ex-head h2 { font-size: 15px; font-weight: 600; color: var(--md-sys-color-on-surface); margin: 0 0 12px; }
-	.if-ph-usage { list-style: none; padding: 0 0 12px; margin: 0; }
-	.if-ph-usage code {
-		display: inline-block; padding: 8px 14px;
-		background: var(--md-sys-color-surface-container);
-		border: 1px solid var(--md-sys-color-outline-variant);
-		border-radius: var(--md-sys-shape-corner-small);
-		font-size: 13px; word-break: break-all;
-	}
-	.if-ph-demo-list { padding: 0; list-style: none; }
-	.if-ph-demo-list .if-result-item { animation: if-fadeIn 0.3s ease; }
-	.if-script-link.is-demo { color: var(--md-sys-color-on-surface); cursor: default; }
-	.if-ph-hint {
-		display: flex; align-items: center; gap: 10px;
-		margin-top: 20px; padding: 12px 16px;
+	.if-install-row {
+		display: flex;
+		flex-wrap: wrap;
+		align-items: center;
+		gap: 12px;
+		margin: 16px 0;
+		padding: 14px 16px;
 		background: var(--md-sys-color-surface-container-low);
-		border: 1px solid var(--md-sys-color-outline-variant);
+		border-radius: var(--md-sys-shape-corner-medium);
+	}
+	.if-help-link {
+		display: inline-flex;
+		align-items: center;
+		gap: 6px;
+		min-height: 40px;
+		font-size: var(--md-sys-typescale-label-large-size);
+		color: var(--md-sys-color-primary);
+		text-decoration: none;
+	}
+	.if-help-link:hover {
+		text-decoration: underline;
+	}
+	.if-install-details {
+		flex: 1 1 100%;
+		min-width: 0;
+		font-size: var(--md-sys-typescale-label-small-size);
+		color: var(--md-sys-color-on-surface-variant);
+	}
+	.if-install-details summary {
+		cursor: pointer;
+	}
+	.if-install-details code {
+		display: block;
+		margin-top: 6px;
+		word-break: break-all;
+		font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+	}
+
+	.if-content-area {
+		font-size: var(--md-sys-typescale-body-medium-size);
+		line-height: 1.75;
+		color: var(--md-sys-color-on-surface);
+	}
+	.if-content-area :global(h1),
+	.if-content-area :global(h2),
+	.if-content-area :global(h3) {
+		margin: 20px 0 10px;
+		line-height: 1.4;
+	}
+	.if-content-area :global(h1) {
+		font-size: var(--md-sys-typescale-title-large-size);
+	}
+	.if-content-area :global(h2) {
+		font-size: var(--md-sys-typescale-title-medium-size);
+	}
+	.if-content-area :global(h3) {
+		font-size: var(--md-sys-typescale-title-small-size);
+	}
+	.if-content-area :global(p) {
+		margin: 10px 0;
+	}
+	.if-content-area :global(a) {
+		color: var(--md-sys-color-primary);
+	}
+	.if-content-area :global(img) {
+		max-width: 100%;
+		height: auto;
 		border-radius: var(--md-sys-shape-corner-small);
-		font-size: 13px; color: var(--md-sys-color-on-surface-variant);
+	}
+	.if-content-area :global(pre) {
+		overflow-x: auto;
+		padding: 12px;
+		background: var(--md-sys-color-surface-container-high);
+		border-radius: var(--md-sys-shape-corner-small);
+	}
+	.if-content-area :global(code) {
+		font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+		font-size: 0.92em;
+	}
+	.if-content-area :global(table) {
+		width: 100%;
+		border-collapse: collapse;
+		display: block;
+		overflow-x: auto;
+	}
+	.if-content-area :global(th),
+	.if-content-area :global(td) {
+		padding: 8px 10px;
+		border-bottom: 1px solid var(--md-sys-color-outline-variant);
+		text-align: start;
+	}
+	.if-content-area :global(ul),
+	.if-content-area :global(ol) {
+		padding-inline-start: 22px;
+	}
+
+	.if-ad {
+		display: flex;
+		justify-content: center;
+	}
+
+	.if-perm-notice {
+		display: flex;
+		align-items: flex-start;
+		justify-content: center;
+		gap: 6px;
+		margin: 0;
+		padding: 4px 8px;
+		font-size: var(--md-sys-typescale-label-small-size);
+		line-height: 1.6;
+		color: var(--md-sys-color-on-surface-variant);
+		text-align: center;
+	}
+	.if-perm-notice :global(svg) {
+		margin-top: 2px;
+	}
+
+	/* ─── Feedback pagination ───────────────────────────────────────── */
+	.if-pagination {
+		display: flex;
+		flex-wrap: wrap;
+		align-items: center;
+		justify-content: center;
+		gap: 8px;
+		margin-top: 20px;
+	}
+	.if-page-indicator {
+		min-width: 56px;
+		text-align: center;
+		font-size: var(--md-sys-typescale-body-medium-size);
+		font-variant-numeric: tabular-nums;
+	}
+
+	/* ─── User page ─────────────────────────────────────────────────── */
+	.if-user-card {
+		display: flex;
+		flex-direction: column;
+		gap: 16px;
+		padding: 24px;
+	}
+	.if-user-header {
+		display: flex;
+		flex-direction: column;
+		gap: 10px;
+	}
+	.if-user-name {
+		margin: 0;
+		font-size: var(--md-sys-typescale-headline-small-size);
+		font-weight: 600;
+	}
+	.if-user-bio {
+		margin: 0;
+		padding: 12px 16px;
+		background: var(--md-sys-color-surface-container-low);
+		border-radius: var(--md-sys-shape-corner-small);
+		font-size: var(--md-sys-typescale-body-medium-size);
+		line-height: 1.7;
+		color: var(--md-sys-color-on-surface-variant);
+	}
+	.if-user-github {
+		margin: 0;
+		font-size: var(--md-sys-typescale-body-small-size);
+		color: var(--md-sys-color-on-surface-variant);
+	}
+	.if-user-github__label {
+		margin-inline-end: 4px;
+	}
+	.if-section-title {
+		margin: 8px 0 0;
+		font-size: var(--md-sys-typescale-title-medium-size);
+		font-weight: 600;
+	}
+	.if-script-list {
+		list-style: none;
+		margin: 0;
+		padding: 0;
+		display: flex;
+		flex-direction: column;
+		gap: 12px;
+	}
+
+	/* ─── Mobile install bar ────────────────────────────────────────── */
+	.if-install-bar {
+		display: none;
+	}
+
+	@media (max-width: 599px) {
+		.if-script-card,
+		.if-user-card,
+		.if-placeholder-box {
+			padding: 16px;
+		}
+		.if-install-bar {
+			position: sticky;
+			bottom: 0;
+			z-index: 20;
+			display: block;
+			padding: 10px 16px calc(10px + env(safe-area-inset-bottom));
+			background: var(--md-sys-color-surface-container);
+			border-top: 1px solid var(--md-sys-color-outline-variant);
+		}
+		.info-container {
+			padding-bottom: 8px;
+		}
 	}
 </style>

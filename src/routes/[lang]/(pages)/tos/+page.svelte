@@ -1,6 +1,7 @@
 <script lang="ts">
 	import { t, type Lang } from '$i18n';
 	import Ad from '$components/Ad.svelte';
+	import ContactEmail from '$components/ContactEmail.svelte';
 	import type { PageData } from './$types';
 
 	let { data }: { data: PageData } = $props();
@@ -15,7 +16,9 @@
 
 <div class="width-constraint" style="padding-top:32px;padding-bottom:32px">
 	<section class="text-content">
-		<h2 class="headline-small" style="text-align:center;margin-bottom:20px">{t(lang, 'tos.title')}</h2>
+		<h2 class="headline-small" style="text-align:center;margin-bottom:20px">
+			{t(lang, 'tos.title')}
+		</h2>
 		<h3>{t(lang, 'tos.welcome')}</h3>
 		<p style="color:var(--md-sys-color-on-surface-variant)">{t(lang, 'tos.preamble')}</p>
 
@@ -27,7 +30,9 @@
 		</div>
 
 		<h3>{t(lang, 'tos.section1_title')}</h3>
+		<!-- eslint-disable-next-line svelte/no-at-html-tags -- 仓库自带 i18n 文案，含 <br> / <a> 等排版标签 -->
 		<p style="color:var(--md-sys-color-on-surface-variant)">{@html t(lang, 'tos.section1_1')}</p>
+		<!-- eslint-disable-next-line svelte/no-at-html-tags -- 同上 -->
 		<p style="color:var(--md-sys-color-on-surface-variant)">{@html t(lang, 'tos.section1_2')}</p>
 
 		<h3>{t(lang, 'tos.section2_title')}</h3>
@@ -36,11 +41,15 @@
 		<p style="color:var(--md-sys-color-on-surface-variant)">{t(lang, 'tos.section2_3')}</p>
 		<p style="color:var(--md-sys-color-on-surface-variant)">{t(lang, 'tos.section2_4')}</p>
 
+		<!-- eslint-disable svelte/no-at-html-tags -- 仓库自带 i18n 文案，无需消毒 -->
 		<h3>{t(lang, 'tos.section3_title')}</h3>
 		<p style="color:var(--md-sys-color-on-surface-variant)">{t(lang, 'tos.section3_1')}</p>
 		<p style="color:var(--md-sys-color-on-surface-variant)">{t(lang, 'tos.section3_2')}</p>
 		<h4>{t(lang, 'tos.section3_3_title')}</h4>
-		<p style="color:var(--md-sys-color-on-surface-variant)">{@html t(lang, 'tos.section3_3_content')}</p>
+		<p style="color:var(--md-sys-color-on-surface-variant)">
+			{@html t(lang, 'tos.section3_3_content')}
+		</p>
+		<!-- eslint-enable svelte/no-at-html-tags -->
 
 		<h3>{t(lang, 'tos.section4_title')}</h3>
 		<p style="color:var(--md-sys-color-on-surface-variant)">{t(lang, 'tos.section4_1')}</p>
@@ -59,7 +68,11 @@
 
 		<h3>{t(lang, 'tos.section7_title')}</h3>
 		<p style="color:var(--md-sys-color-on-surface-variant)">{t(lang, 'tos.section7_1')}</p>
-		<p><strong>{t(lang, 'tos.email')}</strong></p>
+		<p>
+			<strong>{t(lang, 'tos.email')}</strong>
+			<ContactEmail label={t(lang, 'tos.section7_title')} />
+			<strong>{t(lang, 'tos.email_note')}</strong>
+		</p>
 
 		<hr class="md3-divider" />
 		<p style="text-align:center"><strong>{t(lang, 'tos.thanks')}</strong></p>

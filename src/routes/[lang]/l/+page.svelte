@@ -9,8 +9,19 @@
 
 	function buildUrl(lang: Lang): string {
 		const hash = window.location.hash;
-		return window.location.origin + '/' + lang + '/download' + (hash && hash.indexOf('#/') === 0 ? hash : '');
+		return (
+			window.location.origin +
+			'/' +
+			lang +
+			'/download' +
+			(hash && hash.indexOf('#/') === 0 ? hash : '')
+		);
 	}
 </script>
 
-<RedirectInterstitial {lang} delaySec={siteConfig.redirects.downloadDelaySec} {buildUrl} showAds={siteConfig.adsense.allowOnRedirectPages} />
+<RedirectInterstitial
+	{lang}
+	delaySec={siteConfig.redirects.downloadDelaySec}
+	{buildUrl}
+	showAds={siteConfig.adsense.allowOnRedirectPages}
+/>

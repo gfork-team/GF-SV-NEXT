@@ -1,11 +1,10 @@
-﻿<script lang="ts">
+<script lang="ts">
 	import { t, type Lang } from '$i18n';
 	import Ad from '$components/Ad.svelte';
 	import type { PageData } from './$types';
 
 	let { data }: { data: PageData } = $props();
 	let lang: Lang = $derived(data.lang);
-
 
 	interface HelpCard {
 		icon: string;
@@ -16,27 +15,74 @@
 	}
 
 	let gettingStarted = $derived([
-		{ icon: 'download', titleKey: 'help.card_install_title', descKey: 'help.card_install_desc', href: `/${lang}/installing` } as HelpCard,
-		{ icon: 'extension', titleKey: 'help.card_managers_title', descKey: 'help.card_managers_desc', href: `/${lang}/applist` } as HelpCard,
-		{ icon: 'search', titleKey: 'help.card_search_title', descKey: 'help.card_search_desc', href: `/${lang}/search` } as HelpCard
+		{
+			icon: 'download',
+			titleKey: 'help.card_install_title',
+			descKey: 'help.card_install_desc',
+			href: `/${lang}/installing`
+		} as HelpCard,
+		{
+			icon: 'extension',
+			titleKey: 'help.card_managers_title',
+			descKey: 'help.card_managers_desc',
+			href: `/${lang}/applist`
+		} as HelpCard,
+		{
+			icon: 'search',
+			titleKey: 'help.card_search_title',
+			descKey: 'help.card_search_desc',
+			href: `/${lang}/search`
+		} as HelpCard
 	]);
 
 	let support = $derived([
-		{ icon: 'feedback', titleKey: 'help.card_feedback_title', descKey: 'help.card_feedback_desc', href: `/${lang}/feedback` } as HelpCard,
-		{ icon: 'menu_book', titleKey: 'help.card_docs_title', descKey: 'help.card_docs_desc', href: 'https://doc.greasyfork.org.cn', external: true } as HelpCard,
-		{ icon: 'build', titleKey: 'help.card_tampermonkey_title', descKey: 'help.card_tampermonkey_desc', href: 'https://www.tampermonkey.net/faq.php', external: true } as HelpCard,
-		{ icon: 'extension', titleKey: 'help.card_greasemonkey_title', descKey: 'help.card_greasemonkey_desc', href: 'https://wiki.greasemonkey.net/Troubleshooting_(Users)', external: true } as HelpCard
+		{
+			icon: 'feedback',
+			titleKey: 'help.card_feedback_title',
+			descKey: 'help.card_feedback_desc',
+			href: `/${lang}/feedback`
+		} as HelpCard,
+		{
+			icon: 'menu_book',
+			titleKey: 'help.card_docs_title',
+			descKey: 'help.card_docs_desc',
+			href: 'https://doc.greasyfork.org.cn',
+			external: true
+		} as HelpCard,
+		{
+			icon: 'build',
+			titleKey: 'help.card_tampermonkey_title',
+			descKey: 'help.card_tampermonkey_desc',
+			href: 'https://www.tampermonkey.net/faq.php',
+			external: true
+		} as HelpCard,
+		{
+			icon: 'extension',
+			titleKey: 'help.card_greasemonkey_title',
+			descKey: 'help.card_greasemonkey_desc',
+			href: 'https://wiki.greasemonkey.net/Troubleshooting_(Users)',
+			external: true
+		} as HelpCard
 	]);
 
 	let community = $derived([
-		{ icon: 'code', titleKey: 'help.card_github_title', descKey: 'help.card_github_desc', href: 'https://github.com/greasfork-org/greasyfork', external: true } as HelpCard
+		{
+			icon: 'code',
+			titleKey: 'help.card_github_title',
+			descKey: 'help.card_github_desc',
+			href: 'https://github.com/greasfork-org/greasyfork',
+			external: true
+		} as HelpCard
 	]);
 </script>
 
 <svelte:head>
-<title>{t(lang, 'meta.help_title')}</title>
+	<title>{t(lang, 'meta.help_title')}</title>
 	<meta name="description" content={t(lang, 'meta.help_desc')} />
-	<meta name="keywords" content="greasyfork help, userscript help, script installation help, tampermonkey help, greasemonkey help, user script support" />
+	<meta
+		name="keywords"
+		content="greasyfork help, userscript help, script installation help, tampermonkey help, greasemonkey help, user script support"
+	/>
 	<link rel="stylesheet" href="https://fonts.googleapis.com/icon?family=Material+Icons" />
 </svelte:head>
 
@@ -54,7 +100,7 @@
 				{t(lang, 'help.section_getting_started')}
 			</h2>
 			<div class="hp-card-grid">
-				{#each gettingStarted as card}
+				{#each gettingStarted as card (card.href)}
 					<a href={card.href} class="hp-card">
 						<span class="material-icons hp-card-icon">{card.icon}</span>
 						<div class="hp-card-body">
@@ -74,14 +120,21 @@
 				{t(lang, 'help.section_support')}
 			</h2>
 			<div class="hp-card-grid hp-card-grid--four">
-				{#each support as card}
-					<a href={card.href} class="hp-card" target={card.external ? '_blank' : undefined} rel={card.external ? 'noopener noreferrer' : undefined}>
+				{#each support as card (card.href)}
+					<a
+						href={card.href}
+						class="hp-card"
+						target={card.external ? '_blank' : undefined}
+						rel={card.external ? 'noopener noreferrer' : undefined}
+					>
 						<span class="material-icons hp-card-icon">{card.icon}</span>
 						<div class="hp-card-body">
 							<h3 class="hp-card-title">{t(lang, card.titleKey)}</h3>
 							<p class="hp-card-desc">{t(lang, card.descKey)}</p>
 						</div>
-						<span class="material-icons hp-card-arrow">{card.external ? 'open_in_new' : 'arrow_forward'}</span>
+						<span class="material-icons hp-card-arrow"
+							>{card.external ? 'open_in_new' : 'arrow_forward'}</span
+						>
 					</a>
 				{/each}
 			</div>
@@ -94,7 +147,7 @@
 				{t(lang, 'help.section_community')}
 			</h2>
 			<div class="hp-card-grid">
-				{#each community as card}
+				{#each community as card (card.href)}
 					<a href={card.href} class="hp-card" target="_blank" rel="noopener noreferrer">
 						<span class="material-icons hp-card-icon">{card.icon}</span>
 						<div class="hp-card-body">
@@ -128,7 +181,7 @@
 		display: flex;
 		align-items: center;
 		gap: 10px;
-		font-size: var(--md-sys-typescale-title-large);
+		font-size: var(--md-sys-typescale-title-large-size);
 		font-weight: 500;
 		margin: 0 0 24px;
 		color: var(--md-sys-color-on-surface);
@@ -159,15 +212,20 @@
 		background: var(--card-bg);
 		border-radius: 14px;
 		border: 1px solid var(--md-sys-color-outline-variant);
-		box-shadow: 0 1px 2px rgba(0,0,0,.03), 0 4px 12px rgba(0,0,0,.03);
+		box-shadow:
+			0 1px 2px rgba(0, 0, 0, 0.03),
+			0 4px 12px rgba(0, 0, 0, 0.03);
 		text-decoration: none;
 		color: inherit;
-		transition: transform .2s ease-out, box-shadow .2s ease-out, border-color .2s ease-out;
+		transition:
+			transform 0.2s ease-out,
+			box-shadow 0.2s ease-out,
+			border-color 0.2s ease-out;
 	}
 	@media (hover: hover) {
 		.hp-card:hover {
 			transform: translateY(-3px);
-			box-shadow: 0 8px 20px rgba(0,0,0,.08);
+			box-shadow: 0 8px 20px rgba(0, 0, 0, 0.08);
 			border-color: var(--md-sys-color-primary);
 		}
 	}
@@ -186,7 +244,7 @@
 
 	.hp-card-title {
 		margin: 0 0 4px;
-		font-size: var(--md-sys-typescale-title-small);
+		font-size: var(--md-sys-typescale-title-small-size);
 		font-weight: 500;
 		color: var(--md-sys-color-on-surface);
 	}
@@ -227,7 +285,7 @@
 		}
 
 		.hp-section-title {
-			font-size: var(--md-sys-typescale-title-medium);
+			font-size: var(--md-sys-typescale-title-medium-size);
 			margin-bottom: 16px;
 		}
 	}

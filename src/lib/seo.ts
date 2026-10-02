@@ -88,9 +88,11 @@ export function organizationJsonLd(): string {
 		},
 		sameAs: [
 			...new Set(
-				[siteConfig.github.org, siteConfig.github.gfHomeNext, siteConfig.github.gfHomeSvelteKit].filter(
-					Boolean
-				)
+				[
+					siteConfig.github.org,
+					siteConfig.github.gfHomeNext,
+					siteConfig.github.gfHomeSvelteKit
+				].filter(Boolean)
 			)
 		]
 	};
@@ -98,7 +100,12 @@ export function organizationJsonLd(): string {
 }
 
 /** 当前页 WebPage JSON-LD（与 canonical / OG 同源，全部路由可用）。 */
-export function webPageJsonLd(lang: Lang, cleanPath: string, title: string, description: string): string {
+export function webPageJsonLd(
+	lang: Lang,
+	cleanPath: string,
+	title: string,
+	description: string
+): string {
 	const url = canonicalUrl(lang, cleanPath);
 	const ld = {
 		'@context': 'https://schema.org',
