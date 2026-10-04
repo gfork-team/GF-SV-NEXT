@@ -811,6 +811,7 @@
 						{/if}
 					{/if}
 				</div>
+				<Ad type="horizontal" />
 			{/if}
 			<!-- eslint-enable svelte/no-at-html-tags -->
 

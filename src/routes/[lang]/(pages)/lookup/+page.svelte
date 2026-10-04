@@ -1,4 +1,4 @@
-<script lang="ts">
+﻿<script lang="ts">
 	import { onMount } from 'svelte';
 	import { page } from '$app/state';
 	import { t, type Lang } from '$i18n';
@@ -752,6 +752,7 @@
 			</p>
 
 			<div class="lk-ad"><Ad type="fluid" /></div>
+			<Ad type="horizontal" />
 		</div>
 	</div>
 </section>

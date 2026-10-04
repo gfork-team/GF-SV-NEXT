@@ -1,4 +1,4 @@
-<script lang="ts">
+﻿<script lang="ts">
 	import { onMount, tick } from 'svelte';
 	import { t, type Lang } from '$i18n';
 	import { siteConfig } from '$lib/config';
@@ -378,6 +378,7 @@
 						<p class="sr-notice" role="status" aria-live="polite">{notice}</p>
 					{/if}
 				</form>
+				<Ad type="horizontal" />
 			</details>
 		</div>
 
