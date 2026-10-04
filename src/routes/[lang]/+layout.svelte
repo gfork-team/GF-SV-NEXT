@@ -277,6 +277,7 @@
 	<!-- eslint-enable svelte/no-at-html-tags -->
 </svelte:head>
 
+<div class="zh-topbar"></div>
 <Nav {lang} />
 
 {#if announceVisible}
@@ -414,6 +415,17 @@
 	.announce__close:hover {
 		opacity: 1;
 		background: rgb(0 0 0 / 0.08);
+	}
+
+	/* 顶部细粉紫带（gov.cn 风格） */
+	.zh-topbar {
+		height: 4px;
+		background: linear-gradient(
+			90deg,
+			var(--zh-seal-deep, #c86b8a) 0%,
+			var(--zh-seal, #ddaacc) 50%,
+			var(--zh-seal-bright, #eed3e5) 100%
+		);
 	}
 
 	/* 正文与 Nav / Footer 共用同一个宽度 token，避免三块内容左右错位 */

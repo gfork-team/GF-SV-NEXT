@@ -48,31 +48,70 @@
 		return !!hash && hash !== '#' && hash !== '#?' && hash !== '#google_vignette';
 	}
 
-	function parseHashParams(hash: string): SearchParams {
-		let raw = '';
-		if (hash.startsWith('#?')) raw = hash.substring(2);
-		else if (hash.startsWith('#')) raw = hash.substring(1);
-
+	function parseSearchString(raw: string): SearchParams {
 		const params = new URLSearchParams(raw);
 		const result: SearchParams = {};
 		for (const [key, value] of params.entries()) {
 			if (key.endsWith('[]')) {
 				if (!result[key as keyof SearchParams]) (result as Record<string, unknown>)[key] = [];
-				((result as Record<string, unknown>)[key] as string[]).push(value);
+				const arr = (result as Record<string, unknown>)[key] as string[];
+				if (!arr.includes(value)) arr.push(value);
 			} else {
-				(result as Record<string, unknown>)[key] = value;
+				// If key already exists and is array, convert to array or append
+				const existing = (result as Record<string, unknown>)[key];
+				if (existing !== undefined && existing !== value) {
+					if (Array.isArray(existing)) {
+						if (!existing.includes(value)) existing.push(value);
+					} else {
+						(result as Record<string, unknown>)[key] = [existing as string, value];
+					}
+				} else {
+					(result as Record<string, unknown>)[key] = value;
+				}
 			}
 		}
 		return result;
 	}
 
+	function parseHashParams(hash: string): SearchParams {
+		let raw = '';
+		if (hash.startsWith('#?')) raw = hash.substring(2);
+		else if (hash.startsWith('#')) raw = hash.substring(1);
+		return parseSearchString(raw);
+	}
+
 	function getSearchParams(): SearchParams {
 		const hash = window.location.hash;
-		if (!isHashValid(hash)) {
-			return isHashValid(lastValidHash) ? parseHashParams(lastValidHash) : {};
+		const search = window.location.search;
+
+		// Prefer hash params if valid
+		if (isHashValid(hash)) {
+			lastValidHash = hash;
+			const parsed = parseHashParams(hash);
+			return parsed;
 		}
-		lastValidHash = hash;
-		return parseHashParams(hash);
+
+		// If no valid hash but has query params, use them and convert to hash format
+		if (search && search.length > 1) {
+			const parsed = parseSearchString(search.substring(1));
+			// Convert to hash format for consistency
+			const qs = search.substring(1);
+			const url = new URL(window.location.href);
+			url.search = '';
+			url.hash = qs ? `#?${qs}` : '#';
+			window.history.replaceState({}, '', url);
+			ownHash = url.hash;
+			ownSearch = url.search;
+			if (qs) lastValidHash = url.hash;
+			return parsed;
+		}
+
+		// Fall back to last valid hash
+		if (isHashValid(lastValidHash)) {
+			return parseHashParams(lastValidHash);
+		}
+
+		return {};
 	}
 
 	function setHashParams(params: SearchParams): void {
@@ -91,10 +130,13 @@
 		// 仅用于拼 hash 后交给 history.pushState，函数结束即丢弃
 		// eslint-disable-next-line svelte/prefer-svelte-reactivity
 		const url = new URL(window.location.href);
+		// Clear query params if present, use hash-based format for consistency
+		url.search = '';
 		url.hash = qs ? `#?${qs}` : '#';
 		window.history.pushState({}, '', url);
 		// pushState 不触发 hashchange，但 ownHash 必须跟着走，否则下次外部 hashchange 会被误判成自身改动而跳过
 		ownHash = url.hash;
+		ownSearch = url.search;
 	}
 
 	type ScriptResult = ScriptSummary;
@@ -459,19 +501,21 @@
 	 * 否则每次翻页/改筛选都会重复请求一次。这里比对 hash，相同就直接跳过。
 	 */
 	let ownHash = '';
+	let ownSearch = '';
 
 	function scheduleFromLocation() {
 		clearTimeout(hashTimer);
 		hashTimer = setTimeout(() => {
 			if (window.location.hash === '#google_vignette') return;
-			const hash = window.location.hash;
-			if (hash === ownHash) return;
-			ownHash = hash;
-			if (isHashValid(hash)) lastValidHash = hash;
-			syncFromHash();
-			doSearch();
-		}, 100);
-	}
+		const hash = window.location.hash;
+		if (hash === ownHash && window.location.search === ownSearch) return;
+		ownHash = hash;
+		ownSearch = window.location.search;
+		if (isHashValid(hash)) lastValidHash = hash;
+		syncFromHash();
+		doSearch();
+	}, 100);
+}
 
 	function onHashChanged() {
 		scheduleFromLocation();
@@ -481,6 +525,7 @@
 		if (window.location.hash === '#google_vignette') return;
 
 		ownHash = window.location.hash;
+		ownSearch = window.location.search;
 		window.addEventListener('hashchange', onHashChanged);
 
 		const debouncedPop = () => {
@@ -488,6 +533,7 @@
 			popstateTimer = setTimeout(() => {
 				if (window.location.hash === '#google_vignette') return;
 				ownHash = window.location.hash;
+				ownSearch = window.location.search;
 				syncFromHash();
 				doSearch();
 			}, 100);

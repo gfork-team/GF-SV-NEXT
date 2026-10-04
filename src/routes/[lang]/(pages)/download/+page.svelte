@@ -36,7 +36,15 @@
 			return p ? p.replace(/^\/+/, '') : null;
 		}
 		const hash = window.location.hash;
-		return hash && hash.startsWith('#/') ? decodeURIComponent(hash.substring(2)) : null;
+		if (!hash || hash === '#') return null;
+		if (hash.startsWith('#/')) {
+			return decodeURIComponent(hash.substring(2)).replace(/^\/+/, '');
+		}
+		// Also accept #path without leading slash
+		if (hash.startsWith('#')) {
+			return decodeURIComponent(hash.substring(1)).replace(/^\/+/, '');
+		}
+		return null;
 	}
 
 	/** Fetch user IP via Cloudflare trace (matches yuan's fetchUserIP). */

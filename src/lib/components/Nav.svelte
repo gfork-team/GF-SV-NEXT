@@ -46,7 +46,8 @@
 	function switchLang(newLang: Lang) {
 		langOpen = false;
 		menuOpen = false;
-		goto(page.url.pathname.replace(/^\/[^/]+/, `/${newLang}`));
+		const newPath = page.url.pathname.replace(/^\/[^/]+/, `/${newLang}`);
+		goto(`${newPath}${page.url.search}${page.url.hash}`);
 	}
 
 	function closeAll() {
