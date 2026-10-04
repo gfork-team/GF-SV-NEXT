@@ -130,7 +130,7 @@
 			bind:this={container}
 			class="adsbygoogle"
 			style:display={spec.inlineWidth ? 'inline-block' : 'block'}
-			style:width={spec.inlineWidth ?? 'auto'}
+			style:width={spec.inlineWidth ?? undefined}
 			data-ad-client={adClient}
 			data-ad-slot={slotId}
 			data-ad-format={spec.format}
@@ -159,6 +159,9 @@
 	.ad--collapsed {
 		min-height: 0;
 	}
+	/* inlineWidth 为空时不要输出内联 width：内联 width:auto 会盖掉下面
+   .ad :global(ins.adsbygoogle){width:100%}，导致 flex 子项在广告填充前
+   收缩为 0 宽，Google 报 availableWidth=0。 */
 	.ad :global(ins.adsbygoogle) {
 		display: block;
 		width: 100%;

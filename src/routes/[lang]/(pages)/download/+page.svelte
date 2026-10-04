@@ -6,6 +6,8 @@
 
 	let { data } = $props<{ data: { lang: string; showAds: boolean } }>();
 	let lang = $derived(data.lang);
+	/** 广告开关：layout 层已按 adsense.allowedLangs 过滤，这里再叠加页面级开关 */
+	let showAds = $derived(data.showAds && siteConfig.adsense.allowOnDownloadPage);
 
 	const DLC = siteConfig.download;
 
@@ -345,11 +347,10 @@
 		</div>
 
 		<!-- 侧栏：广告框 -->
-		{#if siteConfig.adsense.allowOnDownloadPage}
+		{#if showAds}
 			<aside class="dl-side">
 				<div class="dl-ad-box"><Ad type="sidebar" /></div>
 				<div class="dl-ad-box"><Ad type="auto" /></div>
-				<div class="dl-ad-box"><Ad type="fluid" /></div>
 			</aside>
 		{/if}
 	</div>
@@ -361,7 +362,9 @@
 	}
 	.dl-grid {
 		display: grid;
-		grid-template-columns: minmax(0, 1fr) 300px;
+		/* 340px：容纳 sidebar 槽位 300px 定宽 + 广告框 16px 内边距与 1px 边框，
+		   否则定宽广告会溢出玻璃框 */
+		grid-template-columns: minmax(0, 1fr) 340px;
 		gap: 24px;
 		max-width: 1160px;
 		margin: 0 auto;
@@ -382,9 +385,13 @@
 	.dl-side {
 		display: flex;
 		flex-direction: column;
-		gap: 16px;
+		/* 间距交给下方 :has() 规则控制，广告塌缩后不留空隙 */
 		position: sticky;
 		top: 96px;
+	}
+	/* 只在两个「未塌缩」广告框之间产生间距 */
+	.dl-ad-box:not(:has(:global(.ad--collapsed))) ~ .dl-ad-box:not(:has(:global(.ad--collapsed))) {
+		margin-top: 16px;
 	}
 	.dl-ad-box {
 		background: var(--glass-bg);
@@ -396,8 +403,19 @@
 		box-shadow: var(--glass-shadow);
 		min-height: 250px;
 	}
-	.dl-ad-box > :global(ins.adsbygoogle) {
-		width: 100%;
+	/* 广告被拦截 / 未填充 / 未表态时，外框与 Ad.svelte 的塌缩逻辑同步收起，
+	   避免留下空玻璃盒（预留高度由 Ad.svelte 负责，这里只收外框）。 */
+	.dl-ad-box:has(:global(.ad--collapsed)) {
+		min-height: 0;
+		padding: 0;
+		background: transparent;
+		border-color: transparent;
+		box-shadow: none;
+		backdrop-filter: none;
+		-webkit-backdrop-filter: none;
+	}
+	.dl-ad-box :global(ins.adsbygoogle) {
+		max-width: 100%;
 	}
 	.dl-icon {
 		margin-bottom: 24px;
