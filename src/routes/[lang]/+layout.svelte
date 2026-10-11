@@ -16,7 +16,7 @@
 	import { onMount } from 'svelte';
 	import { onNavigate } from '$app/navigation';
 	import { initTheme, handleSystemChange } from '$lib/theme.svelte';
-	import { initAdState, markSdkReady, markSdkBlocked, GOOGLEFC_INIT } from '$lib/ad-state.svelte';
+	import { initAdState, markSdkBlocked, GOOGLEFC_INIT } from '$lib/ad-state.svelte';
 	import { getColorFoucScript } from '$lib/colors';
 	import { scriptTag } from '$utils';
 	import Nav from '$components/Nav.svelte';
@@ -264,7 +264,6 @@
 			async
 			src="{adsenseScript}?client={adsenseClient}"
 			crossorigin="anonymous"
-			onload={() => markSdkReady()}
 			onerror={() => markSdkBlocked()}
 		></script>
 		<!-- 非个性化广告通道开关：用户拒绝 Cookie 同意时靠它仍可获得展示 -->

@@ -2,7 +2,7 @@
 	import { onMount } from 'svelte';
 	import { siteConfig } from '$lib/config';
 	import { i18nConfig } from '$i18n';
-	import { initAdState, markSdkReady, markSdkBlocked, GOOGLEFC_INIT } from '$lib/ad-state.svelte';
+	import { initAdState, markSdkBlocked, GOOGLEFC_INIT } from '$lib/ad-state.svelte';
 	import { scriptTag } from '$utils';
 	import { parseSearchParams, stringifySearchParams, type SearchParams } from '$lib/search-params';
 	import Ad from '$components/Ad.svelte';
@@ -98,7 +98,6 @@
 			async
 			src="{adsenseScript}?client={siteConfig.adsense.publisherId}"
 			crossorigin="anonymous"
-			onload={() => markSdkReady()}
 			onerror={() => markSdkBlocked()}
 		></script>
 		<!-- eslint-disable-next-line svelte/no-at-html-tags -- 本仓库自身生成的 AdSense 初始化常量 -->

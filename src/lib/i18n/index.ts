@@ -16,7 +16,7 @@ export function t(lang: Lang, key: string, vars?: Record<string, string>): strin
 	let text = dict[key] ?? key;
 	if (vars) {
 		Object.entries(vars).forEach(([k, v]) => {
-			text = text.replace(new RegExp(`{{${k}}}`, 'g'), v);
+			text = text.replace(new RegExp(`\\{${k}\\}`, 'g'), v);
 		});
 	}
 	return text;

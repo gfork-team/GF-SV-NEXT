@@ -8,8 +8,8 @@
      同意 → 个性化；拒绝 → 走 Google 非个性化（npa）通道；未表态 → 不投。
   3. 预留高度避免 CLS，但拦截器 / 未表态 / 未填充 三种情况都会立即塌缩，
      避免出现大片空白广告坑。
-  4. adsbygoogle.js 是 async 脚本，走 ad-state 的 whenSdkReady 队列；
-     另设 2.5s 兜底 push，保证 onload 回调丢失时也不丢广告请求。
+  4. adsbygoogle.js 是 async 脚本，但 window.adsbygoogle 本身就是队列，
+     直接 push 即可，脚本加载前后都有效，无需等待就绪。
   5. 同一 ins 只 push 一次，SPA 前进/后退重挂载不会触发
      "All ins elements already have ads in them"。
   6. sidebar 竖版槽位在窄屏隐藏，避免生成非法窄广告导致 Google 报错。
@@ -17,14 +17,7 @@
 <script lang="ts">
 	import { onMount } from 'svelte';
 	import { siteConfig } from '$lib/config';
-	import {
-		canRenderAds,
-		isAdBlocked,
-		isSdkReady,
-		requestAd,
-		whenSdkReady,
-		getConsentGranted
-	} from '$lib/ad-state.svelte';
+	import { canRenderAds, isAdBlocked, requestAd, getConsentGranted } from '$lib/ad-state.svelte';
 
 	type SlotSpec = {
 		slot: string;
@@ -72,25 +65,9 @@
 		if (container?.getAttribute('data-ad-status')) reserve = false;
 	}
 
-	function arm() {
-		const el = container;
-		if (!el) return;
-		if (isSdkReady() || isAdBlocked() === true) {
-			requestAd(el);
-			return;
-		}
-		whenSdkReady(() => requestAd(el));
-		// 兜底：push 到 window.adsbygoogle 队列本身是「先入队、脚本到位后消费」，
-		// 晚一点 push 依然有效。即使 onload 回调因任何原因没触发，
-		// 也不会因此永久丢失这次广告请求。
-		window.setTimeout(() => requestAd(el), 2500);
-	}
-
 	onMount(() => {
 		const el = container;
 		if (!el) return;
-
-		if (mayRequest) arm();
 
 		const obs = new MutationObserver(syncReserve);
 		obs.observe(el, {
@@ -107,9 +84,12 @@
 		};
 	});
 
-	// 用户做出同意选择后，之前渲染的空槽位需要补投
+	// 同意后立即投放；同一 ins 只投一次（requestAd 内部保证），
+	// 因此用户做出同意选择后，之前渲染的空槽位也会在这里补投。
 	$effect(() => {
-		if (mayRequest && container && !container.getAttribute('data-gf-requested')) arm();
+		if (mayRequest && container && container.getAttribute('data-gf-requested') !== '1') {
+			requestAd(container);
+		}
 	});
 
 	// 同意状态未知或被拦截时不会有广告，直接收掉预留高度
