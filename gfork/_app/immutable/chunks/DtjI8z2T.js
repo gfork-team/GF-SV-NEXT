@@ -1,0 +1,2 @@
+function s(n){const e=new URLSearchParams;for(const[r,a]of Object.entries(n))if(!(a==null||a===""))if(Array.isArray(a))for(const t of a)t!=null&&t!==""&&e.append(r,t);else e.append(r,a);return e.toString()}function i(n){const e={};for(const[r,a]of new URLSearchParams(n).entries())a!==""&&(r.endsWith("[]")?(Array.isArray(e[r])||(e[r]=[]),e[r].push(a)):e[r]=a);return e}function o(n,e){const r=n[e];return Array.isArray(r)?r[0]??"":r??""}function u(n,e){const r=n[e];return Array.isArray(r)?r:r?[r]:[]}export{u as a,o as g,i as p,s};
+//# sourceMappingURL=DtjI8z2T.js.map
