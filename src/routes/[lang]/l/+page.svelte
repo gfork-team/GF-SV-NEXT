@@ -24,4 +24,5 @@
 	delaySec={siteConfig.redirects.downloadDelaySec}
 	{buildUrl}
 	showAds={siteConfig.adsense.allowOnRedirectPages}
+	kind="download"
 />

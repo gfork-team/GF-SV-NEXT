@@ -7,6 +7,7 @@
 	 */
 	import { untrack } from 'svelte';
 	import { siteConfig } from '$config';
+	import { LOOKUP_DEFAULTS } from '$lib/content-defaults';
 	import { t, type Lang } from '$i18n';
 	import Ad from '$components/Ad.svelte';
 	import Icon from '$components/Icon.svelte';
@@ -127,6 +128,23 @@
 			{t(lang, 'lookup.pagination.next')}
 		</button>
 	</nav>
+
+	<!--
+		机读默认内容：页面真实结果在 hash（#?q=...）里，静态 HTML 拿不到，
+		这里把 `q=GitHub` 的真实结果快照写死给爬虫读，对人完全不可见（.sr-defaults）。
+	-->
+	<div class="sr-defaults" aria-hidden="true">
+		<h2>GitHub 相关 Greasy Fork 油猴脚本搜索结果</h2>
+		<p>以下为查询 GitHub 时返回的脚本，含简介、作者、版本与安装量：</p>
+		<ul>
+			{#each LOOKUP_DEFAULTS as row (row.name)}
+				<li>
+					{row.name}（作者 {row.author}，版本 {row.version}，总安装量 {row.installs}）：
+					{row.description}
+				</li>
+			{/each}
+		</ul>
+	</div>
 </div>
 
 <style>

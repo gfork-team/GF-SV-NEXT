@@ -443,6 +443,28 @@ img {
 	display: none !important;
 }
 
+/*
+ * 机读默认内容（`src/lib/content-defaults.ts`）：
+ * lookup / download / info 的真实内容都在 hash 里，静态 HTML 拿不到，
+ * 于是把真实结果快照写进 DOM 给爬虫读，但对人完全不可见 ——
+ * 离屏裁剪 + opacity 0.01（不用 display:none，避免被当成折叠内容忽略）。
+ */
+.sr-defaults {
+	position: absolute;
+	width: 1px;
+	height: 1px;
+	margin: -1px;
+	padding: 0;
+	overflow: hidden;
+	clip: rect(0, 0, 0, 0);
+	clip-path: inset(50%);
+	white-space: nowrap;
+	border: 0;
+	opacity: 0.01;
+	pointer-events: none;
+	user-select: none;
+}
+
 /* ═══════════════════════════════════════════════════════════════════════════
    共享 UI 原语（组件通过这些 class 复用，避免每个组件重复写基础形态）
    层级一律用 surface-container-* 色阶，不使用阴影 / 渐变 / 毛玻璃

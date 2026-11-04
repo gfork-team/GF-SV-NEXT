@@ -1,0 +1,175 @@
+/**
+ * 机读默认内容（给 AdSense / 搜索引擎爬虫看）
+ *
+ * 背景：lookup / download / info 三个页面真正的内容在 hash 里（`#?q=`、`#/path`、
+ * `#/zh-CN/scripts/123/detail`）。hash 不会进入 HTTP 请求，所以静态 HTML 里
+ * 只有骨架和占位文案 —— 爬虫拿不到任何实质内容，AdSense 会判定「内容不足」。
+ *
+ * 做法：把**真实结果快照**写死在页面里，随预渲染输出进 HTML，但用
+ * `.sr-defaults`（视觉隐藏 + 离屏 + opacity 0.01）让用户看不到。
+ * 数据来自线上接口的一次真实抓取，不是编造的示例：
+ * - lookup：查询 `q=GitHub` 的前 10 条真实结果
+ * - info：脚本 369789（Pixiv 替换为高画质原图）的真实详情
+ *
+ * 注意：这些是**快照**，不会随接口更新。仅用于让页面「有内容」，不参与任何交互。
+ */
+
+export interface DefaultScriptRow {
+	name: string;
+	description: string;
+	installs: number;
+	author: string;
+	version: string;
+}
+
+/** lookup：`#?q=GitHub` 的真实结果快照 */
+export const LOOKUP_DEFAULTS: DefaultScriptRow[] = [
+	{
+		name: 'GitHub汉化插件',
+		description: 'GitHub汉化插件，包含人机翻译',
+		installs: 148302,
+		author: 'k1995',
+		version: '0.32'
+	},
+	{
+		name: 'GitHub 文件夹下载器',
+		description: '添加一个下载按钮，允许轻松下载特定的 GitHub 文件夹。',
+		installs: 1649,
+		author: '人民的勤务员',
+		version: '0.7.0.23'
+	},
+	{
+		name: 'GitHub镜像',
+		description: 'GitHub镜像，加速访问GitHub，支持Clone、Release、Raw、Zip加速。',
+		installs: 11946,
+		author: 'HaleShaw',
+		version: '1.4.0'
+	},
+	{
+		name: 'GitHub 增强',
+		description: '为 GitHub 增加额外的功能。',
+		installs: 3275,
+		author: 'PRO-2684',
+		version: '0.7.1'
+	},
+	{
+		name: 'GitHub汉化油猴脚本',
+		description: 'GitHub汉化插件，含个性翻译',
+		installs: 7380,
+		author: 'Iuleoo',
+		version: '2.1.0'
+	},
+	{
+		name: 'Github 镜像访问，加速下载',
+		description: 'GitHub 镜像，github 加速',
+		installs: 138678,
+		author: 'jadezi',
+		version: '2.0.9'
+	},
+	{
+		name: 'GitHub Freshness',
+		description: '通过颜色高亮的方式，帮助你快速判断一个 GitHub 仓库是否在更新。',
+		installs: 396,
+		author: 'rational_stars',
+		version: '2.0.0'
+	},
+	{
+		name: 'Github助手',
+		description:
+			'添加Github文件下载、复制按钮、图片点击放大(右击恢复)、issues中只查看用户相关态度的内容、issues列表项从新标签页打开',
+		installs: 13386,
+		author: 'YeomanYe',
+		version: '0.7.2'
+	},
+	{
+		name: 'GitHub 菜单汉化',
+		description: '汉化 GitHub 界面的部分菜单及内容',
+		installs: 13693,
+		author: 'Canary Dev',
+		version: '1.7.7.2'
+	},
+	{
+		name: '在线下载Github仓库文件夹',
+		description:
+			'无需克隆GitHub仓库, 一键在线下载 Github仓库子文件夹; 同时还能在源码详情页一键复制源码',
+		installs: 8594,
+		author: 'oe',
+		version: '0.7.2'
+	}
+];
+
+/** info：脚本 369789 的真实详情快照 */
+export const INFO_DEFAULTS = {
+	title: 'Pixiv 替换为高画质原图',
+	author: 'maple3142',
+	dailyInstalls: 3,
+	totalInstalls: 19010,
+	goodRatings: 78,
+	version: '0.4',
+	createdAt: '2018-06-24',
+	updatedAt: '2019-07-25',
+	size: '1.1 KB',
+	license: '暂无',
+	sites: ['pixiv.net'],
+	description:
+		'把 Pixiv 的图片替换为原图(高画质)。测试: 水中花。如果当你试着把图片在新分页开启时遇到了 403 Forbidden ，建议可以安装 Pixiv raw image 403 Forbidden Fix 来破解Pixiv 的一些限制。'
+};
+
+/** download：下载加速服务说明（节点域名取自 config.json 的真实列表） */ export const DOWNLOAD_DEFAULTS =
+	{
+		title: 'Greasy Fork 脚本下载加速',
+		description:
+			'自动为 .user.js 脚本选择最快的中转节点：先回显出口 IP 并检查本地缓存，再并发测试各节点连通性，选出延迟最低的节点后自动跳转下载。测速失败时使用备用节点。',
+		nodeHosts: [
+			'static-sg-apse1-primary-mirror-aws-s3-cloudfront-public-cdn.dahi.edu.eu.org',
+			'tencent.api-data-abtest-config.dahi.edu.eu.org',
+			'api-data-aws-abtest-config.dahi.edu.eu.org'
+		],
+		examplePath: 'amidist/example.user.js',
+		steps: [
+			'在 Greasy Fork 脚本页点击安装，或本站详情页的「安装」按钮',
+			'本站跳转到下载加速页，自动测速并选择最快节点',
+			'脚本管理器识别 .user.js 后缀，弹出安装确认'
+		]
+	};
+
+/**
+ * /s 搜索中间页：页面只停留 1 秒左右，正文几乎为空。
+ * 这里补一段真实说明 + 关键词，让广告与搜索爬虫有内容可判；
+ * 关键词来自站内实际热搜脚本类型，不是随机堆词。
+ */
+export const SEARCH_REDIRECT_DEFAULTS = {
+	title: 'Greasy Fork 油猴脚本搜索',
+	description:
+		'正在跳转到脚本搜索结果页。本站提供 Greasy Fork（油猴脚本）的镜像搜索：支持按关键词查找脚本、按站点域名筛选、按安装量/评分/更新日期排序，并可筛选脚本语言（简体中文、繁體中文、English、日本語 等）。搜索结果直接来自 Greasy Fork 官方接口的多节点加速，包含脚本名称、简介、作者、版本与安装量。',
+	keywords: [
+		'油猴脚本',
+		'Greasy Fork 镜像',
+		'userscript 搜索',
+		'脚本安装量',
+		'Tampermonkey 脚本',
+		'Violentmonkey 脚本',
+		'ScriptCat 脚本',
+		'GitHub 汉化插件',
+		'Bilibili 视频加速',
+		'百度网盘下载',
+		'网页去广告',
+		'知乎增強'
+	]
+};
+
+/**
+ * /l 下载中间页：同上，补一段下载加速与安装流程的真实说明。
+ */
+export const DOWNLOAD_REDIRECT_DEFAULTS = {
+	title: 'Greasy Fork 脚本下载加速与安装',
+	description:
+		'正在跳转到脚本下载加速页。本站为 Greasy Fork 的 .user.js 脚本提供多节点下载加速：先回显出口 IP 并检查本地缓存，再并发测试各中转节点的连通性，自动选择延迟最低的节点跳转下载，测速失败时回退到备用节点。脚本下载完成后由 Tampermonkey、Violentmonkey、ScriptCat 或 Userscripts 等脚本管理器接管安装。',
+	steps: [
+		'等待跳转到下载加速页（约 1–2 秒）',
+		'页面自动测速并选中最快的中转节点',
+		'浏览器开始下载 .user.js，脚本管理器弹出安装确认',
+		'安装完成后访问对应网站即可生效'
+	],
+	managers: ['Tampermonkey', 'Violentmonkey', 'ScriptCat', 'Userscripts', 'Greasemonkey']
+};

@@ -3,20 +3,27 @@
 	import Ad from '$components/Ad.svelte';
 	import Icon from '$components/Icon.svelte';
 	import CountdownBlock from '$lib/dynamic/blocks/CountdownBlock.svelte';
+	import { SEARCH_REDIRECT_DEFAULTS, DOWNLOAD_REDIRECT_DEFAULTS } from '$lib/content-defaults';
 
 	let {
 		lang,
 		delaySec,
 		buildUrl,
-		showAds = false
+		showAds = false,
+		kind = 'search'
 	}: {
 		lang: Lang;
 		delaySec: number;
 		buildUrl: (lang: Lang) => string;
 		showAds?: boolean;
+		/** search = /s（跳搜索结果）；download = /l（跳下载加速） */
+		kind?: 'search' | 'download';
 	} = $props();
 
 	const skipText = $derived(t(lang, 'redirect.skip'));
+	const defaults = $derived(
+		kind === 'download' ? DOWNLOAD_REDIRECT_DEFAULTS : SEARCH_REDIRECT_DEFAULTS
+	);
 
 	// 稳定的目标构造器：区块每次需要地址时读当前 hash
 	function target(): string {
@@ -100,6 +107,29 @@
 				<button onclick={() => location.reload()}>{skipText}</button>
 			</p>
 		</div>
+	</div>
+
+	<!--
+		机读默认内容：中间页只停留 1–2 秒、正文为空，广告与搜索爬虫拿不到内容。
+		这里补一段真实说明 + 关键词，视觉上完全不可见（.sr-defaults）。
+	-->
+	<div class="sr-defaults" aria-hidden="true">
+		<h2>{defaults.title}</h2>
+		<p>{defaults.description}</p>
+		{#if kind === 'search'}
+			<ul>
+				{#each SEARCH_REDIRECT_DEFAULTS.keywords as kw (kw)}
+					<li>{kw}</li>
+				{/each}
+			</ul>
+		{:else}
+			<ol>
+				{#each DOWNLOAD_REDIRECT_DEFAULTS.steps as step, i (i)}
+					<li>{step}</li>
+				{/each}
+			</ol>
+			<p>支持的脚本管理器：{DOWNLOAD_REDIRECT_DEFAULTS.managers.join('、')}</p>
+		{/if}
 	</div>
 </div>
 

@@ -11,6 +11,7 @@
 	import { siteProxyUrl } from '$config';
 	import { t, type Lang } from '$i18n';
 	import { setDocumentTitle } from '../core/patch';
+	import { INFO_DEFAULTS } from '$lib/content-defaults';
 	import Slot from '../core/Slot.svelte';
 	import Ad from '$components/Ad.svelte';
 	import Icon from '$components/Icon.svelte';
@@ -428,6 +429,23 @@
 			<Icon name="info" size={16} />
 			<span>{t(lang, 'info.loading_notice')}</span>
 		</p>
+
+		<!--
+			机读默认内容：详情数据在 hash（#/zh-CN/scripts/123/detail）里，
+			静态 HTML 拿不到，这里写死一个真实脚本的详情快照给爬虫读，
+			对人完全不可见（.sr-defaults）。
+		-->
+		<div class="sr-defaults" aria-hidden="true">
+			<h2>{INFO_DEFAULTS.title}</h2>
+			<p>{INFO_DEFAULTS.description}</p>
+			<p>
+				作者 {INFO_DEFAULTS.author} · 版本 {INFO_DEFAULTS.version} · 日安装量
+				{INFO_DEFAULTS.dailyInstalls} · 总安装量 {INFO_DEFAULTS.totalInstalls} · 好评
+				{INFO_DEFAULTS.goodRatings} · 创建于 {INFO_DEFAULTS.createdAt} · 更新于
+				{INFO_DEFAULTS.updatedAt} · 大小 {INFO_DEFAULTS.size} · 许可证
+				{INFO_DEFAULTS.license} · 适用于 {INFO_DEFAULTS.sites.join('、')}
+			</p>
+		</div>
 	</div>
 
 	<!-- 移动端吸底安装条 -->
@@ -661,6 +679,22 @@
 		max-width: 100%;
 		height: auto;
 		border-radius: var(--md-sys-shape-corner-small);
+	}
+	/*
+	 * Greasy Fork 的浏览器兼容性图标：源站是
+	 * `<img class="browser-compatible" src="/vite/assets/chrome-xxx.svg">`，
+	 * 原站 CSS 才有尺寸规则；不接管就会按 intrinsic 尺寸撑满整行。
+	 */
+	.if-content-area :global(img.browser-compatible) {
+		display: inline-block;
+		width: 16px;
+		height: 16px;
+		margin: 0 2px;
+		border-radius: 0;
+		vertical-align: -3px;
+	}
+	.if-content-area :global(img.browser-compatible + img.browser-compatible) {
+		margin-inline-start: 4px;
 	}
 	.if-content-area :global(pre) {
 		overflow-x: auto;

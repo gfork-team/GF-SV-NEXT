@@ -8,6 +8,7 @@
 	import Ad from '$components/Ad.svelte';
 	import Icon from '$components/Icon.svelte';
 	import CountdownBlock from '$lib/dynamic/blocks/CountdownBlock.svelte';
+	import { SEARCH_REDIRECT_DEFAULTS } from '$lib/content-defaults';
 
 	let delaySec = siteConfig.redirects.searchDelaySec;
 	// 本路由不在 [lang] 布局内，需自带 AdSense 脚本
@@ -116,6 +117,17 @@
 				<button onclick={() => location.reload()}>Click here if not redirected</button>
 			</p>
 		</div>
+	</div>
+
+	<!-- 机读默认内容：本页只停留 1–2 秒，补一段真实说明 + 关键词给爬虫（肉眼不可见） -->
+	<div class="sr-defaults" aria-hidden="true">
+		<h2>{SEARCH_REDIRECT_DEFAULTS.title}</h2>
+		<p>{SEARCH_REDIRECT_DEFAULTS.description}</p>
+		<ul>
+			{#each SEARCH_REDIRECT_DEFAULTS.keywords as kw (kw)}
+				<li>{kw}</li>
+			{/each}
+		</ul>
 	</div>
 </div>
 

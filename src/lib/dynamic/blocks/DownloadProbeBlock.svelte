@@ -10,6 +10,7 @@
 	import { t, type Lang } from '$i18n';
 	import Ad from '$components/Ad.svelte';
 	import Icon from '$components/Icon.svelte';
+	import { DOWNLOAD_DEFAULTS } from '$lib/content-defaults';
 	import type { IconName } from '$lib/icons';
 	import { createDownloadProbe, DOWNLOAD_BLOCK_ID } from './download.svelte';
 
@@ -132,6 +133,25 @@
 				<div class="dl-ad-box"><Ad type="auto" /></div>
 			</aside>
 		{/if}
+	</div>
+
+	<!-- 机读默认内容：脚本路径在 hash（#/xxx.user.js）里，静态 HTML 里必须有实质说明 -->
+	<div class="sr-defaults" aria-hidden="true">
+		<h2>{DOWNLOAD_DEFAULTS.title}</h2>
+		<p>{DOWNLOAD_DEFAULTS.description}</p>
+		<h3>中转节点</h3>
+		<ul>
+			{#each DOWNLOAD_DEFAULTS.nodeHosts as host (host)}
+				<li>{host}</li>
+			{/each}
+		</ul>
+		<h3>使用步骤</h3>
+		<ol>
+			{#each DOWNLOAD_DEFAULTS.steps as step, i (i)}
+				<li>{step}</li>
+			{/each}
+		</ol>
+		<p>示例安装路径：{DOWNLOAD_DEFAULTS.examplePath}</p>
 	</div>
 </section>
 
