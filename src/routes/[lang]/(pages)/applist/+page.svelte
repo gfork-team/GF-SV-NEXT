@@ -1,4 +1,4 @@
-﻿<script lang="ts">
+<script lang="ts">
 	import { t, type Lang } from '$i18n';
 	import Ad from '$components/Ad.svelte';
 	import type { PageData } from './$types';
@@ -157,6 +157,11 @@
 				</ul>
 			</li>
 		</ul>
+
+		<!-- 正文内单元：清单很长，桌面端之后是最容易进入视口的位置 -->
+		<div style="text-align:center;margin:24px 0">
+			<Ad type="horizontal" />
+		</div>
 
 		<hr />
 

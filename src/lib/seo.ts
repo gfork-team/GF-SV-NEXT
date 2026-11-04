@@ -24,7 +24,6 @@ export const ROUTE_META: Record<string, RouteMeta> = {
 	'/': { titleKey: 'meta.home_title', descKey: 'meta.home_desc' },
 	'/download': { titleKey: 'meta.download_title', descKey: 'meta.download_desc' },
 	'/lookup': { titleKey: 'meta.lookup_title', descKey: 'meta.lookup_desc' },
-	'/search': { titleKey: 'meta.search_title', descKey: 'meta.search_desc' },
 	'/help': { titleKey: 'meta.help_title', descKey: 'meta.help_desc' },
 	'/about': { titleKey: 'meta.about_title', descKey: 'meta.about_desc' },
 	'/tos': { titleKey: 'meta.tos_title', descKey: 'meta.tos_desc' },

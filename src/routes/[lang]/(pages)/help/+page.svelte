@@ -1,13 +1,15 @@
 <script lang="ts">
 	import { t, type Lang } from '$i18n';
 	import Ad from '$components/Ad.svelte';
+	import Icon from '$components/Icon.svelte';
+	import type { IconName } from '$lib/icons';
 	import type { PageData } from './$types';
 
 	let { data }: { data: PageData } = $props();
 	let lang: Lang = $derived(data.lang);
 
 	interface HelpCard {
-		icon: string;
+		icon: IconName;
 		titleKey: string;
 		descKey: string;
 		href: string;
@@ -26,31 +28,25 @@
 			titleKey: 'help.card_managers_title',
 			descKey: 'help.card_managers_desc',
 			href: `/${lang}/applist`
-		} as HelpCard,
-		{
-			icon: 'search',
-			titleKey: 'help.card_search_title',
-			descKey: 'help.card_search_desc',
-			href: `/${lang}/search`
 		} as HelpCard
 	]);
 
 	let support = $derived([
 		{
-			icon: 'feedback',
+			icon: 'message',
 			titleKey: 'help.card_feedback_title',
 			descKey: 'help.card_feedback_desc',
 			href: `/${lang}/feedback`
 		} as HelpCard,
 		{
-			icon: 'menu_book',
+			icon: 'book',
 			titleKey: 'help.card_docs_title',
 			descKey: 'help.card_docs_desc',
 			href: 'https://doc.greasyfork.org.cn',
 			external: true
 		} as HelpCard,
 		{
-			icon: 'build',
+			icon: 'tool',
 			titleKey: 'help.card_tampermonkey_title',
 			descKey: 'help.card_tampermonkey_desc',
 			href: 'https://www.tampermonkey.net/faq.php',
@@ -83,7 +79,6 @@
 		name="keywords"
 		content="greasyfork help, userscript help, script installation help, tampermonkey help, greasemonkey help, user script support"
 	/>
-	<link rel="stylesheet" href="https://fonts.googleapis.com/icon?family=Material+Icons" />
 </svelte:head>
 
 <div class="width-constraint">
@@ -96,18 +91,20 @@
 		<!-- ── Getting Started ───────────────────────────── -->
 		<section class="hp-section">
 			<h2 class="hp-section-title">
-				<span class="material-icons hp-section-icon">rocket_launch</span>
+				<span class="hp-section-icon" aria-hidden="true"><Icon name="rocket" size={22} /></span>
 				{t(lang, 'help.section_getting_started')}
 			</h2>
 			<div class="hp-card-grid">
 				{#each gettingStarted as card (card.href)}
 					<a href={card.href} class="hp-card">
-						<span class="material-icons hp-card-icon">{card.icon}</span>
+						<span class="hp-card-icon" aria-hidden="true"><Icon name={card.icon} size={22} /></span>
 						<div class="hp-card-body">
 							<h3 class="hp-card-title">{t(lang, card.titleKey)}</h3>
 							<p class="hp-card-desc">{t(lang, card.descKey)}</p>
 						</div>
-						<span class="material-icons hp-card-arrow">arrow_forward</span>
+						<span class="hp-card-arrow" aria-hidden="true"
+							><Icon name="arrow-right" size={18} /></span
+						>
 					</a>
 				{/each}
 			</div>
@@ -116,7 +113,8 @@
 		<!-- ── Help & Support ────────────────────────────── -->
 		<section class="hp-section">
 			<h2 class="hp-section-title">
-				<span class="material-icons hp-section-icon">support</span>
+				<span class="hp-section-icon" aria-hidden="true"><Icon name="help-circle" size={22} /></span
+				>
 				{t(lang, 'help.section_support')}
 			</h2>
 			<div class="hp-card-grid hp-card-grid--four">
@@ -127,34 +125,39 @@
 						target={card.external ? '_blank' : undefined}
 						rel={card.external ? 'noopener noreferrer' : undefined}
 					>
-						<span class="material-icons hp-card-icon">{card.icon}</span>
+						<span class="hp-card-icon" aria-hidden="true"><Icon name={card.icon} size={22} /></span>
 						<div class="hp-card-body">
 							<h3 class="hp-card-title">{t(lang, card.titleKey)}</h3>
 							<p class="hp-card-desc">{t(lang, card.descKey)}</p>
 						</div>
-						<span class="material-icons hp-card-arrow"
-							>{card.external ? 'open_in_new' : 'arrow_forward'}</span
+						<span class="hp-card-arrow" aria-hidden="true"
+							><Icon name={card.external ? 'external' : 'arrow-right'} size={18} /></span
 						>
 					</a>
 				{/each}
 			</div>
 		</section>
 
+		<!-- 正文内单元：教程页内容长，中段是最容易进入视口的位置 -->
+		<div style="text-align:center;margin:32px 0 8px">
+			<Ad type="horizontal" />
+		</div>
+
 		<!-- ── Community & Open Source ───────────────────── -->
 		<section class="hp-section">
 			<h2 class="hp-section-title">
-				<span class="material-icons hp-section-icon">diversity_3</span>
+				<span class="hp-section-icon" aria-hidden="true"><Icon name="users" size={22} /></span>
 				{t(lang, 'help.section_community')}
 			</h2>
 			<div class="hp-card-grid">
 				{#each community as card (card.href)}
 					<a href={card.href} class="hp-card" target="_blank" rel="noopener noreferrer">
-						<span class="material-icons hp-card-icon">{card.icon}</span>
+						<span class="hp-card-icon" aria-hidden="true"><Icon name={card.icon} size={22} /></span>
 						<div class="hp-card-body">
 							<h3 class="hp-card-title">{t(lang, card.titleKey)}</h3>
 							<p class="hp-card-desc">{t(lang, card.descKey)}</p>
 						</div>
-						<span class="material-icons hp-card-arrow">open_in_new</span>
+						<span class="hp-card-arrow" aria-hidden="true"><Icon name="external" size={18} /></span>
 					</a>
 				{/each}
 			</div>
@@ -209,7 +212,7 @@
 		align-items: flex-start;
 		gap: 16px;
 		padding: 20px;
-		background: var(--card-bg);
+		background: var(--md-sys-color-surface-container-lowest);
 		border-radius: 14px;
 		border: 1px solid var(--md-sys-color-outline-variant);
 		box-shadow:

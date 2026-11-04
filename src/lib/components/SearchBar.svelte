@@ -1,8 +1,9 @@
 <script lang="ts">
 	import { goto } from '$app/navigation';
 	import { untrack } from 'svelte';
+	import { dynamicConfig } from '$config';
 	import { t, i18nConfig, type Lang } from '$i18n';
-	import { fetchScriptSuggestions, type ScriptSuggestion } from '$lib/lookup-api';
+	import { fetchSuggestions, type ScriptSuggestion } from '$lib/dynamic/blocks/suggestions';
 	import { formatCount } from '$lib/format';
 	import Icon from '$components/Icon.svelte';
 
@@ -107,12 +108,12 @@
 		debounceTimer = setTimeout(async () => {
 			const controller = new AbortController();
 			abort = controller;
-			const list = await fetchScriptSuggestions(q, controller.signal, 8);
+			const result = await fetchSuggestions(q, 8, controller.signal);
 			if (controller.signal.aborted) return;
 			loading = false;
-			suggestions = list ?? [];
+			suggestions = result.ok ? result.data : [];
 			open = suggestions.length > 0;
-		}, 300);
+		}, dynamicConfig.debounceMs.input);
 	}
 
 	function clear() {
@@ -175,9 +176,15 @@
 			submit(value);
 		}}
 	>
-		<span class="searchbar__lead" aria-hidden="true">
-			<Icon name="search" size={20} />
-		</span>
+		<!-- 左：小号图标按钮（同一提交动作，鼠标/拇指就近都能点） -->
+		<button
+			type="submit"
+			class="searchbar__lead-btn"
+			aria-label={t(lang, 'home.search_action')}
+			title={t(lang, 'home.search_action')}
+		>
+			<Icon name="search" size={16} />
+		</button>
 
 		<input
 			bind:this={input}
@@ -211,9 +218,15 @@
 			</button>
 		{/if}
 
-		<button type="submit" class="ui-btn ui-btn--filled searchbar__go">
-			<Icon name="search" size={18} />
-			<span>{t(lang, 'home.search_action')}</span>
+		<!-- 右：大号图标主按钮（不再带文字，图标放大） -->
+		<button
+			type="submit"
+			class="ui-btn ui-btn--filled searchbar__go"
+			aria-label={t(lang, 'home.search_action')}
+			title={t(lang, 'home.search_action')}
+		>
+			<Icon name="search" size={22} />
+			<span class="visually-hidden">{t(lang, 'home.search_action')}</span>
 		</button>
 	</form>
 
@@ -257,17 +270,42 @@
 		gap: 4px;
 		padding: 4px 4px 4px 12px;
 		background: var(--md-sys-color-surface-container-highest);
-		border: 1px solid transparent;
+		/* 默认就要有可见描边，不能只靠 focus 才出现 */
+		border: 1px solid var(--md-sys-color-outline);
 		border-radius: var(--md-sys-shape-corner-full);
-		transition: border-color var(--md-sys-motion-duration-short)
-			var(--md-sys-motion-easing-standard);
+		transition:
+			border-color var(--md-sys-motion-duration-short) var(--md-sys-motion-easing-standard),
+			box-shadow var(--md-sys-motion-duration-short) var(--md-sys-motion-easing-standard);
 	}
 	.searchbar__box:focus-within {
 		border-color: var(--md-sys-color-primary);
+		/* 用 box-shadow 加粗，避免 border-width 变化导致 1px 位移 */
+		box-shadow: 0 0 0 1px var(--md-sys-color-primary);
 	}
-	.searchbar__lead {
-		display: flex;
+	/* 左侧小号图标按钮：透明底，只有图标，hover 才出底色 */
+	.searchbar__lead-btn {
+		display: inline-flex;
+		align-items: center;
+		justify-content: center;
+		flex: none;
+		width: 32px;
+		height: 32px;
+		padding: 0;
+		border: none;
+		border-radius: var(--md-sys-shape-corner-full);
+		background: transparent;
 		color: var(--md-sys-color-on-surface-variant);
+		cursor: pointer;
+		transition: background-color var(--md-sys-motion-duration-short)
+			var(--md-sys-motion-easing-standard);
+	}
+	.searchbar__lead-btn:hover {
+		background: var(--md-sys-color-surface-container-high);
+		color: var(--md-sys-color-on-surface);
+	}
+	.searchbar__lead-btn:focus-visible {
+		outline: 2px solid var(--md-sys-color-primary);
+		outline-offset: 2px;
 	}
 	.searchbar input {
 		flex: 1;
@@ -294,29 +332,30 @@
 		color: var(--md-sys-color-on-surface-variant);
 		animation: spin 1s linear infinite;
 	}
+	/* 右侧大号图标主按钮：正方形，跟着输入框高度走 */
 	.searchbar__go {
 		flex: none;
+		width: 44px;
+		height: 44px;
+		padding: 0;
 	}
 
 	.searchbar--lg .searchbar__box {
-		padding: 6px 6px 6px 20px;
+		padding: 6px 6px 6px 10px;
+		gap: 6px;
+	}
+	.searchbar--lg .searchbar__lead-btn {
+		width: 36px;
+		height: 36px;
 	}
 	.searchbar--lg input {
 		min-height: 52px;
 		font-size: var(--md-sys-typescale-title-medium-size);
 	}
 	.searchbar--lg .searchbar__go {
+		width: 52px;
+		height: 52px;
 		min-height: 52px;
-		padding: 0 28px;
-	}
-	@media (max-width: 599px) {
-		.searchbar__go span {
-			display: none;
-		}
-		.searchbar__go {
-			width: 48px;
-			padding: 0;
-		}
 	}
 
 	.searchbar__list {

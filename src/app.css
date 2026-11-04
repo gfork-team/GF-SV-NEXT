@@ -418,13 +418,29 @@ img {
 }
 
 /* ─── 骨架屏 ──────────────────────────────────────────────────────────── */
-@keyframes gf-shimmer {
-	0% {
-		background-position: 200% 0;
-	}
-	100% {
-		background-position: -200% 0;
-	}
+/*
+ * 旧的 `.ui-skeleton` 骨架块与 Skeleton.svelte 已随动态内容重构下线：
+ * 占位态现在是「构建期写进 HTML 的真实结构 + 默认文案」，
+ * 不再需要一块会呼吸的灰色条。样式钩子统一走 `[data-state]`。
+ */
+
+/* ─── 动态内容区块（src/lib/dynamic）静态默认层 ────────────────────────────
+ * 动态区块的占位态只用「静态默认层 + data-state 属性选择器」表达：
+ * 不新增运行时样式表、不切 class，因此首帧就是最终态，不会闪变。
+ * .dyn-slot 是 Slot 的状态包裹元素，display: contents 让它不生成盒子，
+ * 区块的默认内容与覆盖后的内容始终处在同一层 grid / flex 中。
+ * ─────────────────────────────────────────────────────────────────────── */
+.dyn-slot {
+	display: contents;
+}
+
+/*
+ * 动态区块用 `hidden` 切换状态（骨架 ↔ 真实内容），而组件里的
+ * `display:flex/grid` 会盖掉浏览器默认的 `[hidden]{display:none}`，
+ * 所以这条兜底必须留在静态默认层。
+ */
+[hidden] {
+	display: none !important;
 }
 
 /* ═══════════════════════════════════════════════════════════════════════════
@@ -432,8 +448,9 @@ img {
    层级一律用 surface-container-* 色阶，不使用阴影 / 渐变 / 毛玻璃
    ═══════════════════════════════════════════════════════════════════════════ */
 
-/* 卡片 */
-.ui-card {
+/* 卡片（`.md3-card` 是早期页面沿用的别名，统一到同一套样式） */
+.ui-card,
+.md3-card {
 	position: relative;
 	display: flex;
 	flex-direction: column;
@@ -648,25 +665,6 @@ a.ui-chip:hover {
 	height: 1px;
 	background: var(--md-sys-color-outline-variant);
 	border: none;
-}
-
-/* 骨架块：纯色 + 呼吸透明度（不使用渐变） */
-.ui-skeleton {
-	display: block;
-	background: var(--md-sys-color-surface-container-high);
-	animation: gf-pulse 1.4s ease-in-out infinite;
-	border-radius: var(--md-sys-shape-corner-extra-small);
-	color: transparent;
-	user-select: none;
-}
-@keyframes gf-pulse {
-	0%,
-	100% {
-		opacity: 1;
-	}
-	50% {
-		opacity: 0.45;
-	}
 }
 
 /* 空状态 */
@@ -911,4 +909,126 @@ a.ui-chip:hover {
 #additional-info a:hover,
 #feedback-list a:hover {
 	color: var(--md-sys-color-secondary);
+}
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   长文页面（`.text-content`：条款 / 清单 / 反馈 / 安装教程）
+   统一成卡片 + 统一排版，避免每个页面自己写一套 margin
+   ═══════════════════════════════════════════════════════════════════════════ */
+.text-content {
+	max-width: 860px;
+	margin: 0 auto;
+	padding: 24px 28px;
+	background: var(--md-sys-color-surface-container-lowest);
+	border: 1px solid var(--md-sys-color-outline-variant);
+	border-radius: var(--md-sys-shape-corner-large);
+	color: var(--md-sys-color-on-surface);
+	line-height: 1.8;
+}
+.text-content > :first-child {
+	margin-top: 0;
+}
+.text-content > :last-child {
+	margin-bottom: 0;
+}
+.text-content h2,
+.text-content h3,
+.text-content h4 {
+	margin: 24px 0 10px;
+	line-height: 1.4;
+	text-wrap: balance;
+}
+.text-content h2 {
+	font-size: var(--md-sys-typescale-headline-small-size);
+	font-weight: 600;
+}
+.text-content h3 {
+	font-size: var(--md-sys-typescale-title-medium-size);
+	font-weight: 600;
+}
+.text-content h4 {
+	font-size: var(--md-sys-typescale-title-small-size);
+	font-weight: 600;
+}
+.text-content p {
+	margin: 10px 0;
+	color: var(--md-sys-color-on-surface-variant);
+}
+.text-content a {
+	color: var(--md-sys-color-primary);
+	text-underline-offset: 2px;
+}
+.text-content ul,
+.text-content ol {
+	margin: 10px 0;
+	padding-inline-start: 1.4em;
+}
+.text-content li {
+	margin: 4px 0;
+	color: var(--md-sys-color-on-surface-variant);
+}
+.text-content hr {
+	margin: 24px 0;
+	border: none;
+	border-top: 1px solid var(--md-sys-color-outline-variant);
+}
+.text-content code {
+	font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+	font-size: 0.92em;
+	padding: 1px 5px;
+	border-radius: var(--md-sys-shape-corner-extra-small);
+	background: var(--md-sys-color-surface-container-high);
+}
+.text-content strong {
+	color: var(--md-sys-color-on-surface);
+	font-weight: 600;
+}
+
+/* `.md3-outlined-button` 是早期页面用的别名，和描边按钮保持一致 */
+.md3-outlined-button {
+	display: inline-flex;
+	align-items: center;
+	justify-content: center;
+	gap: 8px;
+	min-height: 40px;
+	padding: 0 20px;
+	border: 1px solid var(--md-sys-color-outline);
+	border-radius: var(--md-sys-shape-corner-full);
+	background: transparent;
+	color: var(--md-sys-color-primary);
+	font-size: var(--md-sys-typescale-label-large-size);
+	font-weight: 500;
+	text-decoration: none;
+	cursor: pointer;
+	transition:
+		background-color var(--md-sys-motion-duration-short) var(--md-sys-motion-easing-standard),
+		border-color var(--md-sys-motion-duration-short) var(--md-sys-motion-easing-standard);
+}
+.md3-outlined-button:hover {
+	background: var(--md-sys-color-surface-container);
+}
+.md3-outlined-button:focus-visible {
+	outline: 2px solid var(--md-sys-color-primary);
+	outline-offset: 2px;
+}
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   标题字形统一：光学尺寸 + 中文不加字距（避免拥挤）、拉丁文轻微收紧
+   ═══════════════════════════════════════════════════════════════════════════ */
+h1,
+h2,
+h3,
+h4 {
+	font-optical-sizing: auto;
+	text-wrap: balance;
+}
+:lang(en) h1,
+:lang(en) h2,
+:lang(en) h3,
+:lang(en) h4,
+:lang(ja) h1,
+:lang(ja) h2,
+:lang(ja) h3,
+:lang(ja) h4 {
+	letter-spacing: -0.012em;
 }

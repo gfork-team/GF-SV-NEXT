@@ -24,7 +24,12 @@ const config = {
 		adapter: adapter({
 			pages: 'build',
 			assets: 'build',
-			fallback: '404.html',
+			/*
+			 * 用 200.html 作 SPA fallback，避免覆盖我们自己的 static/404.html。
+			 * 404.html 现在是手写的繁体中文页面：静态托管直接吐它，
+			 * 不依赖 JS，也不依赖 SvelteKit 的客户端挂载。
+			 */
+			fallback: '200.html',
 			precompress: false,
 			strict: false
 		}),

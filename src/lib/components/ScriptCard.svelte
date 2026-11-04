@@ -1,7 +1,7 @@
 <script lang="ts">
 	import { t, type Lang } from '$i18n';
-	import type { ScriptSummary } from '$lib/scripts-api';
-	import { authorHref, detailHref, installHref } from '$lib/scripts-api';
+	import type { ScriptSummary } from '$lib/scripts';
+	import { authorHref, detailHref, installHref } from '$lib/scripts';
 	import { truncate } from '$lib/format';
 	import Chip from '$components/Chip.svelte';
 	import StatBar from '$components/StatBar.svelte';
@@ -14,9 +14,22 @@
 		sites?: string[];
 		variant?: 'grid' | 'list';
 		showInstall?: boolean;
+		/**
+		 * 占位行：构建期写进 HTML 的默认列表内容。
+		 * 与真实行共用同一模板与行高，但不可点击、没有安装按钮，
+		 * 所以禁用 JS 时看到的是一组可读的默认卡片而不是链接。
+		 */
+		placeholder?: boolean;
 	}
 
-	let { lang, script, sites = [], variant = 'grid', showInstall = true }: Props = $props();
+	let {
+		lang,
+		script,
+		sites = [],
+		variant = 'grid',
+		showInstall = true,
+		placeholder = false
+	}: Props = $props();
 
 	const href = $derived(detailHref(lang, script));
 	const install = $derived(installHref(lang, script));
@@ -27,11 +40,20 @@
 <article class="ui-card card" class:card--list={variant === 'list'}>
 	<div class="card__head">
 		<h3 class="card__title" style="view-transition-name:script-title-{script.id}">
-			<a {href} data-sveltekit-preload-data="hover">{script.name}</a>
+			<!--
+				标题恒定是 <a>：占位行用 aria-disabled + tabindex=-1 关掉交互，
+				占位 → 真实数据只改 href / 文字，不换标签、不重建节点。
+			-->
+			<a
+				{href}
+				aria-disabled={placeholder ? 'true' : undefined}
+				tabindex={placeholder ? -1 : undefined}
+				data-sveltekit-preload-data={placeholder ? undefined : 'hover'}>{script.name}</a
+			>
 		</h3>
-		{#if script.version}
-			<span class="ui-badge ui-badge--neutral card__ver">v{script.version}</span>
-		{/if}
+		<span class="ui-badge ui-badge--neutral card__ver" hidden={!script.version}
+			>v{script.version ?? ''}</span
+		>
 	</div>
 
 	{#if script.description}
@@ -60,7 +82,7 @@
 	/>
 
 	<div class="card__foot">
-		{#if showInstall && install}
+		{#if !placeholder && showInstall && install}
 			<InstallButton
 				{lang}
 				installHref={install}
@@ -106,6 +128,9 @@
 		line-clamp: 2;
 		-webkit-box-orient: vertical;
 		overflow: hidden;
+	}
+	.card__title a[aria-disabled='true'] {
+		pointer-events: none;
 	}
 	.card__title a::after {
 		content: '';
@@ -164,6 +189,8 @@
 		flex-wrap: wrap;
 		align-items: flex-start;
 		gap: 8px 16px;
+		/* 占位行与真实行同高：行高固定，列表按真实数量增减时不产生行内抖动 */
+		min-height: var(--dyn-row-h, 88px);
 	}
 	.card--list .card__head {
 		flex: 1 1 40%;

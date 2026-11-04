@@ -23,6 +23,7 @@ export const ICONS = {
 	external:
 		'<path d="M14 4h6v6"/><path d="M20 4l-8 8"/><path d="M18 14v4a2 2 0 01-2 2H6a2 2 0 01-2-2V8a2 2 0 012-2h4"/>',
 	code: '<path d="M9 7l-5 5 5 5"/><path d="M15 7l5 5-5 5"/>',
+	mail: '<rect x="3" y="5" width="18" height="14" rx="2"/><path d="M3.5 6.5L12 13l8.5-6.5"/>',
 	history: '<path d="M3.5 12a8.5 8.5 0 105-7.8"/><path d="M3 4v4h4"/><path d="M12 8v4.5l3 1.8"/>',
 	star: '<path d="M12 4l2.4 5 5.6.7-4 3.9 1 5.5-5-2.7-5 2.7 1-5.5-4-3.9 5.6-.7z"/>',
 	alert: '<path d="M12 4.5l8.5 15h-17z"/><path d="M12 10v4"/><path d="M12 17.2v.1"/>',
@@ -43,7 +44,21 @@ export const ICONS = {
 	book: '<path d="M4 5a2 2 0 012-2h13v18H6a2 2 0 01-2-2z"/><path d="M8 3v18"/>',
 	sparkle:
 		'<path d="M12 4l1.6 4.4L18 10l-4.4 1.6L12 16l-1.6-4.4L6 10l4.4-1.6z"/><path d="M18 15l.8 2.2L21 18l-2.2.8L18 21l-.8-2.2L15 18l2.2-.8z"/>',
-	shield: '<path d="M12 3l7 3v6c0 4.5-3 7.5-7 9-4-1.5-7-4.5-7-9V6z"/><path d="M9 12l2 2 4-4"/>'
+	shield: '<path d="M12 3l7 3v6c0 4.5-3 7.5-7 9-4-1.5-7-4.5-7-9V6z"/><path d="M9 12l2 2 4-4"/>',
+	/* 以下 8 个用于替换 Material Icons 字体（help / download 页），
+	   统一成内联 SVG 后不再依赖外部字体，也不会被墙。 */
+	extension:
+		'<path d="M9 7V5a3 3 0 116 0v2"/><rect x="5" y="7" width="14" height="10" rx="2"/><path d="M9 17v2M15 17v2"/>',
+	rocket:
+		'<path d="M12 3c3 2.2 4.6 5.2 4.6 8.6L12 16.2 7.4 11.6C7.4 8.2 9 5.2 12 3z"/><path d="M9.4 15.4L7 19.6l4.2-1.4"/><path d="M14.6 15.4l2.4 4.2-4.2-1.4"/><circle cx="12" cy="9.6" r="1.4"/>',
+	users:
+		'<circle cx="9" cy="9" r="3"/><path d="M3.6 19c0-3 2.4-5 5.4-5s5.4 2 5.4 5"/><circle cx="17" cy="9.5" r="2.2"/><path d="M15.6 14.3c2.5-.2 4.8 1.6 4.8 4.7"/>',
+	'arrow-right': '<path d="M4 12h15"/><path d="M13 6l6 6-6 6"/>',
+	'check-circle': '<circle cx="12" cy="12" r="9"/><path d="M8 12.4l2.7 2.7L16 9.6"/>',
+	clock: '<circle cx="12" cy="12" r="9"/><path d="M12 7.5V12l3 2"/>',
+	gauge:
+		'<path d="M4.6 17.2a8.5 8.5 0 1114.8 0"/><path d="M12 13.2l4-3.2"/><circle cx="12" cy="17" r="1.3"/>',
+	tool: '<path d="M15.6 4.4a4.2 4.2 0 00-4 6.4L5 17.4a2 2 0 102.8 2.8l6.6-6.6a4.2 4.2 0 005.8-5.2l-2.8 2.8-2.6-2.6z"/>'
 } as const;
 
 export type IconName = keyof typeof ICONS;

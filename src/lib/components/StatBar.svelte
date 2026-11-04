@@ -34,37 +34,31 @@
 	const empty = $derived(!total && !daily && rating == null && !updated);
 </script>
 
-{#if !empty}
-	<div class="statbar" class:statbar--md={size === 'md'}>
-		{#if total}
-			<span class="stat" title={`${t(lang, 'stat.total_installs')}: ${totalInstalls}`}>
-				<Icon name="install" size={14} />
-				<span class="stat__num">{total}</span>
-				<span class="stat__label">{t(lang, 'stat.installs')}</span>
-			</span>
-		{/if}
-		{#if daily}
-			<span class="stat" title={`${t(lang, 'stat.daily_installs')}: ${dailyInstalls}`}>
-				<Icon name="refresh" size={14} />
-				<span class="stat__num">{daily}</span>
-				<span class="stat__label">{t(lang, 'stat.daily')}</span>
-			</span>
-		{/if}
-		{#if rating != null}
-			<span class="stat">
-				<Icon name="star" size={14} />
-				<span class="stat__num">{rating}%</span>
-				<span class="stat__label">{t(lang, 'stat.good_rating')}</span>
-			</span>
-		{/if}
-		{#if updated}
-			<span class="stat">
-				<Icon name="history" size={14} />
-				<span class="stat__label">{t(lang, 'stat.updated')} {updated}</span>
-			</span>
-		{/if}
-	</div>
-{/if}
+<!--
+		四个指标恒定输出，缺数据时用 hidden 收起：
+		列表占位行 → 真实行只改文字，不会插入/删除 .statbar，行高与布局都不动。
+	-->
+<div class="statbar" class:statbar--md={size === 'md'} hidden={empty}>
+	<span class="stat" hidden={!total} title={`${t(lang, 'stat.total_installs')}: ${totalInstalls}`}>
+		<Icon name="install" size={14} />
+		<span class="stat__num">{total ?? ''}</span>
+		<span class="stat__label">{t(lang, 'stat.installs')}</span>
+	</span>
+	<span class="stat" hidden={!daily} title={`${t(lang, 'stat.daily_installs')}: ${dailyInstalls}`}>
+		<Icon name="refresh" size={14} />
+		<span class="stat__num">{daily ?? ''}</span>
+		<span class="stat__label">{t(lang, 'stat.daily')}</span>
+	</span>
+	<span class="stat" hidden={rating == null}>
+		<Icon name="star" size={14} />
+		<span class="stat__num">{rating ?? ''}%</span>
+		<span class="stat__label">{t(lang, 'stat.good_rating')}</span>
+	</span>
+	<span class="stat" hidden={!updated}>
+		<Icon name="history" size={14} />
+		<span class="stat__label">{t(lang, 'stat.updated')} {updated ?? ''}</span>
+	</span>
+</div>
 
 <style>
 	.statbar {

@@ -16,10 +16,29 @@ const appVersion =
 		}
 	})();
 
+/**
+ * 该 commit 的提交时间（ISO）：GHA 传 VITE_GIT_TIME，本地读 git。
+ * 只用于页脚展示 "v1a2b3c4 · 2026-11-04"，取不到就留空。
+ */
+const appTime =
+	process.env.VITE_GIT_TIME ||
+	(() => {
+		try {
+			return execSync('git show -s --format=%cI HEAD', {
+				stdio: ['ignore', 'pipe', 'ignore']
+			})
+				.toString()
+				.trim();
+		} catch {
+			return '';
+		}
+	})();
+
 export default defineConfig({
 	plugins: [tailwindcss(), sveltekit()],
 	define: {
-		__APP_VERSION__: JSON.stringify(appVersion.slice(0, 7))
+		__APP_VERSION__: JSON.stringify(appVersion.slice(0, 7)),
+		__APP_VERSION_TIME__: JSON.stringify(appTime)
 	},
 	build: {
 		sourcemap: true,

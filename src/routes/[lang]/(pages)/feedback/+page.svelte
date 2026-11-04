@@ -1,7 +1,7 @@
 <script lang="ts">
 	import { t, type Lang } from '$i18n';
 	import Ad from '$components/Ad.svelte';
-	import ContactEmail from '$components/ContactEmail.svelte';
+	import ContactChannels from '$components/ContactChannels.svelte';
 	import type { PageData } from './$types';
 
 	let { data }: { data: PageData } = $props();
@@ -25,13 +25,16 @@
 		<p style="margin-bottom:12px;color:var(--md-sys-color-on-surface-variant)">
 			{t(lang, 'feedback.contact')}
 		</p>
-		<p>
-			<ContactEmail label={t(lang, 'feedback.contact')} />
-		</p>
+		<ContactChannels {lang} />
 
 		<!-- AD: Bottom -->
 		<div style="text-align:center;margin:16px 0">
 			<Ad type="fluid" />
 		</div>
 	</section>
+
+	<!-- AD: 页面末尾补充一个不同单元的曝光（反馈页原本只有 1 个单元） -->
+	<div style="text-align:center;margin:24px 0 8px">
+		<Ad type="auto" />
+	</div>
 </div>

@@ -14,6 +14,13 @@
 
 const CONSENT_KEY = 'gf-cookie-consent';
 
+/**
+ * 站点用到的广告位类型。
+ * 槽位 id 全部来自 `config.json → adsense.slots`，代码里不写死：
+ * 后台新建/替换广告单元时只改配置，组件不用动。
+ */
+export type AdType = 'fluid' | 'auto' | 'horizontal' | 'autorelaxed' | 'sidebar';
+
 /** true=已同意个性化广告，false=已拒绝（走非个性化），null=尚未表态 */
 let consentGranted = $state<boolean | null>(null);
 let consentLoaded = $state(false);

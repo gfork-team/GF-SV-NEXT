@@ -1,22 +1,32 @@
-﻿<script lang="ts">
+<script lang="ts">
 	import { page } from '$app/state';
 	import { onMount } from 'svelte';
-	import { siteConfig } from '$lib/config';
+	import { adsenseScriptUrl, siteConfig } from '$lib/config';
 	import { initAdState, markSdkBlocked, GOOGLEFC_INIT } from '$lib/ad-state.svelte';
 	import { scriptTag } from '$utils';
 	import Ad from '$components/Ad.svelte';
 
-	// 错误页不在 [lang] 布局内，需要自带 AdSense 脚本
-	let adsenseScript: string =
-		siteConfig.adsense.script ||
-		siteConfig.cdn.adsenseScript ||
-		'https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js';
-	let showAds = $derived(siteConfig.adsense.enabled);
+	/*
+	 * 错误页可能渲染在 [lang] 布局内部（那里已经注入了 adsbygoogle.js），
+	 * 只有「独立渲染」（拿不到 layout 的 lang）时才自带脚本，
+	 * 否则同一文档会执行两份 SDK，AdSense 会报 already-have-ads 并可能漏投。
+	 */
+	let hasLayoutSdk = $derived(!!(page.data as { lang?: string }).lang);
+	let showAds = $derived(!hasLayoutSdk && siteConfig.adsense.enabled);
 
-	let lang = $derived(page.url.pathname.split('/')[1] || '');
-	let isZh = $derived(lang.startsWith('zh'));
-	let homeHref = $derived(lang ? `/${lang}/` : '/');
-	let homeLabel = $derived(isZh ? '返回首页' : 'Go Home');
+	let locale = $derived((page.data as { lang?: string }).lang ?? 'zh-hant');
+	let isZh = $derived(locale.startsWith('zh'));
+	let isHant = $derived(locale === 'zh-hant');
+	let homeHref = $derived(`/${locale === 'zh-hant' ? 'zh-hant' : locale}`);
+	let homeLabel = $derived(isHant ? '返回首頁' : isZh ? '返回首页' : 'Go Home');
+	let notFoundTitle = $derived(isHant ? '找不到頁面' : isZh ? '找不到页面' : 'Page Not Found');
+	let notFoundDesc = $derived(
+		isHant
+			? '您訪問的頁面不存在、已被移動，或連結有誤。'
+			: isZh
+				? '您访问的页面不存在、已被移动，或链接有误。'
+				: 'The page you are looking for does not exist or has been moved.'
+	);
 
 	onMount(() => {
 		initAdState(isZh);
@@ -24,11 +34,11 @@
 </script>
 
 <svelte:head>
-	<title>404 - ZGF</title>
+	<title>{notFoundTitle} - ZGF</title>
 	{#if showAds}
 		<script
 			async
-			src="{adsenseScript}?client={siteConfig.adsense.publisherId}"
+			src="{adsenseScriptUrl()}?client={siteConfig.adsense.publisherId}"
 			crossorigin="anonymous"
 			onerror={() => markSdkBlocked()}
 		></script>
@@ -40,8 +50,8 @@
 <div class="e404">
 	<main class="e404-card ui-card">
 		<h1 class="e404-code">404</h1>
-		<p class="e404-title">Page Not Found</p>
-		<p class="e404-desc">The page you are looking for does not exist or has been moved.</p>
+		<p class="e404-title">{notFoundTitle}</p>
+		<p class="e404-desc">{notFoundDesc}</p>
 		<a class="ui-btn ui-btn--filled ui-btn--lg" href={homeHref}>{homeLabel}</a>
 	</main>
 

@@ -51,9 +51,15 @@
 			"fluid": "1394739154",
 			"auto": "4095096984",
 			"sidebar": "4497590737",
-			"autorelaxed": "3934604756"
+			"autorelaxed": "3934604756",
+			"horizontal": "1008349318"
 		},
 		"fluidLayoutKey": "-gy+2i+5x-ek+82",
+		"lazyLoad": false,
+		"lazyRootMargin": "600px",
+		"keepReserveOnFill": true,
+		"reserveTimeoutMs": 4000,
+		"inFeedAfter": 4,
 		"allowOnRedirectPages": true,
 		"allowOnDownloadPage": true,
 		"dnsPrefetch": [
@@ -137,6 +143,10 @@
 		"siteFilterEnabled": true
 	},
 
+	"mirrorStatus": {
+		"enabled": false
+	},
+
 	"seo": {
 		"twitterHandle": "",
 		"defaultOgImage": "/android-chrome-512x512.png",
@@ -156,13 +166,14 @@
 	"footer": {
 		"icpNumber": "萌 20213149 号",
 		"icpLink": "https://icp.gov.moe/?keyword=20213149",
+		"icpLabel": "gov.moe",
 		"ratingImage": "/img/15p.svg",
 		"copyrightYears": "2020–2026"
 	},
 
 	"github": {
 		"org": "https://github.com/greasyfork-proxy",
-		"repo": "https://github.com/greasyfork-proxy/greasyfork-mirror",
+		"repo": "https://github.com/greasyfork-proxy/GreasyFork-Mirror",
 		"gfHomeNext": "https://github.com/greasyfork-proxy",
 		"gfHomeSvelteKit": "https://github.com/greasyfork-proxy"
 	},

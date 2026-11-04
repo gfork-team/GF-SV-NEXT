@@ -1,5 +1,8 @@
 import cfg from './config.json';
 import { cdnEnabled, cdnStatic, buildBasePath } from '$lib/cdn-toggle';
+import { dynamicConfig } from './dynamic';
+
+export { dynamicConfig };
 
 const _urlRewriteRules = cfg.urlRewriteRules.map((r) => ({
 	from: new RegExp(r.from),
@@ -62,6 +65,17 @@ export const siteConfig = {
 		}
 	},
 	redirects: cfg.redirects,
+	dynamic: dynamicConfig,
+	/**
+	 * 首页「镜像状态」胶囊（/ping 探活）。
+	 * 该探活需要 Cloudflare Worker 侧实现 /ping；未部署时会一直显示"状态未知"，
+	 * 所以默认关闭。部署后把 enabled 改回 true 即可，不用改代码。
+	 */
+	mirrorStatus: {
+		get enabled() {
+			return cfg.mirrorStatus?.enabled === true;
+		}
+	},
 	search: {
 		get siteFilterEnabled() {
 			return cfg.search.siteFilterEnabled === true;
@@ -98,6 +112,20 @@ export function shouldShowAds(lang: string): boolean {
 	const allowed = siteConfig.adsense.allowedLangs as string[];
 	if (allowed.length === 0) return true;
 	return allowed.includes(lang);
+}
+
+/**
+ * AdSense 主脚本地址。
+ * layout / 错误页 / 根路由 /s、/l 都从这里取，避免同一段兜底链抄四份。
+ */
+export function adsenseScriptUrl(): string {
+	return siteConfig.adsense.script || siteConfig.cdn.adsenseScript;
+}
+
+/** 某个广告位类型对应的广告单元 id（空串表示该位置不投放） */
+export function adsenseSlot(type: string): string {
+	const slots = siteConfig.adsense.slots as Record<string, string | undefined>;
+	return slots[type] ?? '';
 }
 
 export function getDownloadDomains(): string[] {

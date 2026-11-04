@@ -4,8 +4,6 @@ import { siteConfig } from '$lib/config';
 const STATIC_PAGES = [
 	{ path: '', priority: '1.0' },
 	{ path: '/download', priority: '0.9' },
-	{ path: '/lookup', priority: '0.9' },
-	{ path: '/search', priority: '0.8' },
 	{ path: '/help', priority: '0.7' },
 	{ path: '/about', priority: '0.6' },
 	{ path: '/applist', priority: '0.6' },

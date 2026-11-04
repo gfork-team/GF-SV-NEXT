@@ -4,9 +4,12 @@
 	import Ad from '$components/Ad.svelte';
 	import Chip from '$components/Chip.svelte';
 	import Icon from '$components/Icon.svelte';
-	import MirrorStatus from '$components/MirrorStatus.svelte';
+	import MirrorStatusBlock from '$lib/dynamic/blocks/MirrorStatusBlock.svelte';
 	import Onboarding from '$components/Onboarding.svelte';
 	import SearchBar from '$components/SearchBar.svelte';
+	import { goto } from '$app/navigation';
+	import { stringifySearchParams, type SearchParams } from '$lib/search-params';
+	import { LOCALE_OPTIONS } from '$lib/locale-options';
 	import type { IconName } from '$lib/icons';
 	import type { PageData } from './$types';
 
@@ -22,11 +25,12 @@
 
 	const hotWords = $derived([1, 2, 3, 4, 5].map((n) => t(lang, `home.hot.${n}`)));
 
-	/* 核心功能：i18n 里用「标题 — 描述」合成，这里拆开 */
+	/* 核心功能：i18n 里用「标题 — 描述」合成，这里拆开。
+	 * 只认全角破折号 / en dash —— ASCII 连字符会误伤 "Multi-CDN" 这类词。 */
 	const features = $derived.by(() =>
 		(['about.feature_1', 'about.feature_2', 'about.feature_3'] as const).map((key) => {
 			const raw = t(lang, key);
-			const idx = raw.search(/[—\-–]/);
+			const idx = raw.search(/[—–]/);
 			return {
 				key,
 				title: idx > 0 ? raw.slice(0, idx).trim() : raw,
@@ -38,8 +42,6 @@
 	const featureIcons: IconName[] = ['shield', 'filter', 'download'];
 
 	const quickLinks: { href: string; key: string; desc: string; icon: IconName }[] = [
-		{ href: '/lookup', key: 'nav.lookup', desc: 'home.quick.desc.lookup', icon: 'search' },
-		{ href: '/search', key: 'nav.search', desc: 'home.quick.desc.search', icon: 'filter' },
 		{ href: '/download', key: 'nav.download', desc: 'home.quick.desc.download', icon: 'download' },
 		{ href: '/applist', key: 'nav.applist', desc: 'home.quick.desc.applist', icon: 'grid' },
 		{ href: '/help', key: 'nav.help', desc: 'home.quick.desc.help', icon: 'help-circle' },
@@ -52,6 +54,35 @@
 		},
 		{ href: '/feedback', key: 'footer.feedback', desc: 'home.quick.desc.feedback', icon: 'message' }
 	];
+
+	// ─── 高级搜索面板（折叠在 hero 下；提交后把参数拼进 lookup 的 hash） ───
+	const advNumeric = [
+		{ key: 'total_installs', labelKey: 'lookup.total_installs', step: '' },
+		{ key: 'daily_installs', labelKey: 'lookup.daily_installs', step: '' },
+		{ key: 'ratings', labelKey: 'lookup.ratings', step: '0.1' }
+	];
+	const advDates = [
+		{ key: 'created', labelKey: 'lookup.created' },
+		{ key: 'updated', labelKey: 'lookup.updated' }
+	];
+
+	/** 表单字段 → SearchParams：`[]` 结尾的多值键单独用 getAll 收 */
+	function submitAdvanced(e: SubmitEvent & { currentTarget: HTMLFormElement }): void {
+		e.preventDefault();
+		const fd = new FormData(e.currentTarget);
+		const params: SearchParams = {};
+		for (const [key, value] of fd.entries()) {
+			if (typeof value !== 'string' || value === '' || key.endsWith('[]')) continue;
+			params[key] = value;
+		}
+		const locales = fd
+			.getAll('entry_locales[]')
+			.filter((v): v is string => typeof v === 'string' && v !== '');
+		if (locales.length) params['entry_locales[]'] = locales;
+
+		const qs = stringifySearchParams(params);
+		goto(qs ? `/${lang}/lookup#?${qs}` : `/${lang}/lookup`);
+	}
 
 	function replaceUrl() {
 		const url = inputUrl.trim();
@@ -109,15 +140,96 @@
 		{/each}
 	</div>
 
-	<div class="hero__status"><MirrorStatus {lang} /></div>
+	<div class="hero__status"><MirrorStatusBlock {lang} /></div>
+
+	<!-- 高级搜索：折叠在 hero 里，提交后跳到 /lookup 的 hash 参数 -->
+	<details class="hero__adv">
+		<summary class="hero__adv-summary">
+			<Icon name="filter" size={16} />
+			{t(lang, 'lookup.sidebar_advanced')}
+		</summary>
+		<form class="hero__adv-form" onsubmit={submitAdvanced}>
+			<div class="hero__adv-row">
+				<label class="hero__adv-label" for="adv-site"
+					>{t(lang, 'lookup.filter_site_placeholder')}</label
+				>
+				<input class="hero__adv-input" id="adv-site" name="site" />
+			</div>
+
+			{#each advNumeric as f (f.key)}
+				<div class="hero__adv-row">
+					<label class="hero__adv-label" for="adv-{f.key}">{t(lang, f.labelKey)}</label>
+					<div class="hero__adv-pair">
+						<select
+							class="hero__adv-input"
+							name="{f.key}_operator"
+							aria-label={t(lang, f.labelKey)}
+						>
+							<option value="gt">{t(lang, 'lookup.operator.gt')}</option>
+							<option value="lt">{t(lang, 'lookup.operator.lt')}</option>
+							<option value="eq">{t(lang, 'lookup.operator.eq')}</option>
+						</select>
+						<input
+							class="hero__adv-input"
+							id="adv-{f.key}"
+							type="number"
+							step={f.step}
+							name={f.key}
+							placeholder={t(lang, 'lookup.filter_value_placeholder')}
+						/>
+					</div>
+				</div>
+			{/each}
+
+			{#each advDates as f (f.key)}
+				<div class="hero__adv-row">
+					<label class="hero__adv-label" for="adv-{f.key}">{t(lang, f.labelKey)}</label>
+					<div class="hero__adv-pair">
+						<select
+							class="hero__adv-input"
+							name="{f.key}_operator"
+							aria-label={t(lang, f.labelKey)}
+						>
+							<option value="gt">{t(lang, 'lookup.operator.after')}</option>
+							<option value="lt">{t(lang, 'lookup.operator.before')}</option>
+						</select>
+						<input class="hero__adv-input" id="adv-{f.key}" type="datetime-local" name={f.key} />
+					</div>
+				</div>
+			{/each}
+
+			<div class="hero__adv-row">
+				<label class="hero__adv-label" for="adv-locales"
+					>{t(lang, 'lookup.filter_script_lang')}</label
+				>
+				<select class="hero__adv-input" id="adv-locales" name="entry_locales[]" multiple size="4">
+					{#each LOCALE_OPTIONS as loc (loc.value)}
+						<option value={loc.value}>{loc.label}</option>
+					{/each}
+				</select>
+				<small class="hero__adv-hint">{t(lang, 'lookup.filter_multi_hint')}</small>
+			</div>
+
+			<input type="hidden" name="tz" value={Intl.DateTimeFormat().resolvedOptions().timeZone} />
+
+			<div class="hero__adv-actions">
+				<button type="submit" class="ui-btn ui-btn--filled ui-btn--sm">
+					{t(lang, 'lookup.filter_apply')}
+				</button>
+			</div>
+		</form>
+	</details>
 </section>
 
 <div class="ad-slot"><Ad type="fluid" /></div>
 
-<!-- ═══ 一级：核心功能 ═══ -->
+<!-- 三步装上脚本：安装路径是首页第二重要的事，放在核心功能之前 -->
+<Onboarding {lang} />
+
+<!-- ═══ 一级：核心特色 ═══ -->
 <section class="section">
 	<div class="section__head">
-		<h2 class="section__title">{t(lang, 'about.features')}</h2>
+		<h2 class="section__title">{t(lang, 'home.features_title')}</h2>
 	</div>
 
 	<div class="feature-grid">
@@ -159,8 +271,6 @@
 		{/each}
 	</div>
 </section>
-
-<Onboarding {lang} />
 
 <div class="ad-slot"><Ad type="auto" /></div>
 
@@ -213,12 +323,12 @@
 
 <!-- ═══ 二级：条款与安装 ═══ -->
 <section class="actions">
-	<div class="actions__row">
-		<span class="actions__text">{t(lang, 'home.tos_agree')}</span>
-		<a class="ui-btn ui-btn--filled" href="/{lang}/tos" data-sveltekit-preload-data="hover">
+	<p class="actions__text">
+		{t(lang, 'home.tos_agree')}
+		<a class="actions__link" href="/{lang}/tos" data-sveltekit-preload-data="hover">
 			{t(lang, 'home.tos_link')}
 		</a>
-	</div>
+	</p>
 	<div class="actions__row">
 		<a
 			class="ui-btn ui-btn--outlined"
@@ -272,10 +382,12 @@
 		font-size: var(--md-sys-typescale-body-large-size);
 		color: var(--md-sys-color-on-surface);
 		background: var(--md-sys-color-surface-container-highest);
-		border: 1px solid transparent;
+		/* 与主搜索框一致：默认可见描边，focus 再用 box-shadow 加粗 */
+		border: 1px solid var(--md-sys-color-outline);
 		border-radius: var(--md-sys-shape-corner-full);
-		transition: border-color var(--md-sys-motion-duration-short)
-			var(--md-sys-motion-easing-standard);
+		transition:
+			border-color var(--md-sys-motion-duration-short) var(--md-sys-motion-easing-standard),
+			box-shadow var(--md-sys-motion-duration-short) var(--md-sys-motion-easing-standard);
 	}
 	.hero__site::placeholder {
 		color: var(--md-sys-color-on-surface-variant);
@@ -283,6 +395,7 @@
 	.hero__site:focus-visible {
 		outline: none;
 		border-color: var(--md-sys-color-primary);
+		box-shadow: 0 0 0 1px var(--md-sys-color-primary);
 	}
 	.hero__hot {
 		display: flex;
@@ -300,6 +413,102 @@
 		display: flex;
 		justify-content: center;
 		padding-top: 4px;
+	}
+
+	/* ─── 高级搜索（折叠） ─── */
+	.hero__adv {
+		width: 100%;
+		max-width: 640px;
+		margin-top: 4px;
+		text-align: left;
+		background: var(--md-sys-color-surface-container-low);
+		border: 1px solid var(--md-sys-color-outline-variant);
+		border-radius: var(--md-sys-shape-corner-medium);
+	}
+	.hero__adv-summary {
+		display: flex;
+		align-items: center;
+		gap: 6px;
+		padding: 10px 14px;
+		cursor: pointer;
+		list-style: none;
+		font-size: var(--md-sys-typescale-label-large-size);
+		font-weight: 500;
+		color: var(--md-sys-color-on-surface);
+	}
+	.hero__adv-summary::-webkit-details-marker {
+		display: none;
+	}
+	.hero__adv[open] .hero__adv-summary {
+		border-bottom: 1px solid var(--md-sys-color-outline-variant);
+	}
+	.hero__adv-form {
+		display: flex;
+		flex-direction: column;
+		gap: 10px;
+		padding: 14px;
+	}
+	.hero__adv-row {
+		display: flex;
+		flex-direction: column;
+		gap: 4px;
+	}
+	.hero__adv-label {
+		font-size: var(--md-sys-typescale-label-medium-size);
+		color: var(--md-sys-color-on-surface-variant);
+	}
+	.hero__adv-input {
+		width: 100%;
+		min-width: 0;
+		height: 38px;
+		padding: 0 12px;
+		font: inherit;
+		font-size: var(--md-sys-typescale-body-small-size);
+		color: var(--md-sys-color-on-surface);
+		background: var(--md-sys-color-surface);
+		border: 1px solid var(--md-sys-color-outline);
+		border-radius: var(--md-sys-shape-corner-small);
+	}
+	.hero__adv-input:focus-visible {
+		outline: none;
+		border-color: var(--md-sys-color-primary);
+		box-shadow: 0 0 0 1px var(--md-sys-color-primary);
+	}
+	select.hero__adv-input[multiple] {
+		height: auto;
+		padding: 6px;
+	}
+	.hero__adv-pair {
+		display: flex;
+		gap: 8px;
+	}
+	.hero__adv-pair .hero__adv-input:first-child {
+		flex: 0 0 96px;
+	}
+	.hero__adv-hint {
+		font-size: var(--md-sys-typescale-label-small-size);
+		color: var(--md-sys-color-on-surface-variant);
+	}
+	.hero__adv-actions {
+		display: flex;
+		justify-content: flex-end;
+	}
+	@media (min-width: 600px) {
+		.hero__adv-form {
+			flex-direction: row;
+			flex-wrap: wrap;
+			align-items: flex-end;
+			gap: 12px;
+		}
+		.hero__adv-row {
+			flex: 1 1 160px;
+		}
+		.hero__adv-row:has(select[multiple]) {
+			flex: 1 1 100%;
+		}
+		.hero__adv-actions {
+			flex: 0 0 auto;
+		}
 	}
 
 	.ad-slot--bottom {
@@ -357,8 +566,10 @@
 	}
 	.feature-card__title {
 		margin: 0;
-		font-size: var(--md-sys-typescale-body-large-size);
+		font-size: 18px;
 		font-weight: 600;
+		line-height: 1.4;
+		letter-spacing: -0.01em;
 		color: var(--md-sys-color-on-surface);
 	}
 	.feature-card__desc {
@@ -555,8 +766,18 @@
 		gap: 12px;
 	}
 	.actions__text {
+		margin: 0;
 		font-size: var(--md-sys-typescale-body-medium-size);
 		color: var(--md-sys-color-on-surface-variant);
+	}
+	/* 条款入口是普通超链接：它是"知情同意"的补充说明，不该抢按钮的视觉权重 */
+	.actions__link {
+		color: var(--md-sys-color-primary);
+		text-decoration: underline;
+		text-underline-offset: 2px;
+	}
+	.actions__link:hover {
+		text-decoration-thickness: 2px;
 	}
 
 	@media (min-width: 600px) {

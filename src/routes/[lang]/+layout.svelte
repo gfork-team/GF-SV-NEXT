@@ -1,7 +1,7 @@
 <script lang="ts">
 	import { page } from '$app/state';
 	import { i18nConfig, t, type Lang } from '$i18n';
-	import { siteConfig, siteProxyUrl, siteUrl } from '$lib/config';
+	import { siteConfig, adsenseScriptUrl, siteProxyUrl, siteUrl } from '$lib/config';
 	import {
 		OG_LOCALES,
 		ROUTE_META,
@@ -59,10 +59,17 @@
 		window.scrollTo({ top: 0, behavior: reducedMotion ? 'auto' : 'smooth' });
 	}
 
+	/*
+	 * 广告状态尽早初始化：放进 onMount 会晚一帧，而每个广告位的首次 push
+	 * 都要等 canRenderAds() 变 true —— 提前到组件初始化能省掉这一帧。
+	 * 语言直接从 <html lang> 读（服务端已按路由写好），避免在初始化期捕获响应式 lang。
+	 */
+	if (typeof window !== 'undefined') {
+		initAdState(document.documentElement.lang === 'zh-hans');
+	}
+
 	onMount(() => {
 		initTheme();
-		// 中国大陆无强制 Cookie 同意要求，视同已同意；其余地区按用户选择投放
-		initAdState(lang === 'zh-hans');
 		reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 		const onScroll = () => {
 			showBackTop = window.scrollY > 400;
@@ -127,10 +134,7 @@
 	);
 	let gtmId = siteConfig.adsense.gtmId;
 	// AdSense 主脚本地址走配置；CN 端点对大陆访问更快，可整体替换
-	let adsenseScript: string =
-		siteConfig.adsense.script ||
-		siteConfig.cdn.adsenseScript ||
-		'https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js';
+	let adsenseScript: string = adsenseScriptUrl();
 	let adsenseClient: string = siteConfig.adsense.publisherId;
 	let adsPrefetch: string[] = $derived(siteConfig.adsense.dnsPrefetch ?? []);
 	let gtmCode = $derived(
@@ -416,14 +420,17 @@
 		background: rgb(0 0 0 / 0.08);
 	}
 
-	/* 顶部细粉紫带（gov.cn 风格） */
+	/*
+	 * 顶部细色带：粉紫渐变换成政务蓝渐变换，高度 4px → 2px。
+	 * 自定义配色（data-zh-china="0"）下 --zh-* 未定义，回落到主题主色，不会突兀。
+	 * 想更低调可以改 height: 1px，想更明显改 3px；颜色只改这两行。
+	 */
 	.zh-topbar {
-		height: 4px;
+		height: 2px;
 		background: linear-gradient(
 			90deg,
-			var(--zh-seal-deep, #c86b8a) 0%,
-			var(--zh-seal, #ddaacc) 50%,
-			var(--zh-seal-bright, #eed3e5) 100%
+			var(--zh-azure, var(--md-sys-color-primary)) 0%,
+			var(--zh-azure-soft, var(--md-sys-color-primary)) 100%
 		);
 	}
 

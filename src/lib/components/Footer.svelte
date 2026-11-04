@@ -11,7 +11,6 @@
 
 	const footerLinks = [
 		{ href: '', key: 'nav.home' },
-		{ href: '/search', key: 'nav.search' },
 		{ href: '/help', key: 'nav.help' },
 		{ href: '/about', key: 'nav.about' }
 	];
@@ -93,6 +92,13 @@
 					{t(lang, 'footer.feedback')}
 				</a>
 				<span class="m3-footer-sep" aria-hidden="true">·</span>
+				<a
+					href={siteConfig.github.repo}
+					class="m3-footer-link"
+					target="_blank"
+					rel="noopener noreferrer">{t(lang, 'contact.github')}</a
+				>
+				<span class="m3-footer-sep" aria-hidden="true">·</span>
 				<span class="m3-footer-copyright">
 					{t(lang, 'footer.copyright').replace('{year}', String(year))}
 					{#if __APP_VERSION__ && __APP_VERSION__ !== 'dev'}
@@ -104,6 +110,11 @@
 							>
 								v{__APP_VERSION__}
 							</a>
+							{#if __APP_VERSION_TIME__}
+								<time datetime={__APP_VERSION_TIME__} class="m3-footer-commit-time">
+									{__APP_VERSION_TIME__.slice(0, 10)}
+								</time>
+							{/if}
 						</span>
 					{/if}
 				</span>
@@ -144,8 +155,9 @@
 						target="_blank"
 						rel="noopener noreferrer"
 						class="m3-footer-link"
+						title={siteConfig.footer.icpLink}
 					>
-						{siteConfig.footer.icpLink}
+						{siteConfig.footer.icpLabel}
 					</a>
 				</span>
 			</div>

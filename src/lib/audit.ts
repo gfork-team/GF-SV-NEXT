@@ -1,4 +1,5 @@
 import { siteConfig, auditEndpoint } from '$lib/config';
+import { request } from '$lib/dynamic/core/request';
 
 type AuditType = 'pageview' | 'search' | 'error';
 
@@ -30,12 +31,20 @@ function flush() {
 	if (navigator.sendBeacon) {
 		navigator.sendBeacon(url, new Blob([body], { type: 'application/json' }));
 	} else {
-		fetch(url, {
-			method: 'POST',
-			body,
-			headers: { 'Content-Type': 'application/json' },
-			keepalive: true
-		}).catch(() => {});
+		// 兜底通道也必须走 request.ts（全站唯一发请求的地方）。
+		// keepalive 保证页面卸载时仍能发出；审计不重试、不缓存。
+		void request<unknown>({
+			key: `audit:${Date.now()}:${Math.random()}`,
+			url,
+			init: {
+				method: 'POST',
+				body,
+				headers: { 'Content-Type': 'application/json' },
+				keepalive: true
+			},
+			attempts: 1,
+			ttlSec: 0
+		});
 	}
 }
 

@@ -1,8 +1,8 @@
 <script lang="ts">
-	import { onMount } from 'svelte';
 	import { t, type Lang } from '$i18n';
 	import Ad from '$components/Ad.svelte';
 	import Icon from '$components/Icon.svelte';
+	import CountdownBlock from '$lib/dynamic/blocks/CountdownBlock.svelte';
 
 	let {
 		lang,
@@ -16,46 +16,12 @@
 		showAds?: boolean;
 	} = $props();
 
-	let waitTemplate = $derived(t(lang, 'redirect.waiting'));
-	let loadingText = $derived(t(lang, 'redirect.loading'));
-	let skipText = $derived(t(lang, 'redirect.skip'));
+	const skipText = $derived(t(lang, 'redirect.skip'));
 
-	onMount(() => {
-		let targetUrl = buildUrl(lang);
-		const updateTarget = () => {
-			targetUrl = buildUrl(lang);
-		};
-		const textEl = document.getElementById('redirect-countdown-text')!;
-
-		// 等待时间为 0：不做倒计时，立即跳转
-		if (delaySec <= 0) {
-			window.location.assign(targetUrl);
-			return;
-		}
-
-		let countdown = delaySec;
-
-		function tick() {
-			countdown--;
-			// 倒计时显示到 1 秒时立即开始跳转
-			if (countdown <= 1) {
-				clearInterval(interval);
-				textEl.textContent = loadingText;
-				window.location.assign(targetUrl);
-				return;
-			}
-			textEl.textContent = waitTemplate.replace('{countdown}', String(countdown));
-		}
-
-		window.addEventListener('hashchange', updateTarget);
-		textEl.textContent = waitTemplate.replace('{countdown}', String(countdown));
-		const interval = setInterval(tick, 1000);
-
-		return () => {
-			clearInterval(interval);
-			window.removeEventListener('hashchange', updateTarget);
-		};
-	});
+	// 稳定的目标构造器：区块每次需要地址时读当前 hash
+	function target(): string {
+		return buildUrl(lang);
+	}
 </script>
 
 <svelte:head>
@@ -98,9 +64,7 @@
 		<div class="rd-card-glow"></div>
 		<div class="rd-card-content">
 			<span class="rd-spin-icon" aria-hidden="true"><Icon name="refresh" size={80} /></span>
-			<p id="redirect-countdown-text" class="rd-countdown">
-				{waitTemplate.replace('{countdown}', String(delaySec))}
-			</p>
+			<CountdownBlock {lang} {delaySec} buildUrl={target} />
 
 			{#if showAds}
 				<div class="rd-ad-slot"><Ad type="auto" /></div>
@@ -220,14 +184,6 @@
 		to {
 			transform: rotate(360deg);
 		}
-	}
-	.rd-countdown {
-		font-size: 16px;
-		color: var(--md-sys-color-on-surface-variant);
-		margin: 0 0 20px;
-		text-align: center;
-		font-weight: 400;
-		letter-spacing: 0.3px;
 	}
 	.rd-ad-slot {
 		width: 100%;

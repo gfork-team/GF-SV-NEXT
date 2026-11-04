@@ -20,7 +20,6 @@
 
 	const navItems = $derived([
 		{ href: `/${lang}`, label: t(lang, 'nav.home') },
-		{ href: `/${lang}/lookup`, label: t(lang, 'nav.lookup') },
 		{ href: `/${lang}/help`, label: t(lang, 'nav.help') },
 		{ href: `/${lang}/about`, label: t(lang, 'nav.about') }
 	]);

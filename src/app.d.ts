@@ -15,6 +15,8 @@ declare global {
 
 	/** Commit SHA 注入值（vite.config.ts 的 define 注入）。 */
 	const __APP_VERSION__: string;
+	/** 该 commit 的提交时间（ISO），注入方式同上；取不到时为空串。 */
+	const __APP_VERSION_TIME__: string;
 
 	namespace App {
 		interface Locals {

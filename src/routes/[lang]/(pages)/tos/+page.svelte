@@ -1,5 +1,6 @@
 <script lang="ts">
 	import { t, type Lang } from '$i18n';
+	import { siteConfig } from '$lib/config';
 	import Ad from '$components/Ad.svelte';
 	import ContactEmail from '$components/ContactEmail.svelte';
 	import type { PageData } from './$types';
@@ -51,6 +52,11 @@
 		</p>
 		<!-- eslint-enable svelte/no-at-html-tags -->
 
+		<!-- 正文内单元：条款正文很长，中段加一个（用 fluid，与首尾单元不重复） -->
+		<div style="text-align:center;margin:24px 0">
+			<Ad type="fluid" />
+		</div>
+
 		<h3>{t(lang, 'tos.section4_title')}</h3>
 		<p style="color:var(--md-sys-color-on-surface-variant)">{t(lang, 'tos.section4_1')}</p>
 		<p style="color:var(--md-sys-color-on-surface-variant)">{t(lang, 'tos.section4_2')}</p>
@@ -72,6 +78,15 @@
 			<strong>{t(lang, 'tos.email')}</strong>
 			<ContactEmail label={t(lang, 'tos.section7_title')} />
 			<strong>{t(lang, 'tos.email_note')}</strong>
+		</p>
+		<p>
+			<strong>{t(lang, 'contact.github_label')}</strong>
+			<a
+				href={siteConfig.github.repo}
+				style="color:var(--md-sys-color-primary);word-break:break-all"
+				target="_blank"
+				rel="noopener noreferrer">{siteConfig.github.repo}</a
+			>
 		</p>
 
 		<hr class="md3-divider" />

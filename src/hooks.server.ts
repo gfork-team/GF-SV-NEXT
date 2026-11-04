@@ -4,6 +4,12 @@ import type { Handle } from '@sveltejs/kit';
 
 const SPECIAL_ROUTES = ['/s', '/l', '/sitemap.xml', '/robots.txt'];
 
+/**
+ * 非语言路径（例如 /foo、适配器生成的 404 fallback）默认按繁体中文渲染。
+ * 理由：四个语言里繁体的覆盖面最广（简体用户也能读），比默认简体更"中性"。
+ */
+const FALLBACK_LANG = 'zh-hant';
+
 /** Paths that serve static assets from CDN. */
 const STATIC_ASSET_REGEX = /\.(css|js|svg|png|jpg|jpeg|webp|woff2|woff|ttf|ico)$/i;
 
@@ -30,7 +36,8 @@ export const handle: Handle = async ({ event, resolve }) => {
 	}
 
 	event.locals.lang =
-		(lang as (typeof i18nConfig.supportedLangs)[number]) || i18nConfig.defaultLang;
+		(lang as (typeof i18nConfig.supportedLangs)[number]) ||
+		(isSpecialRoute(pathname) ? i18nConfig.defaultLang : FALLBACK_LANG);
 
 	const response = await resolve(event, {
 		transformPageChunk: ({ html }) => {

@@ -1,78 +1,26 @@
 <script lang="ts">
 	import { onMount } from 'svelte';
-	import { siteConfig } from '$lib/config';
+	import { siteConfig, adsenseScriptUrl } from '$lib/config';
 	import { initAdState, markSdkBlocked, GOOGLEFC_INIT } from '$lib/ad-state.svelte';
 	import { scriptTag } from '$utils';
 	import Ad from '$components/Ad.svelte';
 	import Icon from '$components/Icon.svelte';
+	import CountdownBlock from '$lib/dynamic/blocks/CountdownBlock.svelte';
 
 	let delaySec = siteConfig.redirects.downloadDelaySec;
 	// 本路由不在 [lang] 布局内，需自带 AdSense 脚本
-	let adsenseScript: string =
-		siteConfig.adsense.script ||
-		siteConfig.cdn.adsenseScript ||
-		'https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js';
+	let adsenseScript: string = adsenseScriptUrl();
 	let showAds = $derived(siteConfig.adsense.enabled);
 
 	onMount(() => {
 		initAdState(true);
 	});
 
-	onMount(() => {
-		let targetUrl = '/en/download';
+	/** 本路由固定把下载请求送到 /en/download，并原样带上 hash 路径 */
+	function target(): string {
 		const hash = window.location.hash;
-		if (hash && hash.indexOf('#/') === 0)
-			targetUrl = window.location.origin + '/en/download' + hash;
-
-		// 等待时间为 0：不做倒计时，立即跳转
-		if (delaySec <= 0) {
-			window.location.assign(targetUrl);
-			return;
-		}
-
-		let countdown = delaySec;
-		const meta = document.createElement('meta');
-		meta.httpEquiv = 'refresh';
-		meta.id = 'redirect-meta';
-		document.head.appendChild(meta);
-		const textEl = document.getElementById('redirect-countdown-text')!;
-		const skipEl = document.getElementById('redirect-skip')!;
-
-		function buildUrl() {
-			const hash = window.location.hash;
-			targetUrl =
-				window.location.origin + '/en/download' + (hash && hash.indexOf('#/') === 0 ? hash : '');
-		}
-
-		function update() {
-			buildUrl();
-			meta.content = countdown + 2 + ';url=' + targetUrl;
-			skipEl.innerHTML =
-				'<button onclick="location.reload()" style="display:inline-block;padding:12px 32px;background:var(--md-sys-color-primary,#7f3300);color:var(--md-sys-color-on-primary,#fff);border:none;border-radius:999px;font-size:14px;font-weight:500;cursor:pointer">Click here if not redirected</button>';
-		}
-
-		function tick() {
-			countdown--;
-			if (countdown <= 0) {
-				clearInterval(interval);
-				textEl.textContent = '正在加载中…';
-				return;
-			}
-			update();
-			textEl.textContent = 'Redirecting in ' + countdown + 's...';
-		}
-
-		buildUrl();
-		update();
-		window.addEventListener('hashchange', update);
-		textEl.textContent = 'Redirecting in ' + countdown + 's...';
-		const interval = setInterval(tick, 1000);
-
-		return () => {
-			clearInterval(interval);
-			window.removeEventListener('hashchange', update);
-		};
-	});
+		return window.location.origin + '/en/download' + (hash && hash.indexOf('#/') === 0 ? hash : '');
+	}
 </script>
 
 <svelte:head>
@@ -125,7 +73,7 @@
 		<div class="card-glow"></div>
 		<div class="card-content">
 			<span class="spin-icon" aria-hidden="true"><Icon name="refresh" size={80} /></span>
-			<p id="redirect-countdown-text" class="countdown">Redirecting in {delaySec}s...</p>
+			<CountdownBlock lang="en" {delaySec} buildUrl={target} metaRefresh />
 
 			<div class="ad-slot"><Ad type="auto" /></div>
 
@@ -239,14 +187,6 @@
 		to {
 			transform: rotate(360deg);
 		}
-	}
-	.countdown {
-		font-size: 16px;
-		color: var(--md-sys-color-on-surface-variant);
-		margin: 0 0 20px;
-		text-align: center;
-		font-weight: 400;
-		letter-spacing: 0.3px;
 	}
 	.ad-slot {
 		width: 100%;

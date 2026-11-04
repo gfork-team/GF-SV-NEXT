@@ -2,7 +2,7 @@
 	import { t, type Lang } from '$i18n';
 	import { siteConfig } from '$lib/config';
 	import Ad from '$components/Ad.svelte';
-	import ContactEmail from '$components/ContactEmail.svelte';
+	import ContactChannels from '$components/ContactChannels.svelte';
 	import type { PageData } from './$types';
 
 	let { data }: { data: PageData } = $props();
@@ -132,13 +132,18 @@
 			</p>
 		</div>
 
+		<!-- 正文内单元：长页面中段，避免只有首尾两个位 -->
+		<div style="text-align:center;margin:28px 0 8px">
+			<Ad type="horizontal" />
+		</div>
+
 		<!-- Contact -->
 		<div class="md3-card" style="margin-top:16px">
 			<h2 class="title-large" style="margin-bottom:12px">{t(lang, 'about.contact')}</h2>
 			<p style="color:var(--md-sys-color-on-surface-variant);line-height:1.6;font-size:14px">
 				{t(lang, 'about.contact_desc')}
-				<ContactEmail label={t(lang, 'about.contact')} />
 			</p>
+			<ContactChannels {lang} />
 		</div>
 
 		<!-- User Agreement -->

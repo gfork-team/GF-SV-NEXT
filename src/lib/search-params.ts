@@ -38,3 +38,17 @@ export function parseSearchParams(raw: string): SearchParams {
 	}
 	return result;
 }
+
+/** 取单值参数（多值键取第一个），把 SearchParams 收敛成字符串 */
+export function getParam(params: SearchParams, key: string): string {
+	const value = params[key];
+	if (Array.isArray(value)) return value[0] ?? '';
+	return value ?? '';
+}
+
+/** 取多值参数（单个字符串按只有一个元素的数组处理） */
+export function getParamList(params: SearchParams, key: string): string[] {
+	const value = params[key];
+	if (Array.isArray(value)) return value;
+	return value ? [value] : [];
+}
