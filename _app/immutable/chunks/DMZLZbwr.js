@@ -1,0 +1,2 @@
+import"./C2aGs5Bs.js";import{aK as c,bd as d,bb as i,b8 as u,M as f,aH as m,af as n,V as l,aP as b}from"./CaEbT08I.js";import{s as v}from"./mx_o6Yoc.js";import{q as e}from"./CqbjTAo0.js";var h=n('<div class="dyn-slot"><!></div>');function q(r,a){c(a,!0),d(()=>{const o=a.resource;i(()=>o.load())});var t=h(),s=l(t);v(s,()=>a.children,()=>a.resource.data),b(t),u(()=>{e(t,"data-block",a.resource.id),e(t,"data-state",a.resource.state)}),f(r,t),m()}export{q as S};
+//# sourceMappingURL=DMZLZbwr.js.map
