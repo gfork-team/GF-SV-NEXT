@@ -1,0 +1,2 @@
+import{aV as a,b4 as i,ah as u}from"./CaEbT08I.js";let s=i(null),l=i(null),n;function o(){return u(s)}function f(e,r,t=6e3){a(s,{message:e,action:r,timeout:t},!0),n&&clearTimeout(n),t>0&&(n=setTimeout(()=>{a(s,null)},t))}function d(){n&&clearTimeout(n),a(s,null)}function m(){return u(l)}function b(e={}){a(l,e,!0)}function g(){a(l,null)}export{o as a,g as c,d,m as g,b as o,f as s};
+//# sourceMappingURL=BbOyWox1.js.map
