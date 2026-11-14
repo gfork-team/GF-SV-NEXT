@@ -8,6 +8,11 @@ on:
 permissions:
   contents: write
 
+# 串行化部署：避免多个 run 同时向 publish / cdn 分支 push 造成竞态。
+concurrency:
+  group: deploy-${{ github.ref }}
+  cancel-in-progress: false
+
 jobs:
   build-and-deploy:
     runs-on: ubuntu-latest
@@ -27,7 +32,37 @@ jobs:
           VITE_CDN_ENABLED: 'true'
           VITE_GIT_SHA: ${{ github.sha }}
 
+      - name: Prepare cdn deploy
+        run: |
+          mkdir -p /tmp/cdn_deploy/gfork
+          cp -r build/_app /tmp/cdn_deploy/gfork/_app
+
+      # 先发 CDN 资源，再发引用这些资源的 HTML。
+      # 若 cdn 部署失败，publish 不会前进，线上仍停留在旧版本，避免
+      # 「HTML 已更新但 _app 资源 404」的破坏性状态。
+      - name: Deploy _app/ to cdn branch
+        id: deploy_cdn
+        continue-on-error: true
+        uses: peaceiris/actions-gh-pages@v4
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          publish_dir: /tmp/cdn_deploy
+          publish_branch: cdn
+          commit_message: 'cdn: ${{ github.sha }}'
+
+      # GitHub 偶发 "remote: Internal Server Error"（服务端 5xx）时重试一次。
+      - name: Retry cdn deploy on transient failure
+        if: steps.deploy_cdn.outcome == 'failure'
+        uses: peaceiris/actions-gh-pages@v4
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          publish_dir: /tmp/cdn_deploy
+          publish_branch: cdn
+          commit_message: 'cdn: ${{ github.sha }} (retry)'
+
       - name: Deploy build/ to publish branch
+        id: deploy_publish
+        continue-on-error: true
         uses: peaceiris/actions-gh-pages@v4
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
@@ -35,15 +70,11 @@ jobs:
           publish_branch: publish
           commit_message: 'deploy: ${{ github.sha }}'
 
-      - name: Prepare cdn deploy
-        run: |
-          mkdir -p /tmp/cdn_deploy/gfork
-          cp -r build/_app /tmp/cdn_deploy/gfork/_app
-
-      - name: Deploy _app/ to cdn branch
+      - name: Retry publish deploy on transient failure
+        if: steps.deploy_publish.outcome == 'failure'
         uses: peaceiris/actions-gh-pages@v4
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
-          publish_dir: /tmp/cdn_deploy
-          publish_branch: cdn
-          commit_message: 'cdn: ${{ github.sha }}'
+          publish_dir: ./build
+          publish_branch: publish
+          commit_message: 'deploy: ${{ github.sha }} (retry)'
