@@ -1,2 +1,0 @@
-import"../chunks/C2aGs5Bs.js";import{aK as d,aH as s,ah as l,bc as c}from"../chunks/CaEbT08I.js";import{x as o}from"../chunks/Ct33ukES.js";import{R as g}from"../chunks/D6MEW3ph.js";function f(t,a){d(a,!0);let n=c(()=>a.data.lang);function r(i){const e=window.location.hash;return window.location.origin+"/"+i+"/download"+(e&&e.indexOf("#/")===0?e:"")}g(t,{get lang(){return l(n)},get delaySec(){return o.redirects.downloadDelaySec},buildUrl:r,get showAds(){return o.adsense.allowOnRedirectPages},kind:"download"}),s()}export{f as component};
-//# sourceMappingURL=15.jpZmJaDA.js.map
