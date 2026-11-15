@@ -6,6 +6,36 @@
 			"statusCode": 308
 		},
 		{
+			"source": "/zh-hans/",
+			"destination": "/zh-hans",
+			"statusCode": 301
+		},
+		{
+			"source": "/zh-hant/",
+			"destination": "/zh-hant",
+			"statusCode": 301
+		},
+		{
+			"source": "/en/",
+			"destination": "/en",
+			"statusCode": 301
+		},
+		{
+			"source": "/ja/",
+			"destination": "/ja",
+			"statusCode": 301
+		},
+		{
+			"source": "/zh-CN",
+			"destination": "/zh-hans",
+			"statusCode": 308
+		},
+		{
+			"source": "/zh-TW",
+			"destination": "/zh-hant",
+			"statusCode": 308
+		},
+		{
 			"source": "/vite/assets/firefox-*",
 			"destination": "/img/firefox.svg",
 			"statusCode": 308
@@ -88,11 +118,29 @@
 	],
 	"headers": [
 		{
+			"source": "/_app/immutable/*",
+			"headers": [
+				{
+					"key": "Cache-Control",
+					"value": "public, max-age=31536000, immutable"
+				}
+			]
+		},
+		{
+			"source": "/img/*",
+			"headers": [
+				{
+					"key": "Cache-Control",
+					"value": "public, max-age=604800"
+				}
+			]
+		},
+		{
 			"source": "/*",
 			"headers": [
 				{
 					"key": "Cache-Control",
-					"value": "max-age=360000"
+					"value": "no-cache, must-revalidate"
 				},
 				{
 					"key": "Access-Control-Allow-Origin",
