@@ -108,7 +108,7 @@
 
 <svelte:head>
 	<title>{pageTitle}</title>
-	<meta name="description" content={t(lang, 'lookup.description')} />
+	<meta name="description" content={t(lang, 'meta.lookup_desc')} />
 	<meta
 		name="keywords"
 		content="userscript search, greasyfork lookup, script search, browser scripts, greasyfork scripts, user scripts"

@@ -116,7 +116,13 @@
 
 <!-- ═══ 一级：Hero ═══ -->
 <section class="hero">
-	<h1 class="hero__title">{t(lang, 'home.super_title')}</h1>
+	<!--
+		文案里用 \n 分了行（镜像 / 搜索 / 下载 三行）。不能用 white-space: pre-line —— 构建后的
+		HTML 压缩会把换行折成空格，所以这里按 \n 拆开显式插 <br>。单行文案（en/ja）不受影响。
+	-->
+	<h1 class="hero__title">
+		{#each t(lang, 'home.super_title').split('\n') as line, i (i)}{#if i}<br />{/if}{line}{/each}
+	</h1>
 
 	<div class="hero__search">
 		<SearchBar id="hero" {lang} size="lg" autofocus params={{ site }} />
@@ -290,7 +296,6 @@
 					target="_blank"
 					rel="noopener noreferrer">{t(lang, 'home.recommend.link1')}</a
 				>
-				{t(lang, 'home.recommend.link2')}
 			</p>
 		</section>
 	{/if}
@@ -367,6 +372,8 @@
 		letter-spacing: -0.01em;
 		color: var(--md-sys-color-on-surface);
 		text-wrap: balance;
+		/* 中文文案用 \n 分了三行（镜像 / 搜索 / 下载），按换行渲染；单行文案不受影响 */
+		white-space: pre-line;
 	}
 	.hero__search {
 		width: 100%;

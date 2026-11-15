@@ -114,7 +114,7 @@
 			</div>
 
 			<p id="redirect-skip" class="skip">
-				<button onclick={() => location.reload()}>Click here if not redirected</button>
+				<button onclick={() => location.reload()}>没有自动跳转？点这里</button>
 			</p>
 		</div>
 	</div>

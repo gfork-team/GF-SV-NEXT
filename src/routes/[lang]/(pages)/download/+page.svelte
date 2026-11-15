@@ -16,7 +16,7 @@
 
 <svelte:head>
 	<title>{t(lang, 'download.title')} - ZGF</title>
-	<meta name="description" content={t(lang, 'download.description')} />
+	<meta name="description" content={t(lang, 'meta.download_desc')} />
 	<meta
 		name="keywords"
 		content="script download, userscript install, script acceleration download, greasyfork download, user script download"

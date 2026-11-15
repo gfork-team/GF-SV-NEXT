@@ -1,0 +1,7 @@
+# 构建与依赖产物
+build/
+.svelte-kit/
+node_modules/
+
+# 生成的文案清单：由 copy-deck 生成脚本产出，表格列宽不做 prettier 对齐
+copy-deck/

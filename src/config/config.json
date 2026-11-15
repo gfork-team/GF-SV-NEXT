@@ -5,10 +5,10 @@
 		"url": "https://home.greasyfork.org.cn",
 		"defaultColorScheme": "teal",
 		"description": {
-			"zh-hans": "Greasy Fork 油猴脚本加速访问 — 加速脚本下载，高级搜索",
-			"zh-hant": "Greasy Fork 油猴腳本加速訪問 — 加速腳本下載，高級搜索",
-			"en": "Greasy Fork Script Accelerated Access — Multi-CDN acceleration, advanced search",
-			"ja": "Greasy Fork ユーザースクリプト高速アクセス — 高速化、高度な検索"
+			"zh-hans": "Greasy Fork 的加速镜像：脚本能看、能搜、能装，下载走加速通道。",
+			"zh-hant": "Greasy Fork 的加速鏡像：腳本能看、能搜、能裝，下載走加速通道。",
+			"en": "An accelerated mirror of Greasy Fork: browse, search and install userscripts without the wait.",
+			"ja": "Greasy Fork の高速ミラー。閲覧・検索・インストールをストレスなく。"
 		},
 		"keywords": [
 			"greasyfork",
@@ -30,7 +30,6 @@
 		"contactEmailCipher": "NzkgFyM7LgEdJkgpIixrFT4COBwAOQkofiYg",
 		"contactEmailKey": "PKEvPBHnoMfF"
 	},
-
 	"favicon": {
 		"icon32": "/favicon-32x32.png",
 		"icon16": "/favicon-16x16.png",
@@ -40,7 +39,6 @@
 		"android512": "/android-chrome-512x512.png",
 		"manifest": "/site.webmanifest"
 	},
-
 	"adsense": {
 		"publisherId": "ca-pub-3758644447684310",
 		"gtmId": "GTM-KZFGTVN7",
@@ -69,18 +67,15 @@
 			"https://www.googleadservices.com"
 		]
 	},
-
 	"cdn": {
 		"siteProxy": "https://gfork.zh-tw.eu.org",
 		"adsenseScript": "https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js"
 	},
-
 	"downloadNodes": [
 		"https://static-sg-apse1-primary-mirror-aws-s3-cloudfront-public-cdn.dahi.edu.eu.org",
 		"https://tencent.api-data-abtest-config.dahi.edu.eu.org",
 		"https://api-data-aws-abtest-config.dahi.edu.eu.org"
 	],
-
 	"download": {
 		"testTimeout": 2000,
 		"testCount": 3,
@@ -94,7 +89,6 @@
 		"useQueryString": false,
 		"debugMode": false
 	},
-
 	"lookupNodes": {
 		"primary": [
 			{
@@ -104,7 +98,11 @@
 			}
 		],
 		"backup": [
-			{ "id": "ALI", "endpoint": "https://web-static-origin.e.yu.ac.cn/gftls", "method": "POST" },
+			{
+				"id": "ALI",
+				"endpoint": "https://web-static-origin.e.yu.ac.cn/gftls",
+				"method": "POST"
+			},
 			{
 				"id": "AWSP",
 				"endpoint": "https://dev-volcengine-auth.netlify.app/gftls",
@@ -122,31 +120,24 @@
 			}
 		]
 	},
-
 	"lookupSignature": {
 		"mode": "sha256Timestamp",
 		"ssLength": 9
 	},
-
 	"infoApi": {
 		"primary": "https://web-static-origin.dahi.edu.cn.dahi.e.yu.ac.cn/gfinfo"
 	},
-
 	"greasyforkRegion": "cn",
-
 	"redirects": {
 		"searchDelaySec": 1,
 		"downloadDelaySec": 1
 	},
-
 	"search": {
 		"siteFilterEnabled": true
 	},
-
 	"mirrorStatus": {
 		"enabled": false
 	},
-
 	"seo": {
 		"twitterHandle": "",
 		"defaultOgImage": "/android-chrome-512x512.png",
@@ -156,13 +147,11 @@
 		"baiduVerification": "",
 		"bingVerification": ""
 	},
-
 	"sponsor": {
 		"name": "Secbit.ai",
 		"url": "https://secbit.ai/",
 		"image": "/img/scai.gif"
 	},
-
 	"footer": {
 		"icpNumber": "萌 20213149 号",
 		"icpLink": "https://icp.gov.moe/?keyword=20213149",
@@ -170,14 +159,12 @@
 		"ratingImage": "/img/15p.svg",
 		"copyrightYears": "2020–2026"
 	},
-
 	"github": {
 		"org": "https://github.com/greasyfork-proxy",
 		"repo": "https://github.com/greasyfork-proxy/GreasyFork-Mirror",
 		"gfHomeNext": "https://github.com/greasyfork-proxy",
 		"gfHomeSvelteKit": "https://github.com/greasyfork-proxy"
 	},
-
 	"links": {
 		"tampermonkey": "https://www.tampermonkey.net/",
 		"violentmonkey": "https://violentmonkey.github.io/",
@@ -187,13 +174,11 @@
 		"sleazyfork": "https://sleazyfork.org/",
 		"bbsTampermonkey": "https://bbs.tampermonkey.net.cn/forum.php"
 	},
-
 	"audit": {
 		"enabled": false,
 		"endpoint": "http://localhost:3001",
 		"corsOrigin": "https://home.greasyfork.org.cn"
 	},
-
 	"announce": {
 		"enabled": false,
 		"type": "warning",
@@ -204,9 +189,14 @@
 			"ja": "【サービス低下】Greasy Fork公式サービスのインターフェースが不安定なため、当サイトの中継サービスの応答速度にも影響が出ています。インターフェースのアップグレードは現在テスト中です。中国のユーザーはホームページのScriptCat(脚本猫)を代替としてご利用いただけますが、こちらも不安定な場合があります。"
 		}
 	},
-
 	"urlRewriteRules": [
-		{ "from": "https?://(www\\.)?greasyfork\\.org", "to": "https://gfork.zh-tw.eu.org" },
-		{ "from": "https?://(www\\.)?sleazyfork\\.org", "to": "https://gfork.zh-tw.eu.org" }
+		{
+			"from": "https?://(www\\.)?greasyfork\\.org",
+			"to": "https://gfork.zh-tw.eu.org"
+		},
+		{
+			"from": "https?://(www\\.)?sleazyfork\\.org",
+			"to": "https://gfork.zh-tw.eu.org"
+		}
 	]
 }

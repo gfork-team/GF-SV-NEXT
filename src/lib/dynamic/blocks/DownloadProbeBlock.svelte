@@ -38,7 +38,7 @@
 
 <svelte:head>
 	<title>{t(lang, 'download.title')} - ZGF</title>
-	<meta name="description" content={t(lang, 'download.description')} />
+	<!-- description 由页面（download/+page.svelte）统一输出，这里不再重复一份 -->
 </svelte:head>
 
 <section class="download-page">
