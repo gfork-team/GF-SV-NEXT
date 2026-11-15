@@ -69,6 +69,13 @@
 	}
 
 	onMount(() => {
+		// 打上水合标记：app.html 的 CDN 缓存自愈脚本靠它判断 JS 是否成功启动
+		(window as unknown as { __gfBooted?: boolean }).__gfBooted = true;
+		try {
+			sessionStorage.removeItem('gf-boot-retry');
+		} catch {
+			/* 隐私模式下 sessionStorage 可能抛错，忽略 */
+		}
 		initTheme();
 		reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 		const onScroll = () => {

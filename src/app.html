@@ -10,5 +10,28 @@
 	</head>
 	<body>
 		%sveltekit.body%
+
+		<!--
+			CDN 缓存自愈：HTML 被 CDN 缓存住、而新版本已经换掉了 `_app/immutable/*` 的文件名时，
+			页面能正常显示（预渲染 HTML）但 JS 入口 404、点链接就成了死链或 404 页。
+			这里在首页加载 2.5s 后检查水合标记，没打上就强制刷新一次拿新 HTML（同一会话只重试一次，避免死循环）。
+		-->
+		<script>
+			(function () {
+				if (window.__gfBooted) return;
+				var KEY = 'gf-boot-retry';
+				var retried = false;
+				try {
+					retried = sessionStorage.getItem(KEY) === '1';
+				} catch (e) {}
+				setTimeout(function () {
+					if (window.__gfBooted || retried) return;
+					try {
+						sessionStorage.setItem(KEY, '1');
+					} catch (e) {}
+					location.reload();
+				}, 4000);
+			})();
+		</script>
 	</body>
 </html>
